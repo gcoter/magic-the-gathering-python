@@ -3,6 +3,8 @@ numpy
 pandas
 jupyter
 plotly
+requests
+beautifulsoup4
 
 # Development requirements
 pre-commit
