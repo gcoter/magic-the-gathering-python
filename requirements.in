@@ -1,1 +1,8 @@
+# Main requirements
+numpy
+pandas
+jupyter
+plotly
+
+# Development requirements
 pre-commit
