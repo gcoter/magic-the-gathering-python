@@ -1,0 +1,6 @@
+[core]
+    remote = origin
+    check_update = false
+['remote "origin"']
+    url = ssh://dvc@gitea.priv.gcoter.com/gcoter/magic-the-gathering-python.dvc
+    port = 22246

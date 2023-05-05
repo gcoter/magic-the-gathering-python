@@ -5,6 +5,7 @@ jupyter
 plotly
 requests
 beautifulsoup4
+dvc[ssh]
 
 # Development requirements
 pre-commit
