@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, Optional
 
+import numpy as np
 import pandas as pd
 
 
@@ -8,33 +9,23 @@ import pandas as pd
 class Card:
     uuid: str
     name: str
-    types: str
-    subtypes: str
-    mana_cost: str
-    power: int
-    toughness: int
+    type_line: str
     text: str
+    mana_cost: Optional[str] = ""
+    power: Optional[str] = ""
+    toughness: Optional[str] = ""
 
     @staticmethod
     def from_series(series: pd.Series):
         return Card(
-            uuid=series["uuid"],
+            uuid=series["id"],
             name=series["name"],
-            types=series["types"],
-            subtypes=series["subtypes"],
-            mana_cost=series["manaCost"],
-            power=series["power"],
-            toughness=series["toughness"],
-            text=series["text"],
+            type_line=series["type_line"],
+            text=series["oracle_text"],
+            mana_cost=series["mana_cost"] if not pd.isna(series["mana_cost"]) else "",
+            power=series["power"] if not pd.isna(series["power"]) else "",
+            toughness=series["toughness"] if not pd.isna(series["toughness"]) else "",
         )
-
-    @property
-    def type_list(self) -> List[str]:
-        return self.types.split(",")
-
-    @property
-    def subtype_list(self) -> List[str]:
-        return self.subtypes.split(",")
 
     @property
     def mana_cost_dict(self) -> Dict[str, int]:

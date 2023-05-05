@@ -11,8 +11,6 @@ from magic_the_gathering.players.base import Player
 class GameEngine:
     N_STARTING_CARDS = 7
     INITIAL_LIFE_POINTS = 20
-    DECK_SIZE = 60
-    LANDS_PROPORTION = 0.20
 
     def __init__(self, game_state: GameState, players: List[Player]):
         self.game_state = game_state
@@ -33,9 +31,7 @@ class GameEngine:
         )
 
         # Create a shuffled deck for each player
-        decks = deck_creator.create_decks(
-            n_players=len(self.players), deck_size=GameEngine.DECK_SIZE, lands_proportion=GameEngine.LANDS_PROPORTION
-        )
+        decks = deck_creator.create_decks(n_players=len(self.players))
         self.game_state.set_decks(decks)
         self.game_state.shuffle_all_decks()
 
