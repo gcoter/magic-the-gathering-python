@@ -30,13 +30,13 @@ class GameState:
         decks: Optional[List[List[Card]]] = None,
         boards: Optional[List[List[BoardItem]]] = None,
         stack: Optional[List[StackItem]] = None,
-        life_points: Optional[List[int]] = None,
+        life_totals: Optional[List[int]] = None,
     ):
         self.hands = hands
         self.decks = decks
         self.boards = boards
         self.stack = stack
-        self.life_points = life_points
+        self.life_totals = life_totals
 
     def initialize_for_new_game(self, initial_life_points, n_players=2):
         # Set hands, decks, boards and stack to empty lists
@@ -46,7 +46,7 @@ class GameState:
         self.stack = []
 
         # Set starting life points for each player
-        self.life_points = [initial_life_points for _ in range(n_players)]
+        self.life_totals = [initial_life_points for _ in range(n_players)]
 
     def draw_cards_from_deck(self, player_index, n_cards=1):
         n_cards = min(n_cards, len(self.decks[player_index]))
@@ -76,7 +76,7 @@ class GameState:
         board_item = BoardItem(card=stack_item.card, state=CardPosition.TAPPED)
         self.boards[stack_item.owner_player_index].append(board_item)
 
-    def untap_all_cards(self, player_index):
+    def untap_all_permanents(self, player_index):
         for board_item in self.boards[player_index]:
             board_item.state = CardPosition.UNTAPPED
 

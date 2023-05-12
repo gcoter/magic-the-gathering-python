@@ -10,7 +10,7 @@ from magic_the_gathering.players.base import Player
 
 class GameEngine:
     N_STARTING_CARDS = 7
-    INITIAL_LIFE_POINTS = 20
+    INITIAL_LIFE_TOTAL = 20
 
     def __init__(self, game_state: GameState, players: List[Player]):
         self.game_state = game_state
@@ -18,7 +18,7 @@ class GameEngine:
 
         self.__current_turn_counter = 0
         self.__current_player_index = 0
-        self.__current_player_has_cast_a_land_this_turn = False
+        self.__current_player_has_played_a_land_this_turn = False
 
         self.__logger = logging.getLogger(self.__class__.__name__)
 
@@ -27,10 +27,11 @@ class GameEngine:
 
         # Initialize the game state
         self.game_state.initialize_for_new_game(
-            initial_life_points=GameEngine.INITIAL_LIFE_POINTS, n_players=len(self.players)
+            initial_life_points=GameEngine.INITIAL_LIFE_TOTAL, n_players=len(self.players)
         )
 
         # Create a shuffled deck for each player
+        # TODO: should we split the deck creation and start_new_game, so that we can can start several games with the same deck(s)?
         decks = deck_creator.create_decks(n_players=len(self.players))
         self.game_state.set_decks(decks)
         self.game_state.shuffle_all_decks()
@@ -44,6 +45,7 @@ class GameEngine:
         while True:
             for index, player in enumerate(self.players):
                 # Each player draws as many cards as necessary to create their hand
+                # TODO: if I understood the code well, this isn't the latest mulligan rule: the London mulligan says that you always draw 7 cards, then put n on the bottom of the library when you keep, when n is the number of times you mulliganed
                 if len(self.game_state.hands[index]) == 0:
                     self.game_state.draw_cards_from_deck(player_index=index, n_cards=n_cards_to_draw_by_player[index])
 
@@ -94,10 +96,10 @@ class GameEngine:
 
     def __begin_phase(self):
         self.__logger.debug("Run begin phase")
-        self.__current_player_has_cast_a_land_this_turn = False
+        self.__current_player_has_played_a_land_this_turn = False  # TODO: at some point we'll change this so that we allow a player to have n land drops, 1 by default, but can change with some cards
 
         # Current player untaps lands and creatures
-        self.game_state.untap_all_cards(player_index=self.__current_player_index)
+        self.game_state.untap_all_permanents(player_index=self.__current_player_index)
 
         # Current player draws one card
         self.game_state.draw_cards_from_deck(player_index=self.__current_player_index, n_cards=1)
@@ -105,8 +107,8 @@ class GameEngine:
     def __precombat_main_phase(self):
         self.__logger.debug("Run precombat main phase")
 
-        # Current player can cast a land (only 1 per turn)
-        self.__current_player_has_cast_a_land_this_turn = self.__current_player_can_cast_one_land()
+        # Current player can play a land (only 1 per turn)
+        self.__current_player_has_played_a_land_this_turn = self.__current_player_can_play_one_land()
 
         # Current player can cast creatures and/or sorceries
         self.__current_player_can_cast_creatures_and_sorceries()
@@ -129,8 +131,8 @@ class GameEngine:
         self.__logger.debug("Run postcombat main phase")
 
         # Current player can play a land (if he has not already)
-        if not self.__current_player_has_cast_a_land_this_turn:
-            self.__current_player_can_cast_one_land()
+        if not self.__current_player_has_played_a_land_this_turn:
+            self.__current_player_can_play_one_land()
 
         # Current player can cast creatures and/or sorceries
         self.__current_player_can_cast_creatures_and_sorceries()
@@ -144,8 +146,8 @@ class GameEngine:
         # Pass the turn to the next player
         self.__pass_to_next_player()
 
-    def __current_player_can_cast_one_land(self) -> bool:
-        hand_card_index = self.current_player.choose_land_to_cast()
+    def __current_player_can_play_one_land(self) -> bool:
+        hand_card_index = self.current_player.choose_land_to_play()
         if hand_card_index is not None:
             self.game_state.cast_card(player_index=self.__current_player_index, hand_card_index=hand_card_index)
             self.game_state.resolve_top_of_the_stack()

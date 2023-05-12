@@ -10,7 +10,7 @@ class Player:
     def choose_mulligan(self, game_state: GameState) -> bool:
         pass
 
-    def choose_land_to_cast(self) -> Union[int, None]:
+    def choose_land_to_play(self) -> Union[int, None]:
         pass
 
     def choose_creatures_to_cast(self) -> List[int]:
