@@ -1,52 +1,60 @@
-from dataclasses import dataclass
-from enum import Enum
 from random import shuffle
 from typing import List, Optional
 
 from magic_the_gathering.cards.base import Card
-
-
-class CardPosition(Enum):
-    UNTAPPED = 0
-    TAPPED = 1
-
-
-@dataclass
-class BoardItem:
-    card: Card
-    state: CardPosition
-
-
-@dataclass
-class StackItem:
-    card: Card
-    owner_player_index: int
+from magic_the_gathering.game_modes.base import GameMode
+from magic_the_gathering.players.base import Player
 
 
 class GameState:
     def __init__(
         self,
+        game_mode: GameMode,
+        players: List[Player],
+        current_turn_counter: Optional[int] = 0,
+        current_player_index: Optional[int] = 0,
+        current_player_has_played_a_land_this_turn: Optional[bool] = False,
         hands: Optional[List[List[Card]]] = None,
         decks: Optional[List[List[Card]]] = None,
-        boards: Optional[List[List[BoardItem]]] = None,
-        stack: Optional[List[StackItem]] = None,
-        life_totals: Optional[List[int]] = None,
+        boards: Optional[List[List[Card]]] = None,
+        graveyards: Optional[List[List[Card]]] = None,
+        exiles: Optional[List[Card]] = None,
+        stack: Optional[List[Card]] = None,
     ):
+        self.game_mode = game_mode
+        self.players = players
+        self.current_turn_counter = current_turn_counter
+        self.current_player_index = current_player_index
+        # TODO: Should 'current_player_has_played_a_land_this_turn' be a property of the player, not of the game state?
+        # TODO: At some point we'll change this so that we allow a player to have n land drops, 1 by default, but can change with some cards
+        self.current_player_has_played_a_land_this_turn = current_player_has_played_a_land_this_turn
         self.hands = hands
         self.decks = decks
         self.boards = boards
+        self.graveyards = graveyards
+        self.exiles = exiles
         self.stack = stack
-        self.life_totals = life_totals
 
-    def initialize_for_new_game(self, initial_life_points, n_players=2):
+    @property
+    def n_players(self):
+        return len(self.players)
+
+    @property
+    def current_player(self):
+        return self.players[self.current_player_index]
+
+    def initialize_for_new_game(self):
+        # TODO: It assumes that the players were initialized, is it a good idea?
+        # FIXME: The game mode contains information about the player initial life points and hand size, but it is not used here
+        # TODO: Pass the current player index? (for now it is always 0)
         # Set hands, decks, boards and stack to empty lists
-        self.hands = [[] for _ in range(n_players)]
-        self.decks = [[] for _ in range(n_players)]
-        self.boards = [[] for _ in range(n_players)]
+        self.hands = [[] for _ in range(self.n_players)]
+        self.decks = [[] for _ in range(self.n_players)]
+        self.boards = [[] for _ in range(self.n_players)]
+        self.graveyards = [[] for _ in range(self.n_players)]
+        # TODO: Is there one exile per player?
+        self.exiles = [[] for _ in range(self.n_players)]
         self.stack = []
-
-        # Set starting life points for each player
-        self.life_totals = [initial_life_points for _ in range(n_players)]
 
     def draw_cards_from_deck(self, player_index, n_cards=1):
         n_cards = min(n_cards, len(self.decks[player_index]))
@@ -68,18 +76,23 @@ class GameState:
         self.decks = decks
 
     def cast_card(self, player_index, hand_card_index):
+        # TODO: Should we implement a play_card method? Is there a difference between casting and playing a card?
         card = self.hands[player_index].pop(hand_card_index)
-        self.stack.append(StackItem(card=card, owner_player_index=player_index))
+        self.stack.append(card)
 
     def resolve_top_of_the_stack(self):
-        stack_item = self.stack.pop(-1)
-        board_item = BoardItem(card=stack_item.card, state=CardPosition.TAPPED)
-        self.boards[stack_item.owner_player_index].append(board_item)
+        # TODO: Currently, this was implemented with casting creatures or lands in mind. It should be generalized.
+        card = self.stack.pop(-1)
+        card.is_tapped = True
+        self.boards[card.owner_player_index].append(card)
 
-    def untap_all_permanents(self, player_index):
-        for board_item in self.boards[player_index]:
-            board_item.state = CardPosition.UNTAPPED
+    def untap_all_permanents(self, player_index: int):
+        for card in self.boards[player_index]:
+            card.is_tapped = False
 
     def tap_cards(self, player_index, board_indices):
-        for board_item in self.boards[player_index]:
-            board_item.state = CardPosition.TAPPED
+        for board_index in board_indices:
+            self.boards[player_index][board_index].is_tapped = True
+
+    def pass_to_next_player(self):
+        self.current_player_index = (self.current_player_index + 1) % self.n_players
