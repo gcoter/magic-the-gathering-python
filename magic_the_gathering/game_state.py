@@ -83,7 +83,7 @@ class GameState:
     def resolve_top_of_the_stack(self):
         # TODO: Currently, this was implemented with casting creatures or lands in mind. It should be generalized.
         card = self.stack.pop(-1)
-        card.is_tapped = True
+        card.is_tapped = False
         self.boards[card.owner_player_index].append(card)
 
     def untap_all_permanents(self, player_index: int):
