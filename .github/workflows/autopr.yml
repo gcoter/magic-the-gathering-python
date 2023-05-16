@@ -27,7 +27,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
               with:
-                ref: master
+                ref: minimal-creatures-and-lands-only-no-abilities
                 fetch-depth: 1
             - name: AutoPR
               uses: docker://ghcr.io/irgolic/autopr:latest
@@ -37,4 +37,4 @@ jobs:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 model: 'gpt-3.5-turbo'
                 context_limit: 4096
-                base_branch: master
+                base_branch: minimal-creatures-and-lands-only-no-abilities
