@@ -87,8 +87,8 @@ class GameState:
         self.boards[card.owner_player_index].append(card)
 
     def untap_all_permanents(self, player_index: int):
-        for card in self.boards[player_index]:
-            card.is_tapped = False
+        for permanent in self.boards[player_index]:
+            permanent.is_tapped = False
 
     def tap_cards(self, player_index, board_indices):
         for board_index in board_indices:
