@@ -46,3 +46,33 @@ class JumpstartDeckCreator:
                         print(f"Card '{card_name}' not found in cards dataframe")
             decks.append(current_deck)
         return decks
+
+
+class RandomVanillaDeckCreator:
+    def __init__(
+        self,
+        legal_creatures_df: pd.DataFrame,
+        lands_proportion: float = 24 / 60,
+    ) -> None:
+        self.legal_creatures_df = legal_creatures_df
+        self.lands_proportion = lands_proportion
+        # TODO: how to handle basic lands?
+
+    def create_decks(self, n_players: int) -> List[List[Card]]:
+        decks = []
+        for _ in range(n_players):
+            current_deck = []
+            for _ in range(60):
+                card_name = random.choice(self.cards_df["name"].unique())
+                if card_name in self.cards_df["name"].values:
+                    card_series = self.cards_df[self.cards_df["name"] == card_name].iloc[0]
+                    if self.allowed_types is not None:
+                        card_types = card_series["type_line"].split(" — ")[0].split()
+                        if not any(card_type in self.allowed_types for card_type in card_types):
+                            continue
+                    card = Card.from_series(card_series)
+                    current_deck.append(card)
+                else:
+                    print(f"Card '{card_name}' not found in cards dataframe")
+            decks.append(current_deck)
+        return decks
