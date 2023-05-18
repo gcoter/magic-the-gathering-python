@@ -75,8 +75,12 @@ class GameState:
     def set_decks(self, decks: List[List[Card]]):
         self.decks = decks
 
+    def play_card(self, player_index, hand_card_index):
+        card = self.hands[player_index].pop(hand_card_index)
+        card.is_tapped = False
+        self.boards[card.owner_player_index].append(card)
+
     def cast_card(self, player_index, hand_card_index):
-        # TODO: Should we implement a play_card method? Is there a difference between casting and playing a card?
         card = self.hands[player_index].pop(hand_card_index)
         self.stack.append(card)
 
