@@ -4,8 +4,11 @@ from magic_the_gathering.game_state import GameState
 
 
 class Player:
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        life_points: int = 20,
+    ):
+        self.life_points = life_points
 
     def choose_mulligan(self, game_state: GameState) -> bool:
         pass

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-import numpy as np
 import pandas as pd
 
 
@@ -9,18 +8,20 @@ import pandas as pd
 class Card:
     uuid: str
     name: str
-    type_line: str
+    type: str
     text: str
     mana_cost: Optional[str] = ""
     power: Optional[str] = ""
     toughness: Optional[str] = ""
+    is_tapped: bool = False  # TODO: Should be part of a state
+    owner_player_index: Optional[int] = 0
 
     @staticmethod
     def from_series(series: pd.Series):
         return Card(
             uuid=series["id"],
             name=series["name"],
-            type_line=series["type_line"],
+            type=series["type_line"],
             text=series["oracle_text"],
             mana_cost=series["mana_cost"] if not pd.isna(series["mana_cost"]) else "",
             power=series["power"] if not pd.isna(series["power"]) else "",
