@@ -15,7 +15,7 @@ class GameState:
         current_player_index: Optional[int] = 0,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
         hands: Optional[List[List[Card]]] = None,
-        decks: Optional[List[List[Card]]] = None,
+        libraries: Optional[List[List[Card]]] = None,
         boards: Optional[List[List[Card]]] = None,
         graveyards: Optional[List[List[Card]]] = None,
         exiles: Optional[List[Card]] = None,
@@ -29,7 +29,7 @@ class GameState:
         # TODO: At some point we'll change this so that we allow a player to have n land drops, 1 by default, but can change with some cards
         self.current_player_has_played_a_land_this_turn = current_player_has_played_a_land_this_turn
         self.hands = hands
-        self.decks = decks
+        self.libraries = libraries
         self.boards = boards
         self.graveyards = graveyards
         self.exiles = exiles
@@ -47,9 +47,9 @@ class GameState:
         # TODO: It assumes that the players were initialized, is it a good idea?
         # FIXME: The game mode contains information about the player initial life points and hand size, but it is not used here
         # TODO: Pass the current player index? (for now it is always 0)
-        # Set hands, decks, boards and stack to empty lists
+        # Set hands, libraries, boards and stack to empty lists
         self.hands = [[] for _ in range(self.n_players)]
-        self.decks = [[] for _ in range(self.n_players)]
+        self.libraries = [[] for _ in range(self.n_players)]
         self.boards = [[] for _ in range(self.n_players)]
         self.graveyards = [[] for _ in range(self.n_players)]
         # TODO: Is there one exile per player?
@@ -57,23 +57,23 @@ class GameState:
         self.stack = []
 
     def draw_cards_from_deck(self, player_index, n_cards=1):
-        n_cards = min(n_cards, len(self.decks[player_index]))
-        drawn_cards = [self.decks[player_index].pop(0) for _ in range(n_cards)]
+        n_cards = min(n_cards, len(self.libraries[player_index]))
+        drawn_cards = [self.libraries[player_index].pop(0) for _ in range(n_cards)]
         self.hands[player_index].extend(drawn_cards)
 
     def add_all_hand_cards_to_deck(self, player_index):
-        self.decks[player_index].extend(self.hands[player_index])
+        self.libraries[player_index].extend(self.hands[player_index])
         self.hands[player_index] = []
 
     def shuffle_deck(self, player_index):
-        shuffle(self.decks[player_index])
+        shuffle(self.libraries[player_index])
 
     def shuffle_all_decks(self):
-        for player_index in range(len(self.decks)):
+        for player_index in range(len(self.libraries)):
             self.shuffle_deck(player_index=player_index)
 
     def set_decks(self, decks: List[List[Card]]):
-        self.decks = decks
+        self.libraries = decks
 
     def play_card(self, player_index, hand_card_index):
         card = self.hands[player_index].pop(hand_card_index)
