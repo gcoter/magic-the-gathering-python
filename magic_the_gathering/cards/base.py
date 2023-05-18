@@ -13,7 +13,7 @@ class Card:
     mana_cost: Optional[str] = ""
     power: Optional[str] = ""
     toughness: Optional[str] = ""
-    is_tapped: bool = False
+    is_tapped: bool = False  # TODO: Should be part of a state
     owner_player_index: Optional[int] = 0
 
     @staticmethod
