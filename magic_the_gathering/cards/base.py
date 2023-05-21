@@ -57,8 +57,6 @@ class Card:
         self.power = power
         self.toughness = toughness
         self.state = state
-        if self.state is None:
-            self.state = CardState()
 
     def create_new_instance(self, state: Optional[CardState] = None):
         return Card(
