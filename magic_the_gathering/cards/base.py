@@ -4,6 +4,7 @@ from uuid import uuid4
 import pandas as pd
 
 from magic_the_gathering.cards.state import CardState
+from magic_the_gathering.players.base import Player
 
 
 class Card:
@@ -69,6 +70,29 @@ class Card:
             toughness=self.toughness,
             state=state,
         )
+
+    def get_power(self) -> int:
+        if self.power == "*":
+            return 0
+        return int(self.power)
+
+    def get_toughness(self) -> int:
+        if self.toughness == "*":
+            return 0
+        return int(self.toughness)
+
+    @property
+    def can_be_cast_by_player(self, player: Player) -> bool:
+        if self.is_land:
+            return False
+        if self.mana_cost_dict is None:
+            return False
+        for mana_color, mana_cost in self.mana_cost_dict.items():
+            # FIXME: Handle mana cost that can be paid with any color
+            assert mana_color in player.mana_pool
+            if player.mana_pool[mana_color] < mana_cost:
+                return False
+        return True
 
     @property
     def main_type(self) -> str:
