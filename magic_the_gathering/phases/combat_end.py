@@ -8,4 +8,9 @@ class CombatEndPhase(Phase):
 
     def run(self, game_state: GameState) -> GameState:
         # TODO: Implement end of combat triggers.
+
+        # Reset the list of attackers and blockers
+        game_state.current_player_attackers = {}
+        game_state.other_players_blockers = {}
+
         return game_state
