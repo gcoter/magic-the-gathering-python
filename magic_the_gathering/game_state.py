@@ -2,7 +2,9 @@ from collections import OrderedDict
 from enum import Enum
 from typing import Dict, List, Optional
 
+from magic_the_gathering.actions.base import Action
 from magic_the_gathering.cards.base import Card
+from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_modes.base import GameMode
 from magic_the_gathering.players.base import Player
 
@@ -25,6 +27,9 @@ class GameState:
         current_player_index: Optional[int] = 0,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
         zones: Optional[Dict[ZonePosition, List[OrderedDict[str, Card]]]] = None,
+        current_player_attackers: Optional[Dict[int, List[str]]] = None,
+        other_players_blockers: Optional[Dict[int, Dict[str, List[str]]]] = None,
+        action_history: Optional[List[Action]] = None,
     ):
         self.game_mode = game_mode
         self.players = players
@@ -44,6 +49,15 @@ class GameState:
                 ZonePosition.STACK: OrderedDict(),  # FIXME: It should probably be just a list but it is simpler to use the same class as the other zones for now
             }
         self.__assert_zones_validity()
+        self.current_player_attackers = current_player_attackers
+        if self.current_player_attackers is None:
+            self.current_player_attackers = {}
+        self.other_players_blockers = other_players_blockers
+        if self.other_players_blockers is None:
+            self.other_players_blockers = {}
+        self.action_history = action_history
+        if self.action_history is None:
+            self.action_history = []
 
     def __assert_zones_validity(self):
         for zone in ZonePosition:
@@ -51,10 +65,38 @@ class GameState:
             assert len(self.zones[zone]) == self.n_players
         assert "stack" in self.zones
 
+    def set_libraries(self, libraries: List[OrderedDict[str, Card]]):
+        for player_index, library in enumerate(libraries):
+            self.zones[ZonePosition.LIBRARY][player_index] = library
+
     @property
-    def n_players(self):
+    def n_players(self) -> int:
         return len(self.players)
 
     @property
-    def current_player(self):
+    def current_player(self) -> Player:
         return self.players[self.current_player_index]
+
+    @property
+    def other_players(self) -> List[Player]:
+        return [
+            player
+            for index, player in enumerate(self.players)
+            if index != self.current_player_index and player.is_alive
+        ]
+
+    def check_if_game_is_over(self):
+        # Conditions for game over (according to https://mtg.fandom.com/wiki/Ending_the_game):
+        # - If a player concedes the game
+        # - If a player’s life total is 0 or less
+        # - If a player is required to draw more cards than are left in their library
+        # - If a player has ten or more poison counters
+        # - If an effect states that a player loses the game
+        # - If an effect states that the game is a draw
+        # - If a player would both win and lose the game simultaneously
+
+        # For now, we only check if all players except one are dead
+        alive_player_indices = [player_index for player_index, player in enumerate(self.players) if player.is_alive]
+        if len(alive_player_indices) == 1:
+            winner_player_index = alive_player_indices[0]
+            raise GameOverException(winner_player_index=winner_player_index)
