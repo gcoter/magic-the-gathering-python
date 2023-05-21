@@ -38,16 +38,3 @@ class GameEngine:
         self.__logger.info(f"Start turn {self.game_state.current_turn_counter}")
         self.__logger.debug(f"Current player is now player '{self.game_state.current_player_index}'")
         self.game_state = self.turn.run(self.game_state)
-
-    def __is_the_game_over(self) -> bool:
-        # TODO: Game over can interrupt a turn in progress, how can we do this?
-
-        # Conditions for game over (according to https://mtg.fandom.com/wiki/Ending_the_game):
-        # - If a player concedes the game
-        # - If a player’s life total is 0 or less
-        # - If a player is required to draw more cards than are left in their library
-        # - If a player has ten or more poison counters
-        # - If an effect states that a player loses the game
-        # - If an effect states that the game is a draw
-        # - If a player would both win and lose the game simultaneously
-        pass
