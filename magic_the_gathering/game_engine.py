@@ -14,25 +14,6 @@ class GameEngine:
         self.mulligan_phase = MulliganPhase()
         self.turn = Turn()
 
-    def start_new_game(self, deck_creator: DeckCreator):
-        # TODO: Should we put all of this inside a 'NewGamePhase'?
-
-        self.__logger.info("Starting a new game")
-
-        # Initialize the game state
-        self.game_state.initialize_for_new_game(
-            initial_life_points=GameEngine.INITIAL_LIFE_TOTAL, n_players=len(self.players)
-        )
-
-        # Create a shuffled deck for each player
-        # TODO: should we split the deck creation and start_new_game, so that we can can start several games with the same deck(s)?
-        decks = deck_creator.create_decks(n_players=len(self.players))
-        self.game_state.set_decks(decks)
-        self.game_state.shuffle_all_decks()
-
-        # Players draw cards to start the game
-        self.game_state = self.mulligan_phase.run(self.game_state)
-
     def run_one_turn(self):
         self.game_state.current_turn_counter += 1
         self.__logger.info(f"Start turn {self.game_state.current_turn_counter}")
