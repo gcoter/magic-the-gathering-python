@@ -1,8 +1,7 @@
 from random import shuffle
 from typing import List, Optional
 
-from magic_the_gathering.card_blueprints.base import CardBlueprint
-from magic_the_gathering.card_objects.base import CardObject
+from magic_the_gathering.cards.base import Card
 from magic_the_gathering.game_modes.base import GameMode
 from magic_the_gathering.players.base import Player
 
@@ -15,12 +14,12 @@ class GameState:
         current_turn_counter: Optional[int] = 0,
         current_player_index: Optional[int] = 0,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
-        hands: Optional[List[List[CardBlueprint]]] = None,
-        libraries: Optional[List[List[CardBlueprint]]] = None,
-        boards: Optional[List[List[CardObject]]] = None,
-        graveyards: Optional[List[List[CardObject]]] = None,
-        exiles: Optional[List[CardObject]] = None,
-        stack: Optional[List[CardObject]] = None,
+        hands: Optional[List[List[Card]]] = None,
+        libraries: Optional[List[List[Card]]] = None,
+        boards: Optional[List[List[Card]]] = None,
+        graveyards: Optional[List[List[Card]]] = None,
+        exiles: Optional[List[Card]] = None,
+        stack: Optional[List[Card]] = None,
     ):
         self.game_mode = game_mode
         self.players = players

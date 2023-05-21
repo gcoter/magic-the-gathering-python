@@ -4,14 +4,12 @@ from typing import List, Optional
 
 import pandas as pd
 
-from magic_the_gathering.card_blueprints.base import CardBlueprint
-from magic_the_gathering.card_blueprints.non_permanent import NonPermanentBlueprint
-from magic_the_gathering.card_blueprints.permanent import PermanentBlueprint
+from magic_the_gathering.cards.base import Card
 
 
 class DeckCreator:
     @abc.abstractmethod
-    def create_decks(self, n_players: int) -> List[List[CardBlueprint]]:
+    def create_decks(self, n_players: int) -> List[List[Card]]:
         pass
 
 
@@ -26,7 +24,7 @@ class JumpstartDeckCreator:
         self.cards_df = cards_df
         self.allowed_types = allowed_types
 
-    def create_decks(self, n_players: int) -> List[List[CardBlueprint]]:
+    def create_decks(self, n_players: int) -> List[List[Card]]:
         decks = []
         for _ in range(n_players):
             current_deck = []
@@ -42,14 +40,8 @@ class JumpstartDeckCreator:
                             card_types = card_series["type_line"].split(" — ")[0].split()
                             if not any(card_type in self.allowed_types for card_type in card_types):
                                 continue
-                        if (
-                            "sorcery" in card_series["type_line"].lower()
-                            or "instant" in card_series["type_line"].lower()
-                        ):
-                            card_blueprint = NonPermanentBlueprint.from_series(card_series)
-                        else:
-                            card_blueprint = PermanentBlueprint.from_series(card_series)
-                        current_deck.extend([card_blueprint] * card_count)
+                        card = Card.from_series(card_series)
+                        current_deck.extend([card] * card_count)
                     else:
                         print(f"Card '{card_name}' not found in cards dataframe")
             decks.append(current_deck)

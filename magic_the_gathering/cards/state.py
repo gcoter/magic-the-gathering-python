@@ -1,7 +1,7 @@
 from pyparsing import Optional
 
 
-class CardObjectState:
+class CardState:
     def __init__(
         self,
         is_tapped: Optional[bool] = False,
