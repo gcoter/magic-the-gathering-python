@@ -1,5 +1,6 @@
 import abc
 import random
+from collections import OrderedDict
 from typing import List, Optional
 
 import pandas as pd
@@ -9,7 +10,7 @@ from magic_the_gathering.cards.base import Card
 
 class DeckCreator:
     @abc.abstractmethod
-    def create_decks(self, n_players: int) -> List[List[Card]]:
+    def create_decks(self, n_players: int) -> List[OrderedDict[str, Card]]:
         pass
 
 
@@ -24,10 +25,10 @@ class JumpstartDeckCreator:
         self.cards_df = cards_df
         self.allowed_types = allowed_types
 
-    def create_decks(self, n_players: int) -> List[List[Card]]:
+    def create_decks(self, n_players: int) -> List[OrderedDict[str, Card]]:
         decks = []
         for _ in range(n_players):
-            current_deck = []
+            current_deck = OrderedDict()
             for _ in range(2):
                 chosen_deck_name = random.choice(self.card_sets_df["deck_name"].unique())
                 deck_composition_df = self.card_sets_df[self.card_sets_df["deck_name"] == chosen_deck_name]
@@ -41,7 +42,9 @@ class JumpstartDeckCreator:
                             if not any(card_type in self.allowed_types for card_type in card_types):
                                 continue
                         card = Card.from_series(card_series)
-                        current_deck.extend([card] * card_count)
+                        cards_to_add = [card] * card_count
+                        for card in cards_to_add:
+                            current_deck[card.uuid] = card
                     else:
                         print(f"Card '{card_name}' not found in cards dataframe")
             decks.append(current_deck)
