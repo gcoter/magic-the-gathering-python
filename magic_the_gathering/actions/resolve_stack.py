@@ -1,9 +1,18 @@
+from typing import List
+
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.game_state import GameState, ZonePosition
 
 
 class ResolveTopOfStackAction(Action):
-    def execute(self, game_state: GameState) -> GameState:
+    @classmethod
+    def list_possible_actions(cls, game_state: GameState) -> List[Action]:
+        stack = game_state.zones[ZonePosition.STACK]
+        if len(stack) > 0:
+            return [cls(owner="Game")]
+        return []
+
+    def _execute(self, game_state: GameState) -> GameState:
         stack = game_state.zones[ZonePosition.STACK]
         assert len(stack) > 0
         resolved_card = stack.pop(-1)
