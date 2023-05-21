@@ -1,8 +1,33 @@
-from magic_the_gathering.game_state import GameState
-from magic_the_gathering.phases.base import Phase
+from typing import List
+
+from magic_the_gathering.actions.base import Action
+from magic_the_gathering.actions.cast_card import CastCardAction
+from magic_the_gathering.actions.play_land import PlayLandAction
+from magic_the_gathering.actions.resolve_stack import ResolveTopOfStackAction
+from magic_the_gathering.game_state import GameState, ZonePosition
+from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGetPriority
 
 
-class MainPhase(Phase):
+class MainPhase(PhaseWherePlayersGetPriority):
+    @staticmethod
+    def list_possible_actions(game_state: GameState) -> List[Action]:
+        possible_actions = []
+        possible_actions.extend(
+            [
+                action
+                for action in PlayLandAction.list_possible_actions(game_state)
+                if action.player_index == game_state.current_player_index
+            ]
+        )
+        possible_actions.extend(
+            [
+                action
+                for action in CastCardAction.list_possible_actions(game_state)
+                if action.player_index == game_state.current_player_index
+            ]
+        )
+        return possible_actions
+
     def __init__(self, name: str):
         super().__init__(
             name=name,
@@ -10,21 +35,23 @@ class MainPhase(Phase):
         )
 
     def run(self, game_state: GameState) -> GameState:
-        # TODO: Review the implementation of this method
+        while True:
+            # Current player chooses one action
+            possible_actions = PhaseWherePlayersGetPriority.list_possible_actions(game_state)
+            current_player = game_state.current_player
+            action = current_player.choose_action(
+                game_state=game_state,
+                possible_actions=possible_actions,
+            )
+            if action is None:
+                break
+            game_state = action.execute(game_state)
 
-        # Current player can play a land (only 1 per turn)
-        hand_card_index = game_state.current_player.choose_land_to_play()
-        if hand_card_index is not None and not game_state.current_player_has_played_a_land_this_turn:
-            game_state.cast_card(player_index=game_state.current_player_index, hand_card_index=hand_card_index)
-            # FIXME: Here we assumes that nothing happens between casting a land and resolving it
-            game_state.resolve_top_of_the_stack()
-            game_state.current_player_has_played_a_land_this_turn = True
+            # TODO: Other players can respond to the action
 
-        # Current player can cast creatures and/or sorceries
-        hand_card_indices = self.current_player.choose_creatures_to_cast()
-        for hand_card_index in hand_card_indices:
-            game_state.cast_card(player_index=game_state.current_player_index, hand_card_index=hand_card_index)
-            # FIXME: Here we assumes that nothing happens between casting a creature/sorcery and resolving it
-            game_state.resolve_top_of_the_stack()
+            # Resolve the stack
+            # TODO: Is it correct to resolve the whole stack at once?
+            while len(game_state.zones[ZonePosition.STACK]) > 0:
+                game_state = ResolveTopOfStackAction(owner="game").execute(game_state)
 
         return game_state

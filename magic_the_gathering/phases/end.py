@@ -1,3 +1,4 @@
+from magic_the_gathering.actions.pass_to_next_player import PassToNextPlayerAction
 from magic_the_gathering.phases.base import Phase
 
 
@@ -12,7 +13,6 @@ class EndPhase(Phase):
         # discard_to_hand_size()
 
         # We should also pass to next player
-        # TODO: Is this the right place to do this?
-        game_state.pass_to_next_player()
+        game_state = PassToNextPlayerAction(owner="Game").execute(game_state)
 
         return game_state
