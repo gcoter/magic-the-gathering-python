@@ -28,7 +28,6 @@ class Turn:
             MainPhase(name="Main Phase 2"),
             EndPhase(),
         ]
-        # TODO: Add a logger
 
     def run(self, game_state: GameState) -> GameState:
         for phase in self.__phases:
