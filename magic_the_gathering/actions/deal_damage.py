@@ -1,3 +1,5 @@
+from typing import List
+
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.kill_player import KillPlayerAction
 from magic_the_gathering.actions.move_to_graveyard import MoveToGraveyardAction
@@ -5,6 +7,11 @@ from magic_the_gathering.game_state import GameState, ZonePosition
 
 
 class DealDamageAction(Action):
+    @classmethod
+    def list_possible_actions(cls, game_state: GameState) -> List[Action]:
+        # TODO: Implement this
+        pass
+
     def __init__(
         self,
         owner: str,

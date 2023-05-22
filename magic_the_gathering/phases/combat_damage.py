@@ -8,4 +8,5 @@ class CombatDamagePhase(Phase):
 
     def run(self, game_state: GameState) -> GameState:
         # We assume the blockers are already ordered as chosen by the attacker
+        # TODO: Implement this
         return game_state
