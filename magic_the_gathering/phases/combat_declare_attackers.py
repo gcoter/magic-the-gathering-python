@@ -9,7 +9,7 @@ from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGet
 class CombatDeclareAttackersPhase(PhaseWherePlayersGetPriority):
     @staticmethod
     def list_possible_actions(game_state: GameState) -> List[Action]:
-        return DeclareAttackerAction.list_possible_actions(game_state=game_state)
+        return [None] + DeclareAttackerAction.list_possible_actions(game_state=game_state)
 
     def __init__(self):
         super().__init__(name="Combat: Declare Attackers Phase")

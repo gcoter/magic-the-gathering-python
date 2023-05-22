@@ -11,7 +11,7 @@ from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGet
 class MainPhase(PhaseWherePlayersGetPriority):
     @staticmethod
     def list_possible_actions(game_state: GameState) -> List[Action]:
-        possible_actions = []
+        possible_actions = [None]
         possible_actions.extend(
             [
                 action
