@@ -24,12 +24,6 @@ class DealDamageAction(Action):
             if len(blocker_card_uuids) == 0:
                 # The player receives the damage directly
                 blocker_player.life_points -= attacker_power
-
-                # If the player has no more life points, it loses the game
-                if blocker_player.life_points <= 0:
-                    game_state = KillPlayerAction(owner=self.owner, player_index=self.blocker_player_index).execute(
-                        game_state
-                    )
             else:
                 # Blockers deal damage to the attacker
                 blocker_power = sum(
@@ -38,22 +32,33 @@ class DealDamageAction(Action):
                 )
                 attacker_card.state.damage_received += blocker_power
 
-                # If the attacker received more damage than its toughness, it dies
-                if attacker_card.state.damage_received >= attacker_card.get_toughness():
-                    game_state = MoveToGraveyardAction(
-                        owner=self.owner, player_index=attacker_player_index, card_uuid=attacker_card_uuid
-                    ).execute(game_state)
-
                 # Each blocker receives damage from the attacker
                 for blocker_card_uuid in blocker_card_uuids:
                     assert blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]
                     blocker_card = game_state.zones[ZonePosition.BOARD][self.blocker_player_index][blocker_card_uuid]
                     blocker_card.state.damage_received += attacker_power
 
-                    # If a blocker received more damage than its toughness, it dies
-                    if blocker_card.state.damage_received >= blocker_card.get_toughness():
-                        game_state = MoveToGraveyardAction(
-                            owner=self.owner, player_index=self.blocker_player_index, card_uuid=blocker_card_uuid
-                        ).execute(game_state)
+        # If the player has no more life points, it loses the game
+        if blocker_player.life_points <= 0:
+            game_state = KillPlayerAction(owner=self.owner, player_index=self.blocker_player_index).execute(game_state)
+
+        # If an attacker received more damage than its toughness, it dies
+        for attacker_card_uuid in game_state.zones[ZonePosition.BOARD][attacker_player_index]:
+            attacker_player_index = game_state.current_player_index
+            assert attacker_card_uuid in game_state.zones[ZonePosition.BOARD][attacker_player_index]
+            attacker_card = game_state.zones[ZonePosition.BOARD][attacker_player_index][attacker_card_uuid]
+            if attacker_card.state.damage_received >= attacker_card.get_toughness():
+                game_state = MoveToGraveyardAction(
+                    owner=self.owner, player_index=attacker_player_index, card_uuid=attacker_card_uuid
+                ).execute(game_state)
+
+        # If a blocker received more damage than its toughness, it dies
+        for blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]:
+            assert blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]
+            blocker_card = game_state.zones[ZonePosition.BOARD][self.blocker_player_index][blocker_card_uuid]
+            if blocker_card.state.damage_received >= blocker_card.get_toughness():
+                game_state = MoveToGraveyardAction(
+                    owner=self.owner, player_index=self.blocker_player_index, card_uuid=blocker_card_uuid
+                ).execute(game_state)
 
         return game_state
