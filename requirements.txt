@@ -572,3 +572,5 @@ zc-lockfile==3.0.post1
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
+
+toolz~=0.12.0
