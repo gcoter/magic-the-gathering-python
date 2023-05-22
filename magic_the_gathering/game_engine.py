@@ -1,6 +1,6 @@
 import logging
 
-from magic_the_gathering.cards.deck_creator import DeckCreator
+from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_state import GameState
 from magic_the_gathering.phases.mulligan import MulliganPhase
 from magic_the_gathering.turn import Turn
@@ -19,3 +19,12 @@ class GameEngine:
         self.__logger.info(f"Start turn {self.game_state.current_turn_counter}")
         self.__logger.debug(f"Current player is now player '{self.game_state.current_player_index}'")
         self.game_state = self.turn.run(self.game_state)
+
+    def run(self):
+        while True:
+            try:
+                self.run_one_turn()
+            except GameOverException as e:
+                print(e)
+                winner_player_index = e.winner_player_index
+                break

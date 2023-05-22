@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import List
 
@@ -28,6 +29,8 @@ def create_decks(n_players: int = 2) -> List[List[Card]]:
 
 
 def run_one_game(n_players: int = 2):
+    logging.basicConfig(level=logging.DEBUG)
+
     game_mode = DefaultGameMode()
     players = [RandomPlayer(life_points=game_mode.initial_life_points)] * n_players
     decks = create_decks(n_players=n_players)
@@ -37,13 +40,7 @@ def run_one_game(n_players: int = 2):
     )
     game_state.set_libraries(libraries=decks)
     game_engine = GameEngine(game_state=game_state)
-    while True:
-        try:
-            game_engine.run_one_turn()
-        except GameOverException as e:
-            print(e)
-            winner_player_index = e.winner_player_index
-            break
+    game_engine.run()
 
 
 if __name__ == "__main__":
