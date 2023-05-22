@@ -33,8 +33,7 @@ class ShuffleAction(Action):
         self.player_index = player_index
 
     def _execute(self, game_state: GameState) -> GameState:
-        zone_to_shuffle = game_state.zones[self.zone]
         assert self.zone != ZonePosition.STACK
-        zone_to_shuffle = zone_to_shuffle[self.player_index]
+        zone_to_shuffle = game_state.zones[self.zone][self.player_index]
         shuffle(zone_to_shuffle)
         return game_state
