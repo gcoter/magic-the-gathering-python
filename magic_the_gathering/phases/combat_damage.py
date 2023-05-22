@@ -8,7 +8,7 @@ class CombatDamagePhase(Phase):
         super().__init__(name="Combat: Damage Phase")
 
     def run(self, game_state: GameState) -> GameState:
-        # FIXME: We assume the blockers are already ordered as chosen by the attacker
+        # FIXME: I think we should add a phase before this one to allow the attacker to choose the order of blockers
         for deal_damage_action in DealDamageAction.list_possible_actions(game_state):
             game_state = deal_damage_action.execute(game_state)
         return game_state
