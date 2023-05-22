@@ -9,8 +9,11 @@ from magic_the_gathering.game_state import GameState, ZonePosition
 class DealDamageAction(Action):
     @classmethod
     def list_possible_actions(cls, game_state: GameState) -> List[Action]:
-        # TODO: Implement this
-        pass
+        possible_blocker_player_indices = game_state.other_players_blockers.keys()
+        return [
+            cls(owner="Game", blocker_player_index=blocker_player_index)
+            for blocker_player_index in possible_blocker_player_indices
+        ]
 
     def __init__(
         self,
