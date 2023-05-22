@@ -1,19 +1,21 @@
 import logging
 import random
+from collections import OrderedDict
 from typing import List
 
 import pandas as pd
 
-from magic_the_gathering.cards.base import Card
+from magic_the_gathering.actions.draw import DrawAction
 from magic_the_gathering.cards.deck_creator import JumpstartDeckCreator
-from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_engine import GameEngine
 from magic_the_gathering.game_modes.default import DefaultGameMode
 from magic_the_gathering.game_state import GameState
 from magic_the_gathering.players.random import RandomPlayer
 
 
-def create_decks(n_players: int = 2) -> List[List[Card]]:
+def create_decks(
+    n_players: int = 2,
+) -> List[List[object]]:  # FIXME: I had to remove Card because it caused a circular import
     jmp_decklist_df = pd.read_csv("data/jmp_decklist.csv")
     j22_decklist_df = pd.read_csv("data/j22_decklist.csv")
     cards_df = pd.read_csv("data/jumpstart_cards.csv")
@@ -22,10 +24,19 @@ def create_decks(n_players: int = 2) -> List[List[Card]]:
         card_sets_df=jmp_and_j22_decklist_df, cards_df=cards_df, allowed_types=["Creature", "Land"]
     )
     decks = deck_creator.create_decks(n_players=n_players)
-    for deck in decks:
-        random.shuffle(deck)
+    for i, deck in enumerate(decks):
+        items = list(deck.items())
+        random.shuffle(items)
+        decks[i] = OrderedDict(items)
     # TODO: Need to add Mulligan phase
     return decks
+
+
+def create_hands(game_state: GameState):
+    for player_index, player in enumerate(game_state.players):
+        for _ in range(game_state.game_mode.initial_hand_size):
+            game_state = DrawAction(owner="game", player_index=player_index).execute(game_state=game_state)
+    return game_state
 
 
 def run_one_game(n_players: int = 2):
@@ -39,6 +50,7 @@ def run_one_game(n_players: int = 2):
         players=players,
     )
     game_state.set_libraries(libraries=decks)
+    game_state = create_hands(game_state=game_state)
     game_engine = GameEngine(game_state=game_state)
     game_engine.run()
 

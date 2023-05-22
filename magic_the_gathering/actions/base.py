@@ -24,6 +24,7 @@ class Action:
 
     def execute(self, game_state: GameState) -> GameState:
         self.logger.debug(f"Executing action: {self}")
+        input(f"Press enter to continue...")
         game_state = self._execute(game_state)
         game_state.action_history.append(self)
         game_state.check_if_game_is_over()
@@ -32,8 +33,13 @@ class Action:
     def __str__(self) -> str:
         string = f"{self.__class__.__name__}("
         attribute_strings = [
-            f"{attribute_name}={attribute_value}" for attribute_name, attribute_value in self.__dict__.items()
+            f"{attribute_name}={attribute_value}"
+            for attribute_name, attribute_value in self.__dict__.items()
+            if attribute_name != "logger"
         ]
         string += ", ".join(attribute_strings)
         string += ")"
         return string
+
+    def __repr__(self) -> str:
+        return self.__str__()

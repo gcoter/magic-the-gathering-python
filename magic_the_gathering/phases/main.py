@@ -37,9 +37,9 @@ class MainPhase(PhaseWherePlayersGetPriority):
     def _run(self, game_state: GameState) -> GameState:
         while True:
             # Current player chooses one action
-            possible_actions = PhaseWherePlayersGetPriority.list_possible_actions(game_state)
+            possible_actions = MainPhase.list_possible_actions(game_state)
             current_player = game_state.current_player
-            action = current_player._choose_action(
+            action = current_player.choose_action(
                 game_state=game_state,
                 possible_actions=possible_actions,
             )

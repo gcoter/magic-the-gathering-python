@@ -18,7 +18,7 @@ class CombatDeclareAttackersPhase(PhaseWherePlayersGetPriority):
         while True:
             possible_actions = CombatDeclareAttackersPhase.list_possible_actions(game_state)
             current_player = game_state.current_player
-            action = current_player._choose_action(
+            action = current_player.choose_action(
                 game_state=game_state,
                 possible_actions=possible_actions,
             )

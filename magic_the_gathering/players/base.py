@@ -32,4 +32,4 @@ class Player:
         return action
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}(life_points={self.life_points})"
+        return f"{self.__class__.__name__}(life_points={self.life_points}, mana_pool={self.mana_pool})"

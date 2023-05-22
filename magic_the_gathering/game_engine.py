@@ -16,7 +16,7 @@ class GameEngine:
 
     def run_one_turn(self):
         self.game_state.current_turn_counter += 1
-        self.__logger.info(f"Start turn {self.game_state.current_turn_counter}")
+        self.__logger.info(f"***** Turn {self.game_state.current_turn_counter} *****")
         self.__logger.debug(f"Current player is now player '{self.game_state.current_player_index}'")
         self.game_state = self.turn.run(self.game_state)
 

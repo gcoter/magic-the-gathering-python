@@ -32,6 +32,7 @@ class DrawAction(Action):
         player_library = game_state.zones[ZonePosition.LIBRARY][self.player_index]
         player_hand = game_state.zones[ZonePosition.HAND][self.player_index]
         assert len(player_library) > 0
-        drawn_card = player_library.pop(0)
+        _, drawn_card = player_library.popitem()
+        self.logger.debug(f"Player {self.player_index} draws {drawn_card}")
         player_hand[drawn_card.uuid] = drawn_card
         return game_state

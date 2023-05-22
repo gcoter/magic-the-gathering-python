@@ -81,7 +81,6 @@ class Card:
             return 0
         return int(self.toughness)
 
-    @property
     def can_be_cast_by_player(self, player: Player) -> bool:
         if self.is_land:
             return False
@@ -89,7 +88,8 @@ class Card:
             return False
         for mana_color, mana_cost in self.mana_cost_dict.items():
             # FIXME: Handle mana cost that can be paid with any color
-            assert mana_color in player.mana_pool
+            if mana_color not in player.mana_pool:
+                return False
             if player.mana_pool[mana_color] < mana_cost:
                 return False
         return True
@@ -137,3 +137,9 @@ class Card:
     @property
     def is_planeswalker(self) -> bool:
         return "planeswalker" in self.type.lower()
+
+    def __repr__(self) -> str:
+        return f"Card(name={self.name}, type={self.type}, state={self.state})"
+
+    def __str__(self) -> str:
+        return self.__repr__()

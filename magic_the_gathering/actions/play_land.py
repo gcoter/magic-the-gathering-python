@@ -42,7 +42,7 @@ class PlayLandAction(Action):
         assert not game_state.current_player_has_played_a_land_this_turn
         player_land_card_new_instance = player_land_card.create_new_instance(
             state=CardState(
-                tapped=False,
+                is_tapped=False,
                 owner_player_id=self.player_index,
                 started_turn_controlled_by_player_id=self.player_index,
             )

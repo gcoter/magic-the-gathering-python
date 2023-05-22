@@ -2,11 +2,8 @@ from collections import OrderedDict
 from enum import Enum
 from typing import Dict, List, Optional
 
-from magic_the_gathering.actions.base import Action
-from magic_the_gathering.cards.base import Card
 from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_modes.base import GameMode
-from magic_the_gathering.players.base import Player
 
 
 class ZonePosition(Enum):
@@ -22,14 +19,18 @@ class GameState:
     def __init__(
         self,
         game_mode: GameMode,
-        players: List[Player],
+        players: List[object],  # FIXME: I had to remove Player because it caused a circular import
         current_turn_counter: Optional[int] = 0,
         current_player_index: Optional[int] = 0,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
-        zones: Optional[Dict[ZonePosition, List[OrderedDict[str, Card]]]] = None,
+        zones: Optional[
+            Dict[ZonePosition, List[OrderedDict[str, object]]]
+        ] = None,  # FIXME: I had to remove Card because it caused a circular import
         current_player_attackers: Optional[Dict[int, List[str]]] = None,
         other_players_blockers: Optional[Dict[int, Dict[str, List[str]]]] = None,
-        action_history: Optional[List[Action]] = None,
+        action_history: Optional[
+            List[object]
+        ] = None,  # FIXME: I had to remove Action because it caused a circular import, we should probably create a separate class for history
     ):
         self.game_mode = game_mode
         self.players = players
@@ -62,10 +63,13 @@ class GameState:
     def __assert_zones_validity(self):
         for zone in ZonePosition:
             assert zone in self.zones
-            assert len(self.zones[zone]) == self.n_players
-        assert "stack" in self.zones
+            if zone != ZonePosition.STACK:
+                assert len(self.zones[zone]) == self.n_players
+        assert ZonePosition.STACK in self.zones
 
-    def set_libraries(self, libraries: List[OrderedDict[str, Card]]):
+    def set_libraries(
+        self, libraries: List[OrderedDict[str, object]]
+    ):  # FIXME: I had to remove Card because it caused a circular import
         for player_index, library in enumerate(libraries):
             self.zones[ZonePosition.LIBRARY][player_index] = library
 
@@ -74,11 +78,11 @@ class GameState:
         return len(self.players)
 
     @property
-    def current_player(self) -> Player:
+    def current_player(self) -> object:  # FIXME: I had to remove Player because it caused a circular import
         return self.players[self.current_player_index]
 
     @property
-    def other_players(self) -> List[Player]:
+    def other_players(self) -> List[object]:  # FIXME: I had to remove Player because it caused a circular import
         return [
             player
             for index, player in enumerate(self.players)
