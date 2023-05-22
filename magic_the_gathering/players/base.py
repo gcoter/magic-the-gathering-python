@@ -1,3 +1,4 @@
+import logging
 from abc import abstractmethod
 from typing import Dict, List
 
@@ -18,7 +19,17 @@ class Player:
                 "green": 0,
             }
         self.is_alive = is_alive  # FIXME: Maybe is_alive is just the same as life_points > 0?
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @abstractmethod
-    def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
+    def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         raise NotImplementedError
+
+    def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
+        self.logger.debug(f"{self} is choosing an action among: {possible_actions}")
+        action = self._choose_action(game_state, possible_actions)
+        self.logger.debug(f"Chosen action: {action}")
+        return action
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(life_points={self.life_points})"

@@ -6,7 +6,7 @@ class EndPhase(Phase):
     def __init__(self):
         super().__init__(name="End Phase")
 
-    def run(self, game_state):
+    def _run(self, game_state):
         # TODO: Implement end phase triggers.
         # Below are the steps proposed by Maxime
         # until_end_of_turn_effects_end()

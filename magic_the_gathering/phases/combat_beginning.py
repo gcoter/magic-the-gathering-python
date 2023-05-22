@@ -8,6 +8,6 @@ class CombatBeginningPhase(Phase):
             name="Combat: Beginning Phase",
         )
 
-    def run(self, game_state: GameState) -> GameState:
+    def _run(self, game_state: GameState) -> GameState:
         # TODO: Implement beginning of combat triggers.
         return game_state

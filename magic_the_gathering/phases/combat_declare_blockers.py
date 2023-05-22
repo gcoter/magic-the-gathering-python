@@ -14,7 +14,7 @@ class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
     def __init__(self):
         super().__init__(name="Combat: Declare Blockers Phase")
 
-    def run(self, game_state: GameState) -> GameState:
+    def _run(self, game_state: GameState) -> GameState:
         for blocker_player_index in game_state.current_player_attackers.keys():
             blocker_player = game_state.players[blocker_player_index]
             assert blocker_player.is_alive
@@ -24,7 +24,7 @@ class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
                     for action in CombatDeclareBlockersPhase.list_possible_actions(game_state)
                     if action.blocker_player_index == blocker_player_index
                 ]
-                action = blocker_player.choose_action(
+                action = blocker_player._choose_action(
                     game_state=game_state,
                     possible_actions=possible_actions,
                 )

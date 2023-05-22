@@ -7,5 +7,5 @@ from magic_the_gathering.players.base import Player
 
 
 class RandomPlayer(Player):
-    def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
+    def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         return random.choice(possible_actions)
