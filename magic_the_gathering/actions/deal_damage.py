@@ -37,13 +37,13 @@ class DealDamageAction(Action):
                     game_state.zones[ZonePosition.BOARD][self.blocker_player_index][blocker_card_uuid].get_power()
                     for blocker_card_uuid in blocker_card_uuids
                 )
-                attacker_card.state.damage_received += blocker_power
+                attacker_card.state.damage_marked += blocker_power
 
                 # Each blocker receives damage from the attacker
                 for blocker_card_uuid in blocker_card_uuids:
                     assert blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]
                     blocker_card = game_state.zones[ZonePosition.BOARD][self.blocker_player_index][blocker_card_uuid]
-                    blocker_card.state.damage_received += attacker_power
+                    blocker_card.state.damage_marked += attacker_power
 
         # If the player has no more life points, it loses the game
         if blocker_player.life_points <= 0:
@@ -54,7 +54,7 @@ class DealDamageAction(Action):
             attacker_player_index = game_state.current_player_index
             assert attacker_card_uuid in game_state.zones[ZonePosition.BOARD][attacker_player_index]
             attacker_card = game_state.zones[ZonePosition.BOARD][attacker_player_index][attacker_card_uuid]
-            if attacker_card.state.damage_received >= attacker_card.get_toughness():
+            if attacker_card.state.damage_marked >= attacker_card.get_toughness():
                 game_state = MoveToGraveyardAction(
                     owner=self.owner, player_index=attacker_player_index, card_uuid=attacker_card_uuid
                 ).execute(game_state)
@@ -63,7 +63,7 @@ class DealDamageAction(Action):
         for blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]:
             assert blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]
             blocker_card = game_state.zones[ZonePosition.BOARD][self.blocker_player_index][blocker_card_uuid]
-            if blocker_card.state.damage_received >= blocker_card.get_toughness():
+            if blocker_card.state.damage_marked >= blocker_card.get_toughness():
                 game_state = MoveToGraveyardAction(
                     owner=self.owner, player_index=self.blocker_player_index, card_uuid=blocker_card_uuid
                 ).execute(game_state)
