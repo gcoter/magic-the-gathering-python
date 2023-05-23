@@ -12,11 +12,11 @@ class Player:
         self.mana_pool = mana_pool
         if self.mana_pool is None:
             self.mana_pool = {
-                "white": 0,
-                "blue": 0,
-                "black": 0,
-                "red": 0,
-                "green": 0,
+                "W": 0,
+                "U": 0,
+                "B": 0,
+                "R": 0,
+                "G": 0,
             }
         self.is_alive = is_alive  # FIXME: Maybe is_alive is just the same as life_points > 0?
         self.logger = logging.getLogger(self.__class__.__name__)

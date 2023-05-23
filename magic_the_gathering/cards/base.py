@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from uuid import uuid4
 
 import pandas as pd
@@ -13,6 +13,13 @@ class Card:
         return cls(
             scryfall_uuid=series["id"],
             name=series["name"],
+            color_identity=series["color_identity"]
+            .replace('"', "")
+            .replace("'", "")
+            .replace("[", "")
+            .replace("]", "")
+            .strip()
+            .split(", "),
             type=series["type_line"],
             text=series["oracle_text"],
             mana_cost_dict=Card.convert_mana_cost_to_dict(series["mana_cost"])
@@ -26,11 +33,11 @@ class Card:
     def convert_mana_cost_to_dict(mana_cost) -> Dict[str, int]:
         mana_cost_list = mana_cost.replace("{", "").replace("}", " ").strip().split(" ")
         mana_cost_dict = {
-            "white": mana_cost_list.count("W"),
-            "blue": mana_cost_list.count("U"),
-            "black": mana_cost_list.count("B"),
-            "red": mana_cost_list.count("R"),
-            "green": mana_cost_list.count("G"),
+            "W": mana_cost_list.count("W"),
+            "U": mana_cost_list.count("U"),
+            "B": mana_cost_list.count("B"),
+            "R": mana_cost_list.count("R"),
+            "G": mana_cost_list.count("G"),
         }
         try:
             mana_cost_dict["any"] = int(mana_cost_list[0])
@@ -42,6 +49,7 @@ class Card:
         self,
         scryfall_uuid: str,
         name: str,
+        color_identity: List[str],
         type: str,
         text: str,
         mana_cost_dict: Optional[Dict[str, int]] = None,
@@ -52,6 +60,7 @@ class Card:
         self.uuid = str(uuid4())
         self.scryfall_uuid = scryfall_uuid
         self.name = name
+        self.color_identity = color_identity
         self.type = type
         self.text = text
         self.mana_cost_dict = mana_cost_dict
@@ -63,6 +72,7 @@ class Card:
         return Card(
             scryfall_uuid=self.scryfall_uuid,
             name=self.name,
+            color_identity=self.color_identity,
             type=self.type,
             text=self.text,
             mana_cost_dict=self.mana_cost_dict,
@@ -138,8 +148,13 @@ class Card:
     def is_planeswalker(self) -> bool:
         return "planeswalker" in self.type.lower()
 
+    @property
+    def main_color(self) -> str:
+        assert len(self.color_identity) == 1
+        return self.color_identity[0]
+
     def __repr__(self) -> str:
-        return f"Card(name={self.name}, type={self.type}, state={self.state})"
+        return f"Card(name={self.name}, color={self.main_color}, type={self.type}, mana_cost={self.mana_cost_dict}, state={self.state})"
 
     def __str__(self) -> str:
         return self.__repr__()
