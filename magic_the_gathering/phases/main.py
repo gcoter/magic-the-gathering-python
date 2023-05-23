@@ -4,6 +4,7 @@ from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.cast_card import CastCardAction
 from magic_the_gathering.actions.play_land import PlayLandAction
 from magic_the_gathering.actions.resolve_stack import ResolveTopOfStackAction
+from magic_the_gathering.actions.tap import TapAction
 from magic_the_gathering.game_state import GameState, ZonePosition
 from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGetPriority
 
@@ -23,6 +24,13 @@ class MainPhase(PhaseWherePlayersGetPriority):
             [
                 action
                 for action in CastCardAction.list_possible_actions(game_state)
+                if action.player_index == game_state.current_player_index
+            ]
+        )
+        possible_actions.extend(
+            [
+                action
+                for action in TapAction.list_possible_actions(game_state)
                 if action.player_index == game_state.current_player_index
             ]
         )

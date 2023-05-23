@@ -31,7 +31,12 @@ class TapAction(Action):
         player_board = game_state.zones[ZonePosition.BOARD][self.player_index]
         assert self.card_uuid in player_board.keys()
         player_card = player_board[self.card_uuid]
-        # FIXME: Increase mana pool if land
         assert not player_card.state.is_tapped
         player_card.state.is_tapped = True
+
+        # Increase mana pool if land
+        if player_card.is_land:
+            player = game_state.players[self.player_index]
+            player.mana_pool[player_card.main_color] += 1
+
         return game_state
