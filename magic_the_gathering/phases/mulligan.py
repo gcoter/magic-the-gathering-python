@@ -11,7 +11,7 @@ class MulliganPhase(Phase):
             name="Mulligan Phase",
         )
 
-    def run(self, game_state: GameState) -> GameState:
+    def _run(self, game_state: GameState) -> GameState:
         take_mulligan_by_player = np.array([False for _ in range(self.players)])
         # TODO: game_state.game_mode.initial_hand_size is ugly, should we assume the hand are already initialized elsewhere (in GameState)?
         n_cards_to_draw_by_player = np.array(
