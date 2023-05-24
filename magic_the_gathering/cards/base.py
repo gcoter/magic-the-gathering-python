@@ -1,45 +1,160 @@
-from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, List, Optional
+from uuid import uuid4
 
 import pandas as pd
 
+from magic_the_gathering.cards.state import CardState
+from magic_the_gathering.players.base import Player
 
-@dataclass
+
 class Card:
-    uuid: str
-    name: str
-    type: str
-    text: str
-    mana_cost: Optional[str] = ""
-    power: Optional[str] = ""
-    toughness: Optional[str] = ""
-    is_tapped: bool = False  # TODO: Should be part of a state
-    owner_player_index: Optional[int] = 0
-
-    @staticmethod
-    def from_series(series: pd.Series):
-        return Card(
-            uuid=series["id"],
+    @classmethod
+    def from_series(cls, series: pd.Series):
+        return cls(
+            scryfall_uuid=series["id"],
             name=series["name"],
+            color_identity=series["color_identity"]
+            .replace('"', "")
+            .replace("'", "")
+            .replace("[", "")
+            .replace("]", "")
+            .strip()
+            .split(", "),
             type=series["type_line"],
             text=series["oracle_text"],
-            mana_cost=series["mana_cost"] if not pd.isna(series["mana_cost"]) else "",
+            mana_cost_dict=Card.convert_mana_cost_to_dict(series["mana_cost"])
+            if not pd.isna(series["mana_cost"])
+            else None,
             power=series["power"] if not pd.isna(series["power"]) else "",
             toughness=series["toughness"] if not pd.isna(series["toughness"]) else "",
         )
 
-    @property
-    def mana_cost_dict(self) -> Dict[str, int]:
-        mana_cost_list = self.mana_cost.replace("{", "").replace("}", " ").strip().split(" ")
+    @staticmethod
+    def convert_mana_cost_to_dict(mana_cost) -> Dict[str, int]:
+        mana_cost_list = mana_cost.replace("{", "").replace("}", " ").strip().split(" ")
         mana_cost_dict = {
-            "white": mana_cost_list.count("W"),
-            "blue": mana_cost_list.count("U"),
-            "black": mana_cost_list.count("B"),
-            "red": mana_cost_list.count("R"),
-            "green": mana_cost_list.count("G"),
+            "W": mana_cost_list.count("W"),
+            "U": mana_cost_list.count("U"),
+            "B": mana_cost_list.count("B"),
+            "R": mana_cost_list.count("R"),
+            "G": mana_cost_list.count("G"),
         }
         try:
             mana_cost_dict["any"] = int(mana_cost_list[0])
         except ValueError:
             mana_cost_dict["any"] = 0
         return mana_cost_dict
+
+    def __init__(
+        self,
+        scryfall_uuid: str,
+        name: str,
+        color_identity: List[str],
+        type: str,
+        text: str,
+        mana_cost_dict: Optional[Dict[str, int]] = None,
+        power: Optional[str] = "",
+        toughness: Optional[str] = "",
+        state: Optional[CardState] = None,
+    ):
+        self.uuid = str(uuid4())
+        self.scryfall_uuid = scryfall_uuid
+        self.name = name
+        self.color_identity = color_identity
+        self.type = type
+        self.text = text
+        self.mana_cost_dict = mana_cost_dict
+        self.power = power
+        self.toughness = toughness
+        self.state = state
+
+    def create_new_instance(self, state: Optional[CardState] = None):
+        return Card(
+            scryfall_uuid=self.scryfall_uuid,
+            name=self.name,
+            color_identity=self.color_identity,
+            type=self.type,
+            text=self.text,
+            mana_cost_dict=self.mana_cost_dict,
+            power=self.power,
+            toughness=self.toughness,
+            state=state,
+        )
+
+    def get_power(self) -> int:
+        if self.power == "*":
+            return 0
+        return int(self.power)
+
+    def get_toughness(self) -> int:
+        if self.toughness == "*":
+            return 0
+        return int(self.toughness)
+
+    def can_be_cast_by_player(self, player: Player) -> bool:
+        if self.is_land:
+            return False
+        if self.mana_cost_dict is None:
+            return False
+        for mana_color, mana_cost in self.mana_cost_dict.items():
+            # FIXME: Handle mana cost that can be paid with any color
+            if mana_color not in player.mana_pool:
+                return False
+            if player.mana_pool[mana_color] < mana_cost:
+                return False
+        return True
+
+    @property
+    def main_type(self) -> str:
+        return self.type.split("—")[0].strip()
+
+    @property
+    def subtypes(self) -> str:
+        return self.type.split("—")[1].strip()
+
+    @property
+    def is_non_permanent(self) -> bool:
+        return self.is_instant or self.is_sorcery
+
+    @property
+    def is_permament(self) -> bool:
+        return not self.is_non_permanent
+
+    @property
+    def is_land(self) -> bool:
+        return "land" in self.type.lower()
+
+    @property
+    def is_creature(self) -> bool:
+        return "creature" in self.type.lower()
+
+    @property
+    def is_instant(self) -> bool:
+        return "instant" in self.type.lower()
+
+    @property
+    def is_sorcery(self) -> bool:
+        return "sorcery" in self.type.lower()
+
+    @property
+    def is_enchantment(self) -> bool:
+        return "enchantment" in self.type.lower()
+
+    @property
+    def is_artifact(self) -> bool:
+        return "artifact" in self.type.lower()
+
+    @property
+    def is_planeswalker(self) -> bool:
+        return "planeswalker" in self.type.lower()
+
+    @property
+    def main_color(self) -> str:
+        assert len(self.color_identity) == 1
+        return self.color_identity[0]
+
+    def __repr__(self) -> str:
+        return f"Card(name={self.name}, color={self.main_color}, type={self.type}, mana_cost={self.mana_cost_dict}, state={self.state})"
+
+    def __str__(self) -> str:
+        return self.__repr__()

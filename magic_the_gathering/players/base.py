@@ -1,38 +1,35 @@
-from typing import List, Tuple, Union
+import logging
+from abc import abstractmethod
+from typing import Dict, List
 
+from magic_the_gathering.actions.base import Action
 from magic_the_gathering.game_state import GameState
 
 
 class Player:
-    def __init__(
-        self,
-        life_points: int = 20,
-    ):
+    def __init__(self, life_points: int = 20, mana_pool: Dict[str, int] = None, is_alive: bool = True):
         self.life_points = life_points
+        self.mana_pool = mana_pool
+        if self.mana_pool is None:
+            self.mana_pool = {
+                "W": 0,
+                "U": 0,
+                "B": 0,
+                "R": 0,
+                "G": 0,
+            }
+        self.is_alive = is_alive  # FIXME: Maybe is_alive is just the same as life_points > 0?
+        self.logger = logging.getLogger(self.__class__.__name__)
 
-    def choose_mulligan(self, game_state: GameState) -> bool:
-        pass
+    @abstractmethod
+    def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
+        raise NotImplementedError
 
-    def choose_land_to_play(self) -> Union[int, None]:
-        pass
+    def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
+        self.logger.debug(f"{self} is choosing an action among: {possible_actions}")
+        action = self._choose_action(game_state, possible_actions)
+        self.logger.debug(f"Chosen action: {action}")
+        return action
 
-    def choose_creatures_to_cast(self) -> List[int]:
-        pass
-
-    def choose_artifacts_to_cast(self):
-        pass
-
-    def choose_enchantment_to_cast(self):
-        pass
-
-    def choose_sorceries_to_cast(self):
-        pass
-
-    def choose_instants_to_cast(self):
-        pass
-
-    def choose_attackers(self) -> Tuple[List[int], List[int]]:
-        pass
-
-    def choose_blockers(self) -> Tuple[List[int], List[int]]:
-        pass
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(life_points={self.life_points}, mana_pool={self.mana_pool})"

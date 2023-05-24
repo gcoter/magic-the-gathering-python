@@ -6,6 +6,6 @@ class UpkeepPhase(Phase):
     def __init__(self):
         super().__init__(name="Upkeep Phase")
 
-    def run(self, game_state: GameState) -> GameState:
+    def _run(self, game_state: GameState) -> GameState:
         # TODO: Implement upkeep triggers.
         return game_state

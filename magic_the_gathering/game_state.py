@@ -1,25 +1,36 @@
-from random import shuffle
-from typing import List, Optional
+from collections import OrderedDict
+from enum import Enum
+from typing import Dict, List, Optional
 
-from magic_the_gathering.cards.base import Card
+from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_modes.base import GameMode
-from magic_the_gathering.players.base import Player
+
+
+class ZonePosition(Enum):
+    HAND = 0
+    LIBRARY = 1
+    BOARD = 2
+    GRAVEYARD = 3
+    EXILE = 4
+    STACK = 5
 
 
 class GameState:
     def __init__(
         self,
         game_mode: GameMode,
-        players: List[Player],
+        players: List[object],  # FIXME: I had to remove Player because it caused a circular import
         current_turn_counter: Optional[int] = 0,
         current_player_index: Optional[int] = 0,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
-        hands: Optional[List[List[Card]]] = None,
-        libraries: Optional[List[List[Card]]] = None,
-        boards: Optional[List[List[Card]]] = None,
-        graveyards: Optional[List[List[Card]]] = None,
-        exiles: Optional[List[Card]] = None,
-        stack: Optional[List[Card]] = None,
+        zones: Optional[
+            Dict[ZonePosition, List[OrderedDict[str, object]]]
+        ] = None,  # FIXME: I had to remove Card because it caused a circular import
+        current_player_attackers: Optional[Dict[int, List[str]]] = None,
+        other_players_blockers: Optional[Dict[int, Dict[str, List[str]]]] = None,
+        action_history: Optional[
+            List[object]
+        ] = None,  # FIXME: I had to remove Action because it caused a circular import, we should probably create a separate class for history
     ):
         self.game_mode = game_mode
         self.players = players
@@ -28,75 +39,68 @@ class GameState:
         # TODO: Should 'current_player_has_played_a_land_this_turn' be a property of the player, not of the game state?
         # TODO: At some point we'll change this so that we allow a player to have n land drops, 1 by default, but can change with some cards
         self.current_player_has_played_a_land_this_turn = current_player_has_played_a_land_this_turn
-        self.hands = hands
-        self.libraries = libraries
-        self.boards = boards
-        self.graveyards = graveyards
-        self.exiles = exiles
-        self.stack = stack
+        self.zones = zones
+        if self.zones is None:
+            self.zones = {
+                ZonePosition.HAND: [OrderedDict() for _ in range(self.n_players)],
+                ZonePosition.LIBRARY: [OrderedDict() for _ in range(self.n_players)],
+                ZonePosition.BOARD: [OrderedDict() for _ in range(self.n_players)],
+                ZonePosition.GRAVEYARD: [OrderedDict() for _ in range(self.n_players)],
+                ZonePosition.EXILE: [OrderedDict() for _ in range(self.n_players)],
+                ZonePosition.STACK: OrderedDict(),  # FIXME: It should probably be just a list but it is simpler to use the same class as the other zones for now
+            }
+        self.__assert_zones_validity()
+        self.current_player_attackers = current_player_attackers
+        if self.current_player_attackers is None:
+            self.current_player_attackers = {}
+        self.other_players_blockers = other_players_blockers
+        if self.other_players_blockers is None:
+            self.other_players_blockers = {}
+        self.action_history = action_history
+        if self.action_history is None:
+            self.action_history = []
+
+    def __assert_zones_validity(self):
+        for zone in ZonePosition:
+            assert zone in self.zones
+            if zone != ZonePosition.STACK:
+                assert len(self.zones[zone]) == self.n_players
+        assert ZonePosition.STACK in self.zones
+
+    def set_libraries(
+        self, libraries: List[OrderedDict[str, object]]
+    ):  # FIXME: I had to remove Card because it caused a circular import
+        for player_index, library in enumerate(libraries):
+            self.zones[ZonePosition.LIBRARY][player_index] = library
 
     @property
-    def n_players(self):
+    def n_players(self) -> int:
         return len(self.players)
 
     @property
-    def current_player(self):
+    def current_player(self) -> object:  # FIXME: I had to remove Player because it caused a circular import
         return self.players[self.current_player_index]
 
-    def initialize_for_new_game(self):
-        # TODO: It assumes that the players were initialized, is it a good idea?
-        # FIXME: The game mode contains information about the player initial life points and hand size, but it is not used here
-        # TODO: Pass the current player index? (for now it is always 0)
-        # Set hands, libraries, boards and stack to empty lists
-        self.hands = [[] for _ in range(self.n_players)]
-        self.libraries = [[] for _ in range(self.n_players)]
-        self.boards = [[] for _ in range(self.n_players)]
-        self.graveyards = [[] for _ in range(self.n_players)]
-        # TODO: Is there one exile per player?
-        self.exiles = [[] for _ in range(self.n_players)]
-        self.stack = []
+    @property
+    def other_players(self) -> List[object]:  # FIXME: I had to remove Player because it caused a circular import
+        return [
+            player
+            for index, player in enumerate(self.players)
+            if index != self.current_player_index and player.is_alive
+        ]
 
-    def draw_cards_from_deck(self, player_index, n_cards=1):
-        n_cards = min(n_cards, len(self.libraries[player_index]))
-        drawn_cards = [self.libraries[player_index].pop(0) for _ in range(n_cards)]
-        self.hands[player_index].extend(drawn_cards)
+    def check_if_game_is_over(self):
+        # Conditions for game over (according to https://mtg.fandom.com/wiki/Ending_the_game):
+        # - If a player concedes the game
+        # - If a player’s life total is 0 or less
+        # - If a player is required to draw more cards than are left in their library
+        # - If a player has ten or more poison counters
+        # - If an effect states that a player loses the game
+        # - If an effect states that the game is a draw
+        # - If a player would both win and lose the game simultaneously
 
-    def add_all_hand_cards_to_deck(self, player_index):
-        self.libraries[player_index].extend(self.hands[player_index])
-        self.hands[player_index] = []
-
-    def shuffle_deck(self, player_index):
-        shuffle(self.libraries[player_index])
-
-    def shuffle_all_decks(self):
-        for player_index in range(len(self.libraries)):
-            self.shuffle_deck(player_index=player_index)
-
-    def set_decks(self, decks: List[List[Card]]):
-        self.libraries = decks
-
-    def play_card(self, player_index, hand_card_index):
-        card = self.hands[player_index].pop(hand_card_index)
-        card.is_tapped = False
-        self.boards[card.owner_player_index].append(card)
-
-    def cast_card(self, player_index, hand_card_index):
-        card = self.hands[player_index].pop(hand_card_index)
-        self.stack.append(card)
-
-    def resolve_top_of_the_stack(self):
-        # TODO: Currently, this was implemented with casting creatures or lands in mind. It should be generalized.
-        card = self.stack.pop(-1)
-        card.is_tapped = False
-        self.boards[card.owner_player_index].append(card)
-
-    def untap_all_permanents(self, player_index: int):
-        for permanent in self.boards[player_index]:
-            permanent.is_tapped = False
-
-    def tap_cards(self, player_index, board_indices):
-        for board_index in board_indices:
-            self.boards[player_index][board_index].is_tapped = True
-
-    def pass_to_next_player(self):
-        self.current_player_index = (self.current_player_index + 1) % self.n_players
+        # For now, we only check if all players except one are dead
+        alive_player_indices = [player_index for player_index, player in enumerate(self.players) if player.is_alive]
+        if len(alive_player_indices) == 1:
+            winner_player_index = alive_player_indices[0]
+            raise GameOverException(winner_player_index=winner_player_index)
