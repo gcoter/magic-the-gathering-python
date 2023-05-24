@@ -12,7 +12,7 @@ class DeclareAttackerAction(Action):
         player_board = game_state.zones[ZonePosition.BOARD][attacker_player_index]
         for target_player_index, target_player in enumerate(game_state.other_players):
             for card_uuid, card in player_board.items():
-                if card.is_creature and not card.is_tapped:
+                if card.is_creature and not card.state.is_tapped:
                     possible_actions.append(
                         cls(
                             owner=f"Player {attacker_player_index}",
@@ -38,9 +38,9 @@ class DeclareAttackerAction(Action):
         assert self.attacker_card_uuid in player_board
         attacker_card = player_board[self.attacker_card_uuid]
         assert attacker_card.is_creature
-        assert not attacker_card.is_tapped
+        assert not attacker_card.state.is_tapped
         if self.target_player_index not in game_state.current_player_attackers:
             game_state.current_player_attackers[self.target_player_index] = []
         game_state.current_player_attackers[self.target_player_index].append(self.attacker_card_uuid)
-        attacker_card.is_tapped = True
+        attacker_card.state.is_tapped = True
         return game_state

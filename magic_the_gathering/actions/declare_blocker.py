@@ -10,7 +10,7 @@ class DeclareBlockerAction(Action):
         possible_actions = []
         for blocker_player_index, attacker_card_uuids in game_state.current_player_attackers.items():
             for blocker_card_uuid, blocker_card in game_state.zones[ZonePosition.BOARD][blocker_player_index].items():
-                if blocker_card.is_creature and not blocker_card.is_tapped:
+                if blocker_card.is_creature and not blocker_card.state.is_tapped:
                     for attacker_card_uuid in attacker_card_uuids:
                         possible_actions.append(
                             cls(

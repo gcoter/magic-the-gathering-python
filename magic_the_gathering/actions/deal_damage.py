@@ -26,7 +26,9 @@ class DealDamageAction(Action):
     def _execute(self, game_state: GameState) -> GameState:
         blocker_player = game_state.players[self.blocker_player_index]
         assert blocker_player.is_alive
-        for attacker_card_uuid, blocker_card_uuids in game_state.other_players_blockers[self.blocker_player_index]:
+        for attacker_card_uuid, blocker_card_uuids in game_state.other_players_blockers[
+            self.blocker_player_index
+        ].items():
             attacker_player_index = game_state.current_player_index
             assert attacker_card_uuid in game_state.zones[ZonePosition.BOARD][attacker_player_index]
             attacker_card = game_state.zones[ZonePosition.BOARD][attacker_player_index][attacker_card_uuid]
