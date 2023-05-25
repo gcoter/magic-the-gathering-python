@@ -43,3 +43,13 @@ class Action:
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def to_json_dict(self) -> dict:
+        return {
+            "action_type": self.__class__.__name__,
+            "action_attributes": {
+                attribute_name: attribute_value
+                for attribute_name, attribute_value in self.__dict__.items()
+                if attribute_name != "logger"
+            },
+        }
