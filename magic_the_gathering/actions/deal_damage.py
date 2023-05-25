@@ -36,6 +36,9 @@ class DealDamageAction(Action):
             if len(blocker_card_uuids) == 0:
                 # The player receives the damage directly
                 blocker_player.life_points -= attacker_power
+                self.logger.info(
+                    f"Player {self.blocker_player_index} receives {attacker_power} damage from {attacker_card}"
+                )
             else:
                 # Blockers deal damage to the attacker
                 blocker_power = sum(
@@ -43,12 +46,14 @@ class DealDamageAction(Action):
                     for blocker_card_uuid in blocker_card_uuids
                 )
                 attacker_card.state.damage_marked += blocker_power
+                self.logger.info(f"{attacker_card} receives {blocker_power} damage from blockers")
 
                 # Each blocker receives damage from the attacker
                 for blocker_card_uuid in blocker_card_uuids:
                     assert blocker_card_uuid in game_state.zones[ZonePosition.BOARD][self.blocker_player_index]
                     blocker_card = game_state.zones[ZonePosition.BOARD][self.blocker_player_index][blocker_card_uuid]
                     blocker_card.state.damage_marked += attacker_power
+                    self.logger.info(f"{blocker_card} receives {attacker_power} damage from {attacker_card}")
 
         # If the player has no more life points, it loses the game
         if blocker_player.life_points <= 0:

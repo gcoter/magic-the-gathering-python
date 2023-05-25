@@ -17,7 +17,7 @@ from magic_the_gathering.players.random import RandomPlayer
 
 
 def simulate_combat():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     df = pd.read_csv("data/vanilla_creature_cards.csv")
 

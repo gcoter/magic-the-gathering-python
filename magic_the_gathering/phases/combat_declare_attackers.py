@@ -35,4 +35,6 @@ class CombatDeclareAttackersPhase(PhaseWherePlayersGetPriority):
             if action is None:
                 break
             game_state = action.execute(game_state)
+
+        self.logger.info(f"Declared attackers: {game_state.current_player_attackers}")
         return game_state

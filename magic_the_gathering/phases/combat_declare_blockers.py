@@ -45,4 +45,6 @@ class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
                     game_state.other_players_blockers[blocker_player_index] = {}
                 if attacker_card_uuid not in game_state.other_players_blockers[blocker_player_index]:
                     game_state.other_players_blockers[blocker_player_index][attacker_card_uuid] = []
+
+        self.logger.info(f"Declared blockers: {game_state.other_players_blockers}")
         return game_state
