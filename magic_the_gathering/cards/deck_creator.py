@@ -69,9 +69,9 @@ class RandomVanillaDeckCreator:
         for _ in range(n_players):
             current_deck = OrderedDict()
             color = random.choice(["W", "U", "B", "R", "G"])
-            land_color_filter = self.legal_lands_df["color_identity"].str.contains(color)
+            land_color_filter = self.legal_lands_df["color_identity"] == f"['{color}']"
             land_card_names = self.legal_lands_df[land_color_filter]["name"].unique()
-            creature_color_filter = self.legal_creatures_df["color_identity"].str.contains(color)
+            creature_color_filter = self.legal_creatures_df["color_identity"] == f"['{color}']"
             creature_card_names = self.legal_creatures_df[creature_color_filter]["name"].unique()
             for _ in range(self.deck_size):
                 if random.random() < self.lands_proportion:
