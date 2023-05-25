@@ -19,9 +19,7 @@ from magic_the_gathering.players.random import RandomPlayer
 def simulate_combat():
     logging.basicConfig(level=logging.DEBUG)
 
-    with open("data/scryfall/default-cards-20230502210911.json", "r") as f:
-        scryfall_default_cards_json_list = json.load(f)
-    df = pd.DataFrame(scryfall_default_cards_json_list)
+    df = pd.read_csv("data/vanilla_creature_cards.csv")
 
     # Player 0 board: card scryfall IDs
     player_0_board_scryfall_ids = [
