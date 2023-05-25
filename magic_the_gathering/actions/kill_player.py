@@ -18,6 +18,7 @@ class KillPlayerAction(Action):
         self.player_index = player_index
 
     def _execute(self, game_state: GameState) -> GameState:
+        self.logger.info(f"Player {self.player_index} is killed")
         killed_player = game_state.players[self.player_index]
         assert killed_player.is_alive
         killed_player.is_alive = False
