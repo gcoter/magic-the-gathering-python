@@ -33,3 +33,10 @@ class Player:
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(life_points={self.life_points}, mana_pool={self.mana_pool})"
+
+    def to_json_dict(self) -> Dict:
+        return {
+            "life_points": self.life_points,
+            "mana_pool": self.mana_pool,
+            "is_alive": self.is_alive,
+        }
