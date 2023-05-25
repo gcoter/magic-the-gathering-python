@@ -150,11 +150,11 @@ class Card:
 
     @property
     def main_color(self) -> str:
-        assert len(self.color_identity) == 1
+        # FIXME: Handle multi-color cards
         return self.color_identity[0]
 
     def __repr__(self) -> str:
-        return f"Card(name={self.name}, color={self.main_color}, type={self.type}, mana_cost={self.mana_cost_dict}, state={self.state})"
+        return f"Card(name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, state={self.state})"
 
     def __str__(self) -> str:
         return self.__repr__()
