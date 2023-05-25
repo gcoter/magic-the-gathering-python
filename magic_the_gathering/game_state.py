@@ -124,6 +124,7 @@ class GameState:
             },
             "current_player_attackers": self.current_player_attackers,
             "other_players_blockers": self.other_players_blockers,
+            "action_history": [action.to_json_dict() for action in self.action_history],
         }
         json_dict["zones"][ZonePosition.STACK.name] = [
             card.to_json_dict() for card in self.zones[ZonePosition.STACK].values()
