@@ -40,6 +40,8 @@ class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
                         )
                 if action is None:
                     break
+                else:
+                    game_state = action.execute(game_state)
             for attacker_card_uuid in game_state.current_player_attackers[blocker_player_index]:
                 if blocker_player_index not in game_state.other_players_blockers:
                     game_state.other_players_blockers[blocker_player_index] = {}

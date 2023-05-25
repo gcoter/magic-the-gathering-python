@@ -33,7 +33,7 @@ class DeclareBlockerAction(Action):
         assert self.blocker_card_uuid in blocker_board
         blocker_card = blocker_board[self.blocker_card_uuid]
         assert blocker_card.is_creature
-        assert not blocker_card.is_tapped
+        assert not blocker_card.state.is_tapped
         assert self.attacker_card_uuid in game_state.current_player_attackers[self.blocker_player_index]
         if self.blocker_player_index not in game_state.other_players_blockers:
             game_state.other_players_blockers[self.blocker_player_index] = {}
@@ -42,5 +42,5 @@ class DeclareBlockerAction(Action):
         game_state.other_players_blockers[self.blocker_player_index][self.attacker_card_uuid].append(
             self.blocker_card_uuid
         )
-        blocker_card.is_tapped = True
+        blocker_card.state.is_tapped = True
         return game_state
