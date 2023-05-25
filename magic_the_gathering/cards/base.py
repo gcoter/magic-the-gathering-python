@@ -154,7 +154,7 @@ class Card:
         return self.color_identity[0]
 
     def __repr__(self) -> str:
-        return f"Card(name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, state={self.state})"
+        return f"Card(uuid={self.uuid}, name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, power={self.get_power()}, toughness={self.get_toughness()}, state={self.state})"
 
     def __str__(self) -> str:
         return self.__repr__()
