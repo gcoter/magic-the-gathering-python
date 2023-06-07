@@ -10,16 +10,16 @@ from magic_the_gathering.players.base import Player
 class Card:
     @classmethod
     def from_series(cls, series: pd.Series):
+        color_identity = series["color_identity"]
+        if isinstance(color_identity, str):
+            color_identity = (
+                color_identity.replace('"', "").replace("'", "").replace("[", "").replace("]", "").strip().split(", ")
+            )
+        assert isinstance(color_identity, list)
         return cls(
             scryfall_uuid=series["id"],
             name=series["name"],
-            color_identity=series["color_identity"]
-            .replace('"', "")
-            .replace("'", "")
-            .replace("[", "")
-            .replace("]", "")
-            .strip()
-            .split(", "),
+            color_identity=color_identity,
             type=series["type_line"],
             text=series["oracle_text"],
             mana_cost_dict=Card.convert_mana_cost_to_dict(series["mana_cost"])
@@ -154,7 +154,7 @@ class Card:
         return self.color_identity[0]
 
     def __repr__(self) -> str:
-        return f"Card(name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, state={self.state})"
+        return f"Card(uuid={self.uuid}, name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, power={self.get_power()}, toughness={self.get_toughness()}, state={self.state})"
 
     def __str__(self) -> str:
         return self.__repr__()

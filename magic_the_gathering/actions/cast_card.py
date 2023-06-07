@@ -46,7 +46,7 @@ class CastCardAction(Action):
 
         player_card_new_instance = player_card.create_new_instance(
             state=CardState(
-                tapped=False,
+                is_tapped=False,
                 owner_player_id=self.player_index,
                 started_turn_controlled_by_player_id=self.player_index,
             )
