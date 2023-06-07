@@ -82,12 +82,12 @@ class Card:
         )
 
     def get_power(self) -> int:
-        if self.power == "*":
+        if self.power == "*" or self.power == "":
             return 0
         return int(self.power)
 
     def get_toughness(self) -> int:
-        if self.toughness == "*":
+        if self.toughness == "*" or self.toughness == "":
             return 0
         return int(self.toughness)
 
