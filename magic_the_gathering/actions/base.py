@@ -24,7 +24,7 @@ class Action:
 
     def execute(self, game_state: GameState) -> GameState:
         self.logger.debug(f"Executing action: {self}")
-        input(f"Press enter to continue...")
+        # input(f"Press enter to continue...")
         game_state = self._execute(game_state)
         game_state.action_history.append(self)
         game_state.check_if_game_is_over()

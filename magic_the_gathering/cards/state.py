@@ -21,3 +21,9 @@ class CardState:
             "started_turn_controlled_by_player_id": self.started_turn_controlled_by_player_id,
             "damage_marked": self.damage_marked,
         }
+
+    def __repr__(self):
+        return f"CardState(is_tapped={self.is_tapped}, owner_player_id={self.owner_player_id}, started_turn_controlled_by_player_id={self.started_turn_controlled_by_player_id}, damage_marked={self.damage_marked})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
