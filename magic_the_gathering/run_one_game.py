@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 from collections import OrderedDict
 from typing import List
@@ -41,10 +42,18 @@ def create_hands(game_state: GameState):
 
 
 def run_one_game(n_players: int = 2):
-    logging.basicConfig(level=logging.DEBUG)
+    log_level_env = os.getenv("LOG_LEVEL")
+    log_level = logging.WARNING
+    if log_level_env is not None:
+        if log_level_env == "info":
+            log_level = logging.INFO
+        elif log_level_env == "debug":
+            log_level = logging.DEBUG
+
+    logging.basicConfig(level=log_level)
 
     game_mode = DefaultGameMode()
-    players = [RandomPlayer(life_points=game_mode.initial_life_points)] * n_players
+    players = [RandomPlayer(index=index, life_points=game_mode.initial_life_points) for index in range(n_players)]
     decks = create_decks(n_players=n_players)
     game_state = GameState(
         game_mode=game_mode,
