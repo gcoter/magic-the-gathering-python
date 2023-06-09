@@ -33,9 +33,6 @@ class GameState:
         ] = None,  # FIXME: I had to remove Card because it caused a circular import
         current_player_attackers: Optional[Dict[int, List[str]]] = None,
         other_players_blockers: Optional[Dict[int, Dict[str, List[str]]]] = None,
-        action_history: Optional[
-            List[object]
-        ] = None,  # FIXME: I had to remove Action because it caused a circular import, we should probably create a separate class for history
     ):
         self.game_mode = game_mode
         self.players = players
@@ -64,9 +61,6 @@ class GameState:
         self.other_players_blockers = other_players_blockers
         if self.other_players_blockers is None:
             self.other_players_blockers = {}
-        self.action_history = action_history
-        if self.action_history is None:
-            self.action_history = []
 
     def __assert_zones_validity(self):
         for zone in ZonePosition:
@@ -132,7 +126,6 @@ class GameState:
             },
             "current_player_attackers": self.current_player_attackers,
             "other_players_blockers": self.other_players_blockers,
-            "action_history": [action.to_json_dict() for action in self.action_history[-10:]],
         }
         json_dict["zones"][ZonePosition.STACK.name] = [
             card.to_json_dict() for card in self.zones[ZonePosition.STACK].values()
@@ -149,7 +142,6 @@ class GameState:
             "global": self.__global_to_vector(),
             "players": self.__players_to_vector(),
             "zones": self.__zones_to_vector(),
-            "action_history": self.__action_history_to_vector(),
         }
 
     def __players_to_vector(self) -> np.ndarray:
@@ -217,6 +209,3 @@ class GameState:
         one_hot_vector = np.zeros(len(ZonePosition))
         one_hot_vector[zone.value] = 1
         return one_hot_vector
-
-    def __action_history_to_vector(self) -> np.ndarray:
-        pass
