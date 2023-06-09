@@ -1,5 +1,8 @@
 import logging
+import os
+import pickle
 
+from magic_the_gathering.actions.base import Action
 from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_state import GameState
 from magic_the_gathering.phases.mulligan import MulliganPhase
@@ -25,6 +28,16 @@ class GameEngine:
             try:
                 self.run_one_turn()
             except GameOverException as e:
-                print(e)
                 winner_player_index = e.winner_player_index
+                self.__logger.info(f"Player {winner_player_index} wins the game")
+                log_directory_path = os.getenv("LOG_DIRECTORY_PATH")
+                if log_directory_path:
+                    data_dict = {
+                        "game_id": self.game_state.game_id,
+                        "dataset": Action.DATASET,
+                        "winner_player_index": winner_player_index,
+                    }
+                    pickle_file_path = os.path.join(log_directory_path, f"game_{self.game_state.game_id}.pickle")
+                    with open(pickle_file_path, "wb") as f:
+                        pickle.dump(data_dict, f)
                 break

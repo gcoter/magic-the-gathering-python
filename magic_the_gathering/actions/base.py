@@ -6,6 +6,9 @@ from magic_the_gathering.game_state import GameState
 
 
 class Action:
+    GLOBAL_ACTION_COUNT = 0
+    DATASET = []
+
     @classmethod
     @abstractmethod
     def list_possible_actions(cls, game_state: GameState) -> List["Action"]:
@@ -24,8 +27,9 @@ class Action:
 
     def execute(self, game_state: GameState) -> GameState:
         self.logger.debug(f"Executing action: {self}")
-        # input(f"Press enter to continue...")
+        Action.DATASET.append({"game_state": game_state.to_json_dict(), "action": self.to_json_dict()})
         game_state = self._execute(game_state)
+        Action.GLOBAL_ACTION_COUNT += 1
         game_state.action_history.append(self)
         game_state.check_if_game_is_over()
         return game_state
@@ -43,3 +47,13 @@ class Action:
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def to_json_dict(self) -> dict:
+        return {
+            "action_type": self.__class__.__name__,
+            "action_attributes": {
+                attribute_name: attribute_value
+                for attribute_name, attribute_value in self.__dict__.items()
+                if attribute_name != "logger"
+            },
+        }

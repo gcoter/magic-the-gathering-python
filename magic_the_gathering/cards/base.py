@@ -21,7 +21,7 @@ class Card:
             name=series["name"],
             color_identity=color_identity,
             type=series["type_line"],
-            text=series["oracle_text"],
+            text=series["oracle_text"] if not pd.isna(series["oracle_text"]) else "",
             mana_cost_dict=Card.convert_mana_cost_to_dict(series["mana_cost"])
             if not pd.isna(series["mana_cost"])
             else None,
@@ -82,12 +82,12 @@ class Card:
         )
 
     def get_power(self) -> int:
-        if self.power == "*":
+        if self.power == "*" or self.power == "":
             return 0
         return int(self.power)
 
     def get_toughness(self) -> int:
-        if self.toughness == "*":
+        if self.toughness == "*" or self.toughness == "":
             return 0
         return int(self.toughness)
 
@@ -158,3 +158,17 @@ class Card:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def to_json_dict(self) -> Dict:
+        return {
+            "uuid": self.uuid,
+            "scryfall_uuid": self.scryfall_uuid,
+            "name": self.name,
+            "color_identity": self.color_identity,
+            "type": self.type,
+            "text": self.text,
+            "mana_cost_dict": self.mana_cost_dict,
+            "power": self.power,
+            "toughness": self.toughness,
+            "state": self.state.to_json_dict() if self.state is not None else None,
+        }

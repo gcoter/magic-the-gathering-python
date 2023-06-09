@@ -1,6 +1,8 @@
+import json
 from collections import OrderedDict
 from enum import Enum
 from typing import Dict, List, Optional
+from uuid import uuid4
 
 from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_modes.base import GameMode
@@ -20,6 +22,7 @@ class GameState:
         self,
         game_mode: GameMode,
         players: List[object],  # FIXME: I had to remove Player because it caused a circular import
+        game_id: Optional[str] = None,
         current_turn_counter: Optional[int] = 0,
         current_player_index: Optional[int] = 0,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
@@ -34,6 +37,9 @@ class GameState:
     ):
         self.game_mode = game_mode
         self.players = players
+        self.game_id = game_id
+        if self.game_id is None:
+            self.game_id = str(uuid4())
         self.current_turn_counter = current_turn_counter
         self.current_player_index = current_player_index
         # TODO: Should 'current_player_has_played_a_land_this_turn' be a property of the player, not of the game state?
@@ -104,3 +110,34 @@ class GameState:
         if len(alive_player_indices) == 1:
             winner_player_index = alive_player_indices[0]
             raise GameOverException(winner_player_index=winner_player_index)
+
+    def to_json_dict(self) -> Dict:
+        json_dict = {
+            "game_id": self.game_id,
+            "game_mode": self.game_mode.to_json_dict(),
+            "players": [player.to_json_dict() for player in self.players],
+            "current_turn_counter": self.current_turn_counter,
+            "current_player_index": self.current_player_index,
+            "current_player_has_played_a_land_this_turn": self.current_player_has_played_a_land_this_turn,
+            "zones": {
+                zone.name: [
+                    card.to_json_dict()
+                    for player_index in range(self.n_players)
+                    for card in self.zones[zone][player_index].values()
+                ]
+                for zone in self.zones.keys()
+                if zone != ZonePosition.STACK and zone != ZonePosition.LIBRARY
+            },
+            "current_player_attackers": self.current_player_attackers,
+            "other_players_blockers": self.other_players_blockers,
+            "action_history": [action.to_json_dict() for action in self.action_history[-10:]],
+        }
+        json_dict["zones"][ZonePosition.STACK.name] = [
+            card.to_json_dict() for card in self.zones[ZonePosition.STACK].values()
+        ]
+        return json_dict
+
+    def save_as_json(self, file_path: str):
+        json_dict = self.to_json_dict()
+        with open(file_path, "w") as f:
+            json.dump(json_dict, f, indent=4)

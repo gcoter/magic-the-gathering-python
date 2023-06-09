@@ -7,7 +7,8 @@ from magic_the_gathering.game_state import GameState
 
 
 class Player:
-    def __init__(self, life_points: int = 20, mana_pool: Dict[str, int] = None, is_alive: bool = True):
+    def __init__(self, index: int, life_points: int = 20, mana_pool: Dict[str, int] = None, is_alive: bool = True):
+        self.index = index
         self.life_points = life_points
         self.mana_pool = mana_pool
         if self.mana_pool is None:
@@ -33,3 +34,11 @@ class Player:
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(life_points={self.life_points}, mana_pool={self.mana_pool})"
+
+    def to_json_dict(self) -> Dict:
+        return {
+            "index": self.index,
+            "life_points": self.life_points,
+            "mana_pool": self.mana_pool,
+            "is_alive": self.is_alive,
+        }
