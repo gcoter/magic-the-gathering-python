@@ -4,6 +4,8 @@ from enum import Enum
 from typing import Dict, List, Optional
 from uuid import uuid4
 
+import numpy as np
+
 from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_modes.base import GameMode
 
@@ -141,3 +143,80 @@ class GameState:
         json_dict = self.to_json_dict()
         with open(file_path, "w") as f:
             json.dump(json_dict, f, indent=4)
+
+    def to_vectors(self) -> Dict[str, np.ndarray]:
+        return {
+            "global": self.__global_to_vector(),
+            "players": self.__players_to_vector(),
+            "zones": self.__zones_to_vector(),
+            "action_history": self.__action_history_to_vector(),
+        }
+
+    def __players_to_vector(self) -> np.ndarray:
+        players_vectors = []
+        for player_index, player in enumerate(self.players):
+            player_vector = player.to_vector()
+            is_current_player_vector = np.array([1 if player_index == self.current_player_index else 0])
+            vector = np.concatenate([player_vector, is_current_player_vector])
+            players_vectors.append(vector)
+        return np.array(players_vectors).astype(np.float32)
+
+    def __global_to_vector(self) -> np.ndarray:
+        return np.array([self.current_turn_counter, self.current_player_has_played_a_land_this_turn]).astype(np.float32)
+
+    def __zones_to_vector(self) -> np.ndarray:
+        zones_vectors = []
+        for zone in ZonePosition:
+            if zone == ZonePosition.STACK:
+                for card_uuid, card in self.zones[zone].items():
+                    card_vector = card.to_vector()
+                    card_owner_one_hot_vector = self.__player_index_to_one_hot_vector(card.state.owner_player_id)
+                    started_turn_controlled_by_player_one_hot_vector = self.__player_index_to_one_hot_vector(
+                        card.state.started_turn_controlled_by_player_id
+                    )
+                    player_index_vector = np.zeros(self.n_players)
+                    zone_vector = self.__zone_position_to_one_hot_vector(zone)
+                    vector = np.concatenate(
+                        [
+                            card_vector,
+                            card_owner_one_hot_vector,
+                            started_turn_controlled_by_player_one_hot_vector,
+                            player_index_vector,
+                            zone_vector,
+                        ]
+                    )
+                    zones_vectors.append(vector)
+            else:
+                for player_index in range(self.n_players):
+                    for card_uuid, card in self.zones[zone][player_index].items():
+                        card_vector = card.to_vector()
+                        card_owner_one_hot_vector = self.__player_index_to_one_hot_vector(card.state.owner_player_id)
+                        started_turn_controlled_by_player_one_hot_vector = self.__player_index_to_one_hot_vector(
+                            card.state.started_turn_controlled_by_player_id
+                        )
+                        player_index_vector = self.__player_index_to_one_hot_vector(player_index)
+                        zone_vector = self.__zone_position_to_one_hot_vector(zone)
+                        vector = np.concatenate(
+                            [
+                                card_vector,
+                                card_owner_one_hot_vector,
+                                started_turn_controlled_by_player_one_hot_vector,
+                                player_index_vector,
+                                zone_vector,
+                            ]
+                        )
+                        zones_vectors.append(vector)
+        return np.array(zones_vectors).astype(np.float32)
+
+    def __player_index_to_one_hot_vector(self, player_index: int) -> np.ndarray:
+        one_hot_vector = np.zeros(self.n_players)
+        one_hot_vector[player_index] = 1
+        return one_hot_vector
+
+    def __zone_position_to_one_hot_vector(self, zone: ZonePosition) -> np.ndarray:
+        one_hot_vector = np.zeros(len(ZonePosition))
+        one_hot_vector[zone.value] = 1
+        return one_hot_vector
+
+    def __action_history_to_vector(self) -> np.ndarray:
+        pass

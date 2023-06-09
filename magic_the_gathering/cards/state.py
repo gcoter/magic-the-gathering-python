@@ -1,5 +1,7 @@
 from typing import Optional
 
+import numpy as np
+
 
 class CardState:
     def __init__(
@@ -27,3 +29,11 @@ class CardState:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def to_vector(self) -> np.ndarray:
+        return np.array(
+            [
+                self.is_tapped,
+                self.damage_marked,
+            ]
+        )

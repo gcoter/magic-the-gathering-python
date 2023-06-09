@@ -2,6 +2,8 @@ import logging
 from abc import abstractmethod
 from typing import Dict, List
 
+import numpy as np
+
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.game_state import GameState
 
@@ -42,3 +44,16 @@ class Player:
             "mana_pool": self.mana_pool,
             "is_alive": self.is_alive,
         }
+
+    def to_vector(self) -> np.ndarray:
+        return np.array(
+            [
+                self.life_points,
+                self.mana_pool["W"],
+                self.mana_pool["U"],
+                self.mana_pool["B"],
+                self.mana_pool["R"],
+                self.mana_pool["G"],
+                self.is_alive,
+            ]
+        )
