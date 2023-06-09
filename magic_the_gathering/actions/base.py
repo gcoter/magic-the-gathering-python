@@ -30,7 +30,6 @@ class Action:
         Action.DATASET.append({"game_state": game_state.to_json_dict(), "action": self.to_json_dict()})
         game_state = self._execute(game_state)
         Action.GLOBAL_ACTION_COUNT += 1
-        game_state.action_history.append(self)
         game_state.check_if_game_is_over()
         return game_state
 
