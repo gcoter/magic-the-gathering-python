@@ -39,7 +39,7 @@ class Action:
 
     def execute(self, game_state: GameState) -> GameState:
         self.logger.debug(f"Executing action: {self}")
-        Action.DATASET.append({"game_state": game_state.to_json_dict(), "action": self.to_json_dict()})
+        Action.DATASET.append({"game_state": game_state, "action": self})
         game_state = self._execute(game_state)
         Action.GLOBAL_ACTION_COUNT += 1
         game_state.check_if_game_is_over()
