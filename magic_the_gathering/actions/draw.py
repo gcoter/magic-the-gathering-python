@@ -35,7 +35,6 @@ class DrawAction(Action):
         if len(player_library) == 0:
             self.logger.debug(f"Player {self.player_index} has no cards in library")
             game_state = KillPlayerAction(
-                owner="Game",
                 player_index=self.player_index,
             ).execute(game_state)
         else:
