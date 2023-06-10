@@ -16,7 +16,6 @@ class PlayLandAction(Action):
                     if card.is_land and not game_state.current_player_has_played_a_land_this_turn:
                         possible_actions.append(
                             cls(
-                                owner=f"Player {player_index}",
                                 player_index=player_index,
                                 land_card_uuid=card.uuid,
                             )
@@ -25,11 +24,13 @@ class PlayLandAction(Action):
 
     def __init__(
         self,
-        owner: str,
         player_index: int,
         land_card_uuid: str,
     ):
-        super().__init__(owner=owner)
+        super().__init__(
+            source_player_index=player_index,
+            target_card_uuids=[land_card_uuid],
+        )
         self.player_index = player_index
         self.land_card_uuid = land_card_uuid
 

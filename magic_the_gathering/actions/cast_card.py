@@ -16,15 +16,17 @@ class CastCardAction(Action):
                     if card.can_be_cast_by_player(player=player):
                         possible_actions.append(
                             cls(
-                                owner=f"Player {player_index}",
                                 player_index=player_index,
                                 card_uuid=card_uuid,
                             )
                         )
         return possible_actions
 
-    def __init__(self, owner: str, player_index: int, card_uuid: str):
-        super().__init__(owner=owner)
+    def __init__(self, player_index: int, card_uuid: str):
+        super().__init__(
+            source_player_index=player_index,
+            target_card_uuids=[card_uuid],
+        )
         self.player_index = player_index
         self.card_uuid = card_uuid
 

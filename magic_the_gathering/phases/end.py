@@ -13,6 +13,6 @@ class EndPhase(Phase):
         # discard_to_hand_size()
 
         # We should also pass to next player
-        game_state = PassToNextPlayerAction(owner="Game").execute(game_state)
+        game_state = PassToNextPlayerAction().execute(game_state)
 
         return game_state

@@ -15,7 +15,6 @@ class ShuffleAction(Action):
                     if zone != ZonePosition.STACK:
                         possible_actions.append(
                             cls(
-                                owner=f"Player {player_index}",
                                 zone=zone,
                                 player_index=player_index,
                             )
@@ -24,11 +23,14 @@ class ShuffleAction(Action):
 
     def __init__(
         self,
-        owner: str,
         zone: ZonePosition,
         player_index: int,
     ):
-        super().__init__(owner=owner)
+        super().__init__(
+            source_player_index=player_index,
+            target_player_index=player_index,
+            target_zone=zone,
+        )
         self.zone = zone
         self.player_index = player_index
 

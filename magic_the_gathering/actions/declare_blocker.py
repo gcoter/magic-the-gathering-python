@@ -14,7 +14,6 @@ class DeclareBlockerAction(Action):
                     for attacker_card_uuid in attacker_card_uuids:
                         possible_actions.append(
                             cls(
-                                owner=f"Player {blocker_player_index}",
                                 blocker_player_index=blocker_player_index,
                                 blocker_card_uuid=blocker_card_uuid,
                                 attacker_card_uuid=attacker_card_uuid,
@@ -22,8 +21,12 @@ class DeclareBlockerAction(Action):
                         )
         return possible_actions
 
-    def __init__(self, owner: str, blocker_player_index: int, blocker_card_uuid: str, attacker_card_uuid: str):
-        super().__init__(owner=owner)
+    def __init__(self, blocker_player_index: int, blocker_card_uuid: str, attacker_card_uuid: str):
+        super().__init__(
+            source_player_index=blocker_player_index,
+            source_card_uuids=[blocker_card_uuid],
+            target_card_uuids=[attacker_card_uuid],
+        )
         self.blocker_player_index = blocker_player_index
         self.blocker_card_uuid = blocker_card_uuid
         self.attacker_card_uuid = attacker_card_uuid

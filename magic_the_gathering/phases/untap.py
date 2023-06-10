@@ -8,5 +8,5 @@ class UntapPhase(Phase):
         super().__init__(name="Untap Phase")
 
     def _run(self, game_state: GameState) -> GameState:
-        action = UntapAllAction(owner="game", player_index=game_state.current_player_index)
+        action = UntapAllAction(player_index=game_state.current_player_index)
         return action.execute(game_state)

@@ -9,7 +9,7 @@ class ResolveTopOfStackAction(Action):
     def list_possible_actions(cls, game_state: GameState) -> List[Action]:
         stack = game_state.zones[ZonePosition.STACK]
         if len(stack) > 0:
-            return [cls(owner="Game")]
+            return [cls()]
         return []
 
     def _execute(self, game_state: GameState) -> GameState:
