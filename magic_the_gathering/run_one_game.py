@@ -37,7 +37,7 @@ def create_decks(
 def create_hands(game_state: GameState):
     for player_index, player in enumerate(game_state.players):
         for _ in range(game_state.game_mode.initial_hand_size):
-            game_state = DrawAction(owner="game", player_index=player_index).execute(game_state=game_state)
+            game_state = DrawAction(player_index=player_index).execute(game_state=game_state)
     return game_state
 
 
