@@ -6,6 +6,9 @@ plotly
 requests
 beautifulsoup4
 dvc[ssh]
+torch
+pytorch-lightning
+mlflow
 
 # Development requirements
 pre-commit
