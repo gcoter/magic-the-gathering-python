@@ -162,12 +162,12 @@ class GameState:
             if zone == ZonePosition.STACK:
                 for card_uuid, card in self.zones[zone].items():
                     card_vector = card.to_vector()
-                    card_owner_one_hot_vector = self.__player_index_to_one_hot_vector(card.state.owner_player_id)
-                    started_turn_controlled_by_player_one_hot_vector = self.__player_index_to_one_hot_vector(
+                    card_owner_one_hot_vector = self.player_index_to_one_hot_vector(card.state.owner_player_id)
+                    started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
                         card.state.started_turn_controlled_by_player_id
                     )
                     player_index_vector = np.zeros(self.n_players)
-                    zone_vector = self.__zone_position_to_one_hot_vector(zone)
+                    zone_vector = self.zone_position_to_one_hot_vector(zone)
                     vector = np.concatenate(
                         [
                             card_vector,
@@ -182,12 +182,12 @@ class GameState:
                 for player_index in range(self.n_players):
                     for card_uuid, card in self.zones[zone][player_index].items():
                         card_vector = card.to_vector()
-                        card_owner_one_hot_vector = self.__player_index_to_one_hot_vector(card.state.owner_player_id)
-                        started_turn_controlled_by_player_one_hot_vector = self.__player_index_to_one_hot_vector(
+                        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(card.state.owner_player_id)
+                        started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
                             card.state.started_turn_controlled_by_player_id
                         )
-                        player_index_vector = self.__player_index_to_one_hot_vector(player_index)
-                        zone_vector = self.__zone_position_to_one_hot_vector(zone)
+                        player_index_vector = self.player_index_to_one_hot_vector(player_index)
+                        zone_vector = self.zone_position_to_one_hot_vector(zone)
                         vector = np.concatenate(
                             [
                                 card_vector,
@@ -200,12 +200,34 @@ class GameState:
                         zones_vectors.append(vector)
         return np.array(zones_vectors).astype(np.float32)
 
-    def __player_index_to_one_hot_vector(self, player_index: int) -> np.ndarray:
+    def player_index_to_one_hot_vector(self, player_index: int = None) -> np.ndarray:
         one_hot_vector = np.zeros(self.n_players)
-        one_hot_vector[player_index] = 1
+        if player_index is not None:
+            one_hot_vector[player_index] = 1
         return one_hot_vector
 
-    def __zone_position_to_one_hot_vector(self, zone: ZonePosition) -> np.ndarray:
+    def zone_position_to_one_hot_vector(self, zone: ZonePosition = None) -> np.ndarray:
         one_hot_vector = np.zeros(len(ZonePosition))
-        one_hot_vector[zone.value] = 1
+        if zone is not None:
+            one_hot_vector[zone.value] = 1
         return one_hot_vector
+
+    def card_uuids_to_multi_hot_vector(self, card_uuids: List[str] = None) -> np.ndarray:
+        multi_hot_vector = np.zeros(len(all_card_uuids))
+        if card_uuids is None:
+            return multi_hot_vector
+        all_card_uuids = self.__all_card_uuids()
+        for index, card_uuid in enumerate(all_card_uuids):
+            if card_uuid in card_uuids:
+                multi_hot_vector[index] = 1
+        return multi_hot_vector
+
+    def __all_card_uuids(self) -> List[str]:
+        card_uuids = []
+        for zone in ZonePosition:
+            if zone == ZonePosition.STACK:
+                card_uuids.extend(list(self.zones[zone].keys()))
+            else:
+                for player_index in range(self.n_players):
+                    card_uuids.extend(list(self.zones[zone][player_index].keys()))
+        return card_uuids
