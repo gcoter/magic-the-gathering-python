@@ -182,9 +182,11 @@ class GameState:
                 for player_index in range(self.n_players):
                     for card_uuid, card in self.zones[zone][player_index].items():
                         card_vector = card.to_vector()
-                        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(card.state.owner_player_id)
+                        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
+                            card.state.owner_player_id if card.state is not None else None
+                        )
                         started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
-                            card.state.started_turn_controlled_by_player_id
+                            card.state.started_turn_controlled_by_player_id if card.state is not None else None
                         )
                         player_index_vector = self.player_index_to_one_hot_vector(player_index)
                         zone_vector = self.zone_position_to_one_hot_vector(zone)
@@ -213,10 +215,10 @@ class GameState:
         return one_hot_vector
 
     def card_uuids_to_multi_hot_vector(self, card_uuids: List[str] = None) -> np.ndarray:
+        all_card_uuids = self.__all_card_uuids()
         multi_hot_vector = np.zeros(len(all_card_uuids))
         if card_uuids is None:
             return multi_hot_vector
-        all_card_uuids = self.__all_card_uuids()
         for index, card_uuid in enumerate(all_card_uuids):
             if card_uuid in card_uuids:
                 multi_hot_vector[index] = 1
