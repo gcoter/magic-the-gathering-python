@@ -9,6 +9,7 @@ dvc[ssh]
 torch
 pytorch-lightning
 mlflow
+fire
 
 # Development requirements
 pre-commit
