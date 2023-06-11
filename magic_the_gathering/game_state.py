@@ -178,7 +178,7 @@ class GameState:
                         ]
                     )
                     zones_vectors.append(vector)
-            else:
+            elif zone != ZonePosition.LIBRARY:
                 for player_index in range(self.n_players):
                     for card_uuid, card in self.zones[zone][player_index].items():
                         card_vector = card.to_vector()
@@ -229,7 +229,7 @@ class GameState:
         for zone in ZonePosition:
             if zone == ZonePosition.STACK:
                 card_uuids.extend(list(self.zones[zone].keys()))
-            else:
+            elif zone != ZonePosition.LIBRARY:
                 for player_index in range(self.n_players):
                     card_uuids.extend(list(self.zones[zone][player_index].keys()))
         return card_uuids
