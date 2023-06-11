@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 import torch
@@ -22,19 +22,21 @@ class DeepLearningBasedPlayer(ChooseHighestScoreActionPlayer):
         self.scorer = scorer
         self.scorer.eval()
 
-    def _score_action(self, game_state: GameState, action: Action) -> float:
-        game_state_vectors = [game_state.to_vectors()]
-        if action is None:
-            n_cards = len(game_state_vectors[0]["zones"])
-            action_vectors = [
-                {
-                    "general": np.zeros(self.scorer.action_general_dim),
-                    "source_card_uuids": np.zeros(n_cards),
-                    "target_card_uuids": np.zeros(n_cards),
-                }
-            ]
-        else:
-            action_vectors = [action.to_vectors(game_state=game_state)]
+    def _score_actions(self, game_state: GameState, actions: List[Action]) -> np.ndarray:
+        game_state_vectors = [game_state.to_vectors()] * len(actions)
+        action_vectors = []
+        for action in actions:
+            if action is None:
+                n_cards = len(game_state_vectors[0]["zones"])
+                action_vectors.append(
+                    {
+                        "general": np.zeros(self.scorer.action_general_dim),
+                        "source_card_uuids": np.zeros(n_cards),
+                        "target_card_uuids": np.zeros(n_cards),
+                    }
+                )
+            else:
+                action_vectors.append(action.to_vectors(game_state=game_state))
 
         batch_game_state_vectors_torch = {
             "global": torch.tensor(
@@ -57,13 +59,13 @@ class DeepLearningBasedPlayer(ChooseHighestScoreActionPlayer):
             ).bool(),
         }
 
-        score = (
+        scores = (
             self.scorer(
                 batch_game_state_vectors=batch_game_state_vectors_torch, batch_action_vectors=batch_action_vectors_torch
             )
             .cpu()
             .detach()
-            .numpy()[0][0]
+            .numpy()[:, 0]
         )
 
-        return float(score)
+        return scores
