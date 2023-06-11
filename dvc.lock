@@ -1,0 +1,14 @@
+schema: '2.0'
+stages:
+  collect_data:
+    cmd: "python scripts/run_competition_between_players.py --n_games 100 --player_classes
+      random,random --log_directory_path data/game_logs/\n"
+    deps:
+    - path: scripts/run_competition_between_players.py
+      md5: 46ff08add46ad868797ff47b75e69d0c
+      size: 4187
+    outs:
+    - path: data/game_logs/
+      md5: c9f1fc4b589c0cff9cef834d892a6254.dir
+      size: 808722906
+      nfiles: 100

@@ -1,0 +1,16 @@
+vars:
+  - n_games: 100
+  - player_classes: random,random
+  - log_directory_path: data/game_logs/
+
+stages:
+  collect_data:
+    cmd: >
+      python scripts/run_competition_between_players.py
+      --n_games ${n_games}
+      --player_classes ${player_classes}
+      --log_directory_path ${log_directory_path}
+    deps:
+      - scripts/run_competition_between_players.py
+    outs:
+      - ${log_directory_path}
