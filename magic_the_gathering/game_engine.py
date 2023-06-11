@@ -23,7 +23,7 @@ class GameEngine:
         self.__logger.debug(f"Current player is now player '{self.game_state.current_player_index}'")
         self.game_state = self.turn.run(self.game_state)
 
-    def run(self):
+    def run(self) -> int:
         while True:
             try:
                 self.run_one_turn()
@@ -40,4 +40,4 @@ class GameEngine:
                     pickle_file_path = os.path.join(log_directory_path, f"game_{self.game_state.game_id}.pickle")
                     with open(pickle_file_path, "wb") as f:
                         pickle.dump(data_dict, f)
-                break
+                return winner_player_index
