@@ -79,7 +79,7 @@ def create_players(game_mode: GameMode, players_classes: List[str]):
     return players
 
 
-def run_competition_between_players(n_games: int, player_classes: List[str]):
+def run_competition_between_players(n_games: int, player_classes: List[str], log_directory_path: str = None):
     set_logging_level()
 
     n_players = len(player_classes)
@@ -98,7 +98,7 @@ def run_competition_between_players(n_games: int, player_classes: List[str]):
         )
         game_state.set_libraries(libraries=decks)
         game_state = create_hands(game_state=game_state)
-        game_engine = GameEngine(game_state=game_state)
+        game_engine = GameEngine(game_state=game_state, log_directory_path=log_directory_path)
         winner_player_index = game_engine.run()
         win_counts[winner_player_index] += 1
 
