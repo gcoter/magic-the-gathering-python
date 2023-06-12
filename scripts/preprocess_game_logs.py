@@ -9,10 +9,10 @@ from fire import Fire
 
 def preprocess_game_logs(game_logs_folder_path: str, output_h5_path: str):
     Path(output_h5_path).parent.mkdir(parents=True, exist_ok=True)
-    h5_file = h5py.File(output_h5_path, "w")
     action_general_dim = 16
 
     preprocessed_dataset_dict = {
+        "game_id": [],
         "game_state": {"global": [], "players": [], "zones": []},
         "action": {"general": [], "source_card_uuids": [], "target_card_uuids": []},
         "label": [],
@@ -55,6 +55,7 @@ def preprocess_game_logs(game_logs_folder_path: str, output_h5_path: str):
                 if action.source_player_index is not None:
                     label = int(action.source_player_index == winner_player_index)
 
+            preprocessed_dataset_dict["game_id"].append(game_state.game_id)
             for key, vector in game_state_vectors.items():
                 preprocessed_dataset_dict["game_state"][key].append(vector)
             for key, vector in action_vectors.items():
@@ -67,9 +68,15 @@ def preprocess_game_logs(game_logs_folder_path: str, output_h5_path: str):
         preprocessed_dataset_dict["action"][key] = np.array(vector_list)
     preprocessed_dataset_dict["label"] = np.array(preprocessed_dataset_dict["label"])
 
-    import pdb
-
-    pdb.set_trace()
+    # Save to h5
+    print(f"Save preprocessed dataset to '{output_h5_path}'")
+    h5_file = h5py.File(output_h5_path, "w")
+    h5_file.create_dataset("game_id", data=preprocessed_dataset_dict["game_id"])
+    for key, vector in preprocessed_dataset_dict["game_state"].items():
+        h5_file.create_dataset(f"game_state/{key}", data=vector)
+    for key, vector in preprocessed_dataset_dict["action"].items():
+        h5_file.create_dataset(f"action/{key}", data=vector)
+    h5_file.create_dataset("label", data=preprocessed_dataset_dict["label"])
 
 
 if __name__ == "__main__":
