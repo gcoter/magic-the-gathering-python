@@ -98,11 +98,15 @@ class Card:
         if self.mana_cost_dict is None:
             return False
         for mana_color, mana_cost in self.mana_cost_dict.items():
-            # FIXME: Handle mana cost that can be paid with any color
-            if mana_color not in player.mana_pool:
-                return False
-            if player.mana_pool[mana_color] < mana_cost:
-                return False
+            if mana_color != "any":
+                if mana_color not in player.mana_pool:
+                    return False
+                if player.mana_pool[mana_color] < mana_cost:
+                    return False
+        player_pool_value = sum(player.mana_pool.values())
+        mana_value = sum(self.mana_cost_dict.values())
+        if player_pool_value < mana_value:
+            return False
         return True
 
     @property
@@ -118,7 +122,7 @@ class Card:
         return self.is_instant or self.is_sorcery
 
     @property
-    def is_permament(self) -> bool:
+    def is_permanent(self) -> bool:
         return not self.is_non_permanent
 
     @property
