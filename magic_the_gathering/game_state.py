@@ -26,7 +26,7 @@ class GameState:
         players: List[object],  # FIXME: I had to remove Player because it caused a circular import
         game_id: Optional[str] = None,
         current_turn_counter: Optional[int] = 0,
-        current_player_index: Optional[int] = 0,
+        current_player_index: Optional[int] = None,
         current_player_has_played_a_land_this_turn: Optional[bool] = False,
         zones: Optional[
             Dict[ZonePosition, List[OrderedDict[str, object]]]
@@ -41,6 +41,8 @@ class GameState:
             self.game_id = str(uuid4())
         self.current_turn_counter = current_turn_counter
         self.current_player_index = current_player_index
+        if self.current_player_index is None:
+            self.current_player_index = np.random.randint(0, self.n_players)
         # TODO: Should 'current_player_has_played_a_land_this_turn' be a property of the player, not of the game state?
         # TODO: At some point we'll change this so that we allow a player to have n land drops, 1 by default, but can change with some cards
         self.current_player_has_played_a_land_this_turn = current_player_has_played_a_land_this_turn

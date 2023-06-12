@@ -1,3 +1,4 @@
+import random
 from typing import List
 
 from magic_the_gathering.actions.base import Action
@@ -38,13 +39,19 @@ class CastCardAction(Action):
         player_card = player_hand[self.card_uuid]
         assert not player_card.is_land
 
-        # Handle mana cost
+        # Handle colored mana cost
         player_mana_pool = game_state.players[self.player_index].mana_pool
         for mana_color, mana_cost in player_card.mana_cost_dict.items():
-            # FIXME: Handle mana cost that can be paid with any color
-            assert mana_color in player_mana_pool
-            assert player_mana_pool[mana_color] >= mana_cost
-            player_mana_pool[mana_color] -= mana_cost
+            if mana_color != "any":
+                assert mana_color in player_mana_pool
+                assert player_mana_pool[mana_color] >= mana_cost
+                player_mana_pool[mana_color] -= mana_cost
+
+        # Handle generic mana cost
+        for _ in range(player_card.mana_cost_dict["any"]):
+            possible_colors = [mana_color for mana_color, mana_amount in player_mana_pool.items() if mana_amount > 0]
+            chosen_color = random.choice(possible_colors)
+            player_mana_pool[chosen_color] -= 1
 
         player_card_new_instance = player_card.create_new_instance(
             state=CardState(
@@ -54,5 +61,5 @@ class CastCardAction(Action):
             )
         )
         del player_hand[self.card_uuid]
-        stack.append(player_card_new_instance)
+        stack[player_card_new_instance.uuid] = player_card_new_instance
         return game_state

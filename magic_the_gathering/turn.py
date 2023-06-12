@@ -31,6 +31,10 @@ class Turn:
 
     def run(self, game_state: GameState) -> GameState:
         for phase in self.__phases:
+            # No Draw Phase for the first turn (for the first player)
+            if isinstance(phase, DrawPhase) and game_state.current_turn_counter == 1:
+                continue
+
             game_state = phase.run(game_state)
             # TODO: Here is the logic of a turn below, how can we implement it using the Phase classes efficiently?
             # apply_beginning_of_phase_game_effect(phase)
