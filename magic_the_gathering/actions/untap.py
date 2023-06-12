@@ -63,7 +63,7 @@ class UntapAllAction(Action):
             player_card.state.is_tapped = False
 
         # Reset mana pool
-        game_state.players[self.player_index].mana_pool_dict = {
+        game_state.players[self.player_index].mana_pool = {
             "W": 0,
             "U": 0,
             "B": 0,
