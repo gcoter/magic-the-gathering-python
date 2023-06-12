@@ -7,7 +7,7 @@ from magic_the_gathering.game_state import GameState
 class PassToNextPlayerAction(Action):
     @classmethod
     def list_possible_actions(cls, game_state: GameState) -> List[Action]:
-        return [cls(owner="Game")]
+        return [cls()]
 
     def _execute(self, game_state: GameState) -> GameState:
         while True:

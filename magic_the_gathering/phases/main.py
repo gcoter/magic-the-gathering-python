@@ -60,6 +60,6 @@ class MainPhase(PhaseWherePlayersGetPriority):
             # Resolve the stack
             # TODO: Is it correct to resolve the whole stack at once?
             while len(game_state.zones[ZonePosition.STACK]) > 0:
-                game_state = ResolveTopOfStackAction(owner="game").execute(game_state)
+                game_state = ResolveTopOfStackAction().execute(game_state)
 
         return game_state

@@ -16,7 +16,7 @@ class DeclareAttackerAction(Action):
                     if card.is_creature and not card.state.is_tapped:
                         possible_actions.append(
                             cls(
-                                owner=f"Player {attacker_player_index}",
+                                attacker_player_index=attacker_player_index,
                                 target_player_index=target_player_index,
                                 attacker_card_uuid=card_uuid,
                             )
@@ -25,11 +25,15 @@ class DeclareAttackerAction(Action):
 
     def __init__(
         self,
-        owner: str,
+        attacker_player_index: int,
         target_player_index: int,
         attacker_card_uuid: str,
     ):
-        super().__init__(owner=owner)
+        super().__init__(
+            source_player_index=attacker_player_index,
+            target_player_index=target_player_index,
+            target_card_uuids=[attacker_card_uuid],
+        )
         self.target_player_index = target_player_index
         self.attacker_card_uuid = attacker_card_uuid
 

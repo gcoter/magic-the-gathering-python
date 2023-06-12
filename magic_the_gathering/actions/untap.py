@@ -42,7 +42,6 @@ class UntapAllAction(Action):
         for player_index, player in enumerate(game_state.players):
             possible_actions.append(
                 cls(
-                    owner=f"Player {player_index}",
                     player_index=player_index,
                 )
             )
@@ -50,10 +49,12 @@ class UntapAllAction(Action):
 
     def __init__(
         self,
-        owner: str,
         player_index: int,
     ):
-        super().__init__(owner=owner)
+        super().__init__(
+            source_player_index=player_index,
+            target_player_index=player_index,
+        )
         self.player_index = player_index
 
     def _execute(self, game_state: GameState) -> GameState:

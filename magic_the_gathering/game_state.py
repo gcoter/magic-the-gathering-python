@@ -4,6 +4,8 @@ from enum import Enum
 from typing import Dict, List, Optional
 from uuid import uuid4
 
+import numpy as np
+
 from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_modes.base import GameMode
 
@@ -31,9 +33,6 @@ class GameState:
         ] = None,  # FIXME: I had to remove Card because it caused a circular import
         current_player_attackers: Optional[Dict[int, List[str]]] = None,
         other_players_blockers: Optional[Dict[int, Dict[str, List[str]]]] = None,
-        action_history: Optional[
-            List[object]
-        ] = None,  # FIXME: I had to remove Action because it caused a circular import, we should probably create a separate class for history
     ):
         self.game_mode = game_mode
         self.players = players
@@ -62,9 +61,6 @@ class GameState:
         self.other_players_blockers = other_players_blockers
         if self.other_players_blockers is None:
             self.other_players_blockers = {}
-        self.action_history = action_history
-        if self.action_history is None:
-            self.action_history = []
 
     def __assert_zones_validity(self):
         for zone in ZonePosition:
@@ -130,7 +126,6 @@ class GameState:
             },
             "current_player_attackers": self.current_player_attackers,
             "other_players_blockers": self.other_players_blockers,
-            "action_history": [action.to_json_dict() for action in self.action_history[-10:]],
         }
         json_dict["zones"][ZonePosition.STACK.name] = [
             card.to_json_dict() for card in self.zones[ZonePosition.STACK].values()
@@ -141,3 +136,100 @@ class GameState:
         json_dict = self.to_json_dict()
         with open(file_path, "w") as f:
             json.dump(json_dict, f, indent=4)
+
+    def to_vectors(self) -> Dict[str, np.ndarray]:
+        return {
+            "global": self.__global_to_vector(),
+            "players": self.__players_to_vector(),
+            "zones": self.__zones_to_vector(),
+        }
+
+    def __players_to_vector(self) -> np.ndarray:
+        players_vectors = []
+        for player_index, player in enumerate(self.players):
+            player_vector = player.to_vector()
+            is_current_player_vector = np.array([1 if player_index == self.current_player_index else 0])
+            vector = np.concatenate([player_vector, is_current_player_vector])
+            players_vectors.append(vector)
+        return np.array(players_vectors).astype(np.float32)
+
+    def __global_to_vector(self) -> np.ndarray:
+        return np.array([self.current_turn_counter, self.current_player_has_played_a_land_this_turn]).astype(np.float32)
+
+    def __zones_to_vector(self) -> np.ndarray:
+        zones_vectors = []
+        for zone in ZonePosition:
+            if zone == ZonePosition.STACK:
+                for card_uuid, card in self.zones[zone].items():
+                    card_vector = card.to_vector()
+                    card_owner_one_hot_vector = self.player_index_to_one_hot_vector(card.state.owner_player_id)
+                    started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
+                        card.state.started_turn_controlled_by_player_id
+                    )
+                    player_index_vector = np.zeros(self.n_players)
+                    zone_vector = self.zone_position_to_one_hot_vector(zone)
+                    vector = np.concatenate(
+                        [
+                            card_vector,
+                            card_owner_one_hot_vector,
+                            started_turn_controlled_by_player_one_hot_vector,
+                            player_index_vector,
+                            zone_vector,
+                        ]
+                    )
+                    zones_vectors.append(vector)
+            elif zone != ZonePosition.LIBRARY:
+                for player_index in range(self.n_players):
+                    for card_uuid, card in self.zones[zone][player_index].items():
+                        card_vector = card.to_vector()
+                        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
+                            card.state.owner_player_id if card.state is not None else None
+                        )
+                        started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
+                            card.state.started_turn_controlled_by_player_id if card.state is not None else None
+                        )
+                        player_index_vector = self.player_index_to_one_hot_vector(player_index)
+                        zone_vector = self.zone_position_to_one_hot_vector(zone)
+                        vector = np.concatenate(
+                            [
+                                card_vector,
+                                card_owner_one_hot_vector,
+                                started_turn_controlled_by_player_one_hot_vector,
+                                player_index_vector,
+                                zone_vector,
+                            ]
+                        )
+                        zones_vectors.append(vector)
+        return np.array(zones_vectors).astype(np.float32)
+
+    def player_index_to_one_hot_vector(self, player_index: int = None) -> np.ndarray:
+        one_hot_vector = np.zeros(self.n_players)
+        if player_index is not None:
+            one_hot_vector[player_index] = 1
+        return one_hot_vector
+
+    def zone_position_to_one_hot_vector(self, zone: ZonePosition = None) -> np.ndarray:
+        one_hot_vector = np.zeros(len(ZonePosition))
+        if zone is not None:
+            one_hot_vector[zone.value] = 1
+        return one_hot_vector
+
+    def card_uuids_to_multi_hot_vector(self, card_uuids: List[str] = None) -> np.ndarray:
+        all_card_uuids = self.__all_card_uuids()
+        multi_hot_vector = np.zeros(len(all_card_uuids))
+        if card_uuids is None:
+            return multi_hot_vector
+        for index, card_uuid in enumerate(all_card_uuids):
+            if card_uuid in card_uuids:
+                multi_hot_vector[index] = 1
+        return multi_hot_vector
+
+    def __all_card_uuids(self) -> List[str]:
+        card_uuids = []
+        for zone in ZonePosition:
+            if zone == ZonePosition.STACK:
+                card_uuids.extend(list(self.zones[zone].keys()))
+            elif zone != ZonePosition.LIBRARY:
+                for player_index in range(self.n_players):
+                    card_uuids.extend(list(self.zones[zone][player_index].keys()))
+        return card_uuids

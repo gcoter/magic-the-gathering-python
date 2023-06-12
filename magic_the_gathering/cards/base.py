@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 from uuid import uuid4
 
+import numpy as np
 import pandas as pd
 
 from magic_the_gathering.cards.state import CardState
@@ -172,3 +173,51 @@ class Card:
             "toughness": self.toughness,
             "state": self.state.to_json_dict() if self.state is not None else None,
         }
+
+    def to_vector(self) -> np.ndarray:
+        color_identity_vector = self.__color_identity_to_vector()
+        type_vector = self.__type_to_vector()
+        power_toughness_vector = self.__power_toughness_to_vector()
+        mana_cost_vector = self.__mana_cost_to_vector()
+        state_vector = self.state.to_vector() if self.state is not None else np.zeros(2)
+        return np.concatenate(
+            [
+                color_identity_vector,
+                type_vector,
+                power_toughness_vector,
+                mana_cost_vector,
+                state_vector,
+            ]
+        )
+
+    def __color_identity_to_vector(self) -> np.ndarray:
+        color_identity_vector = np.zeros(5)
+        for index, color in enumerate(["W", "U", "B", "R", "G"]):
+            if color in self.color_identity:
+                color_identity_vector[index] = 1
+        return color_identity_vector
+
+    def __mana_cost_to_vector(self) -> np.ndarray:
+        mana_cost_vector = np.zeros(6)
+        if self.mana_cost_dict is None:
+            return mana_cost_vector
+        for index, color in enumerate(["W", "U", "B", "R", "G"]):
+            mana_cost_vector[index] = self.mana_cost_dict.get(color, 0)
+        mana_cost_vector[5] = self.mana_cost_dict.get("any", 0)
+        return mana_cost_vector
+
+    def __type_to_vector(self) -> np.ndarray:
+        return np.array(
+            [
+                self.is_land,
+                self.is_creature,
+                self.is_instant,
+                self.is_sorcery,
+                self.is_enchantment,
+                self.is_artifact,
+                self.is_planeswalker,
+            ]
+        )
+
+    def __power_toughness_to_vector(self) -> np.ndarray:
+        return np.array([self.get_power(), self.get_toughness()])

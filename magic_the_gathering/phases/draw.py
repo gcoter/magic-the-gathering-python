@@ -9,5 +9,5 @@ class DrawPhase(Phase):
 
     def _run(self, game_state: GameState) -> GameState:
         # FIXME: Draw should do nothing for the first player at the beginning of the game
-        action = DrawAction(owner="game", player_index=game_state.current_player_index)
+        action = DrawAction(player_index=game_state.current_player_index)
         return action.execute(game_state)

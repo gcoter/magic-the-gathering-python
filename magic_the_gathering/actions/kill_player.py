@@ -10,11 +10,11 @@ class KillPlayerAction(Action):
         possible_actions = []
         for player_index, player in enumerate(game_state.players):
             if player.is_alive:
-                possible_actions.append(cls(owner="Game", player_index=player_index))
+                possible_actions.append(cls(player_index=player_index))
         return possible_actions
 
-    def __init__(self, owner: str, player_index: int):
-        super().__init__(owner)
+    def __init__(self, player_index: int):
+        super().__init__(target_player_index=player_index)
         self.player_index = player_index
 
     def _execute(self, game_state: GameState) -> GameState:

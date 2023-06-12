@@ -15,7 +15,6 @@ class DrawAction(Action):
                 if len(player_library) > 0:
                     possible_actions.append(
                         cls(
-                            owner=f"Player {player_index}",
                             player_index=player_index,
                         )
                     )
@@ -23,10 +22,11 @@ class DrawAction(Action):
 
     def __init__(
         self,
-        owner: str,
         player_index: int,
     ):
-        super().__init__(owner=owner)
+        super().__init__(
+            target_player_index=player_index,
+        )
         self.player_index = player_index
 
     def _execute(self, game_state: GameState) -> GameState:
@@ -35,7 +35,6 @@ class DrawAction(Action):
         if len(player_library) == 0:
             self.logger.debug(f"Player {self.player_index} has no cards in library")
             game_state = KillPlayerAction(
-                owner="Game",
                 player_index=self.player_index,
             ).execute(game_state)
         else:
