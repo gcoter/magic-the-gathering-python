@@ -11,7 +11,8 @@ from magic_the_gathering.cards.deck_creator import RandomVanillaDeckCreator
 from magic_the_gathering.game_engine import GameEngine
 from magic_the_gathering.game_modes.default import DefaultGameMode
 from magic_the_gathering.game_state import GameState
-from magic_the_gathering.players.random import RandomPlayer
+from magic_the_gathering.players.deep_learning_based.models.v1 import DeepLearningScorerV1
+from magic_the_gathering.players.deep_learning_based.player import DeepLearningBasedPlayer
 
 
 def create_decks(
@@ -53,7 +54,18 @@ def run_one_game(n_players: int = 2):
     logging.basicConfig(level=log_level)
 
     game_mode = DefaultGameMode()
-    players = [RandomPlayer(index=index, life_points=game_mode.initial_life_points) for index in range(n_players)]
+    scorer = DeepLearningScorerV1(
+        n_players=n_players,
+        player_dim=8,
+        card_dim=34,
+        action_general_dim=16,
+        max_action_sequence_length=16,
+        final_common_dim=32,
+    )
+    players = [
+        DeepLearningBasedPlayer(index=index, life_points=game_mode.initial_life_points, scorer=scorer)
+        for index in range(n_players)
+    ]
     decks = create_decks(n_players=n_players)
     game_state = GameState(
         game_mode=game_mode,
