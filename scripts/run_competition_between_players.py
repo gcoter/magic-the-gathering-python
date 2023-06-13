@@ -5,6 +5,7 @@ import random
 from typing import List, OrderedDict
 
 import pandas as pd
+import torch
 from fire import Fire
 
 from magic_the_gathering.actions.draw import DrawAction
@@ -57,7 +58,7 @@ def create_hands(game_state: GameState):
     return game_state
 
 
-def create_players(game_mode: GameMode, players_classes: List[str]):
+def create_players(game_mode: GameMode, players_classes: List[str], deep_learning_scorer_path: str = None):
     n_players = len(players_classes)
     string_to_player = {"random": RandomPlayer, "deep_learning": DeepLearningBasedPlayer}
     players = []
@@ -68,9 +69,11 @@ def create_players(game_mode: GameMode, players_classes: List[str]):
                 player_dim=8,
                 card_dim=34,
                 action_general_dim=16,
-                max_action_sequence_length=16,
                 final_common_dim=32,
             )
+            if deep_learning_scorer_path is not None:
+                checkpoint = torch.load(deep_learning_scorer_path)
+                scorer.load_state_dict(checkpoint["state_dict"])
             player = string_to_player[player_class](
                 index=index, life_points=game_mode.initial_life_points, scorer=scorer
             )
@@ -83,8 +86,9 @@ def create_players(game_mode: GameMode, players_classes: List[str]):
 def run_competition_between_players(
     n_games: int,
     player_classes: List[str],
-    metrics_json_path: str,
+    metrics_json_path: str = None,
     log_directory_path: str = None,
+    deep_learning_scorer_path: str = None,
 ):
     set_logging_level()
 
@@ -96,7 +100,9 @@ def run_competition_between_players(
 
     for n in range(n_games):
         print(f"\n***** Game {n + 1} / {n_games} *****")
-        players = create_players(game_mode=game_mode, players_classes=player_classes)
+        players = create_players(
+            game_mode=game_mode, players_classes=player_classes, deep_learning_scorer_path=deep_learning_scorer_path
+        )
         decks = create_decks(n_players=n_players)
         game_state = GameState(
             game_mode=game_mode,
@@ -113,20 +119,21 @@ def run_competition_between_players(
         win_rate = win_count / n_games
         print(f"- Player '{player_classes[player_index]}': {win_rate * 100:.2f}%")
 
-    print("\n===== Save metrics =====")
-    metrics_dict = {
-        "n_games": n_games,
-        "win_counts": {
-            f"player_{index}": win_count
-            for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
-        },
-        "win_rates": {
-            f"player_{index}": win_count / n_games
-            for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
-        },
-    }
-    with open(metrics_json_path, "w") as f:
-        json.dump(metrics_dict, f, indent=4)
+    if metrics_json_path is not None:
+        print("\n===== Save metrics =====")
+        metrics_dict = {
+            "n_games": n_games,
+            "win_counts": {
+                f"player_{index}": win_count
+                for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
+            },
+            "win_rates": {
+                f"player_{index}": win_count / n_games
+                for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
+            },
+        }
+        with open(metrics_json_path, "w") as f:
+            json.dump(metrics_dict, f, indent=4)
 
 
 if __name__ == "__main__":
