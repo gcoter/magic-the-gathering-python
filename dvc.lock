@@ -9,21 +9,21 @@ stages:
       size: 4187
     outs:
     - path: data/game_logs/
-      md5: c9f1fc4b589c0cff9cef834d892a6254.dir
-      size: 808722906
+      md5: 3ecbc75c7606407e92d88ba8d60f78fe.dir
+      size: 7959972614
       nfiles: 100
   preprocess_data:
     cmd: "python scripts/preprocess_game_logs.py --game_logs_folder_path data/game_logs/
       --output_h5_path data/preprocessed_game_logs.h5\n"
     deps:
     - path: data/game_logs/
-      md5: c9f1fc4b589c0cff9cef834d892a6254.dir
-      size: 808722906
+      md5: 3ecbc75c7606407e92d88ba8d60f78fe.dir
+      size: 7959972614
       nfiles: 100
     - path: scripts/preprocess_game_logs.py
-      md5: 9a6bc7b330501ba284154ac2228c868b
-      size: 3481
+      md5: b1d10d2154246c08ba9b76a5ca02fcad
+      size: 6344
     outs:
     - path: data/preprocessed_game_logs.h5
-      md5: d52bb5e1129337579cecf4676cc011db
-      size: 27027040
+      md5: b45b3473641f49177018a0f0c7c45b4c
+      size: 709738024
