@@ -1,7 +1,8 @@
 vars:
-  - n_games: 100
+  - n_games: 10
   - player_classes: random,random
   - log_directory_path: data/game_logs/
+  - collect_data_metrics_path: metrics/collect_data.json
   - preprocessed_h5_path: data/preprocessed_game_logs.h5
 
 stages:
@@ -11,10 +12,14 @@ stages:
       --n_games ${n_games}
       --player_classes ${player_classes}
       --log_directory_path ${log_directory_path}
+      --metrics_json_path ${collect_data_metrics_path}
     deps:
       - scripts/run_competition_between_players.py
     outs:
       - ${log_directory_path}
+    metrics:
+      - ${collect_data_metrics_path}:
+          cache: false
   preprocess_data:
     cmd: >
       python scripts/preprocess_game_logs.py
