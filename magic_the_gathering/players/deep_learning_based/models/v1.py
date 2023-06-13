@@ -47,6 +47,7 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
             "global": (batch_size, global_game_state_dim),
             "players": (batch_size, n_players, player_dim),
             "zones": (batch_size, n_cards, card_dim),
+            "zones_padding_mask": (batch_size, n_cards)
         }
 
         batch_action_vectors:
@@ -54,7 +55,9 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         {
             "general": (batch_size, action_general_dim),
             "source_card_uuids": (batch_size, n_cards),
-            "target_card_uuids": (batch_size, n_cards)
+            "source_card_uuids_padding_mask": (batch_size, n_cards),
+            "target_card_uuids": (batch_size, n_cards),
+            "target_card_uuids_padding_mask": (batch_size, n_cards)
         }
         """
         batch_size = batch_game_state_vectors["global"].shape[0]
