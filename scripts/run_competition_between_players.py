@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -79,7 +80,12 @@ def create_players(game_mode: GameMode, players_classes: List[str]):
     return players
 
 
-def run_competition_between_players(n_games: int, player_classes: List[str], log_directory_path: str = None):
+def run_competition_between_players(
+    n_games: int,
+    player_classes: List[str],
+    metrics_json_path: str,
+    log_directory_path: str = None,
+):
     set_logging_level()
 
     n_players = len(player_classes)
@@ -106,6 +112,21 @@ def run_competition_between_players(n_games: int, player_classes: List[str], log
     for player_index, win_count in win_counts.items():
         win_rate = win_count / n_games
         print(f"- Player '{player_classes[player_index]}': {win_rate * 100:.2f}%")
+
+    print("\n===== Save metrics =====")
+    metrics_dict = {
+        "n_games": n_games,
+        "win_counts": {
+            f"player_{index}": win_count
+            for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
+        },
+        "win_rates": {
+            f"player_{index}": win_count / n_games
+            for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
+        },
+    }
+    with open(metrics_json_path, "w") as f:
+        json.dump(metrics_dict, f, indent=4)
 
 
 if __name__ == "__main__":
