@@ -34,11 +34,11 @@ class BaseDeepLearningScorer(LightningModule):
         raise NotImplementedError
 
     def __step(self, batch, batch_idx, base_metric_name):
-        batch_game_state_vectors, batch_action_vectors, batch_target_scores = batch
+        batch_game_state_vectors, batch_action_vectors, batch_labels = batch
         batch_predicted_scores = self.forward(
             batch_game_state_vectors=batch_game_state_vectors, batch_action_vectors=batch_action_vectors
         )
-        batch_loss = self.loss(batch_predicted_scores, batch_target_scores)
+        batch_loss = self.loss(batch_predicted_scores, batch_labels)
         self.log(f"{base_metric_name}_loss", batch_loss, on_epoch=True)
         return batch_loss
 
