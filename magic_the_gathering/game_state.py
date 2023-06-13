@@ -141,6 +141,7 @@ class GameState:
 
     def to_vectors(self) -> Dict[str, np.ndarray]:
         return {
+            "game_id": self.game_id,
             "global": self.__global_to_vector(),
             "players": self.__players_to_vector(),
             "zones": self.__zones_to_vector(),
