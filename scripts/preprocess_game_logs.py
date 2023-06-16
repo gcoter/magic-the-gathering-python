@@ -58,8 +58,12 @@ def preprocess_game_logs(game_logs_folder_path: str, output_h5_path: str):
 
     preprocessed_dataset_dict["game_id"] = np.array(preprocessed_dataset_dict["game_id"], dtype="S")
 
-    preprocessed_dataset_dict["game_state"]["global"] = np.array(preprocessed_dataset_dict["game_state"]["global"])
-    preprocessed_dataset_dict["game_state"]["players"] = np.array(preprocessed_dataset_dict["game_state"]["players"])
+    preprocessed_dataset_dict["game_state"]["global"] = np.array(
+        preprocessed_dataset_dict["game_state"]["global"], dtype=np.float32
+    )
+    preprocessed_dataset_dict["game_state"]["players"] = np.array(
+        preprocessed_dataset_dict["game_state"]["players"], dtype=np.float32
+    )
 
     max_n_cards = max([len(zones) for zones in preprocessed_dataset_dict["game_state"]["zones"]])
     vector_dim = preprocessed_dataset_dict["game_state"]["zones"][-1].shape[1]
@@ -73,38 +77,43 @@ def preprocess_game_logs(game_logs_folder_path: str, output_h5_path: str):
             padding_mask[: len(vector)] = 1
         preprocessed_dataset_dict["game_state"]["zones"][i] = np.pad(vector, pad_width)
         preprocessed_dataset_dict["game_state"]["zones_padding_mask"].append(padding_mask)
-    preprocessed_dataset_dict["game_state"]["zones"] = np.array(preprocessed_dataset_dict["game_state"]["zones"])
+    preprocessed_dataset_dict["game_state"]["zones"] = np.array(
+        preprocessed_dataset_dict["game_state"]["zones"], dtype=np.float32
+    )
     preprocessed_dataset_dict["game_state"]["zones_padding_mask"] = np.array(
-        preprocessed_dataset_dict["game_state"]["zones_padding_mask"]
+        preprocessed_dataset_dict["game_state"]["zones_padding_mask"], dtype=bool
     )
 
-    preprocessed_dataset_dict["action"]["general"] = np.array(preprocessed_dataset_dict["action"]["general"])
+    preprocessed_dataset_dict["action"]["general"] = np.array(
+        preprocessed_dataset_dict["action"]["general"], dtype=np.float32
+    )
 
     for i, vector in enumerate(preprocessed_dataset_dict["action"]["source_card_uuids"]):
         pad_width = (0, max_n_cards - len(vector))
-        padding_mask = np.zeros((max_n_cards, vector_dim))
+        padding_mask = np.zeros(max_n_cards)
         padding_mask[: len(vector)] = 1
         preprocessed_dataset_dict["action"]["source_card_uuids"][i] = np.pad(vector, pad_width)
         preprocessed_dataset_dict["action"]["source_card_uuids_padding_mask"].append(padding_mask)
     for i, vector in enumerate(preprocessed_dataset_dict["action"]["target_card_uuids"]):
         pad_width = (0, max_n_cards - len(vector))
+        padding_mask = np.zeros(max_n_cards)
         padding_mask[: len(vector)] = 1
         preprocessed_dataset_dict["action"]["target_card_uuids"][i] = np.pad(vector, pad_width)
         preprocessed_dataset_dict["action"]["target_card_uuids_padding_mask"].append(padding_mask)
     preprocessed_dataset_dict["action"]["source_card_uuids"] = np.array(
-        preprocessed_dataset_dict["action"]["source_card_uuids"]
+        preprocessed_dataset_dict["action"]["source_card_uuids"], dtype=bool
     )
     preprocessed_dataset_dict["action"]["source_card_uuids_padding_mask"] = np.array(
-        preprocessed_dataset_dict["action"]["source_card_uuids_padding_mask"]
+        preprocessed_dataset_dict["action"]["source_card_uuids_padding_mask"], dtype=bool
     )
     preprocessed_dataset_dict["action"]["target_card_uuids"] = np.array(
-        preprocessed_dataset_dict["action"]["target_card_uuids"]
+        preprocessed_dataset_dict["action"]["target_card_uuids"], dtype=bool
     )
     preprocessed_dataset_dict["action"]["target_card_uuids_padding_mask"] = np.array(
-        preprocessed_dataset_dict["action"]["target_card_uuids_padding_mask"]
+        preprocessed_dataset_dict["action"]["target_card_uuids_padding_mask"], dtype=bool
     )
 
-    preprocessed_dataset_dict["label"] = np.array(preprocessed_dataset_dict["label"])
+    preprocessed_dataset_dict["label"] = np.array(preprocessed_dataset_dict["label"], dtype=int)
 
     # Print shapes
     print("\n===== Shapes =====")
