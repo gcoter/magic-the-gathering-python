@@ -2,8 +2,10 @@ vars:
   - n_games: 10
   - player_classes: random,random
   - log_directory_path: data/game_logs/
-  - collect_data_metrics_path: metrics/collect_data.json
+  - params_path: params.yaml
   - preprocessed_h5_path: data/preprocessed_game_logs.h5
+  - collect_data_metrics_path: results/metrics/collect_data.json
+  - model_folder_path: results/models/
 
 stages:
   collect_data:
@@ -30,3 +32,18 @@ stages:
       - ${log_directory_path}
     outs:
       - ${preprocessed_h5_path}
+  train_deep_learning_scorer:
+    cmd: >
+      python scripts/train_deep_learning_scorer.py
+      --params_path ${params_path}
+      --preprocessed_game_logs_path ${preprocessed_h5_path}
+      --model_folder_path ${model_folder_path}
+      --model_file_name deep_learning_scorer
+    deps:
+      - scripts/train_deep_learning_scorer.py
+      - ${preprocessed_h5_path}
+    params:
+      - ${params_path}:
+          - deep_learning_scorer
+    outs:
+      - ${model_folder_path}/deep_learning_scorer.ckpt

@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import random
+from pathlib import Path
 from typing import List, OrderedDict
 
 import pandas as pd
@@ -120,6 +121,7 @@ def run_competition_between_players(
         print(f"- Player '{player_classes[player_index]}': {win_rate * 100:.2f}%")
 
     if metrics_json_path is not None:
+        Path(metrics_json_path).parent.mkdir(parents=True, exist_ok=True)
         print("\n===== Save metrics =====")
         metrics_dict = {
             "n_games": n_games,
