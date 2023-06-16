@@ -1,10 +1,11 @@
 vars:
   - n_games: 10
-  - player_classes: random,random
+  - player_classes: random,deep_learning
   - log_directory_path: data/game_logs/
   - params_path: params.yaml
   - preprocessed_h5_path: data/preprocessed_game_logs.h5
   - collect_data_metrics_path: results/metrics/collect_data.json
+  - evaluate_deep_learning_player_metrics_path: results/metrics/evaluate_deep_learning_player.json
   - model_folder_path: results/models/
 
 stages:
@@ -47,3 +48,16 @@ stages:
           - deep_learning_scorer
     outs:
       - ${model_folder_path}/deep_learning_scorer.ckpt
+  evaluate_deep_learning_player:
+    cmd: >
+      python scripts/run_competition_between_players.py
+      --n_games ${n_games}
+      --player_classes ${player_classes}
+      --metrics_json_path ${evaluate_deep_learning_player_metrics_path}
+      --deep_learning_scorer_path ${model_folder_path}/deep_learning_scorer.ckpt
+    deps:
+      - scripts/run_competition_between_players.py
+      - ${model_folder_path}/deep_learning_scorer.ckpt
+    metrics:
+      - ${evaluate_deep_learning_player_metrics_path}:
+          cache: false
