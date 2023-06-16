@@ -1,2 +1,5 @@
 *.pyc
 venv/
+lightning_logs/
+mlruns/
+notebooks/models/
