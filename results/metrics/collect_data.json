@@ -1,0 +1,11 @@
+{
+    "n_games": 10,
+    "win_counts": {
+        "player_0": 7,
+        "player_1": 3
+    },
+    "win_rates": {
+        "player_0": 0.7,
+        "player_1": 0.3
+    }
+}

@@ -2,31 +2,67 @@ schema: '2.0'
 stages:
   collect_data:
     cmd: "python scripts/run_competition_between_players.py --n_games 10 --player_classes
-      random,random --log_directory_path data/game_logs/ --metrics_json_path metrics/collect_data.json\n"
+      random,random --log_directory_path data/game_logs/ --metrics_json_path results/metrics/collect_data.json\n"
     deps:
     - path: scripts/run_competition_between_players.py
-      md5: 56a4f0c1930a84c79cf7f47181be5f18
-      size: 5206
+      md5: 92e95bcbd3c0d1617b4d512217b468e0
+      size: 5305
     outs:
     - path: data/game_logs/
-      md5: 032fbc00d50e780a58b32db73d22a291.dir
-      size: 85359481
+      md5: 4d2b2ec93a734d1762c5d5d4900cd60e.dir
+      size: 83469500
       nfiles: 10
-    - path: metrics/collect_data.json
-      md5: 9adcd304fbab89791f87c756b395daa4
+    - path: results/metrics/collect_data.json
+      md5: fdcb3040348a3ba38e9e4a3741cdde80
       size: 168
   preprocess_data:
     cmd: "python scripts/preprocess_game_logs.py --game_logs_folder_path data/game_logs/
       --output_h5_path data/preprocessed_game_logs.h5\n"
     deps:
     - path: data/game_logs/
-      md5: 032fbc00d50e780a58b32db73d22a291.dir
-      size: 85359481
+      md5: 4d2b2ec93a734d1762c5d5d4900cd60e.dir
+      size: 83469500
       nfiles: 10
     - path: scripts/preprocess_game_logs.py
       md5: f31be2ce9f3aae2807e36d772efed0e5
       size: 6574
     outs:
     - path: data/preprocessed_game_logs.h5
-      md5: 52919a9e8ddb4e793e28a45f58c676b1
-      size: 12260792
+      md5: af40a8f1169d17cd7671d9fc6accb932
+      size: 9479492
+  train_deep_learning_scorer:
+    cmd: "python scripts/train_deep_learning_scorer.py --params_path params.yaml --preprocessed_game_logs_path
+      data/preprocessed_game_logs.h5 --model_folder_path results/models/ --model_file_name
+      deep_learning_scorer\n"
+    deps:
+    - path: data/preprocessed_game_logs.h5
+      md5: af40a8f1169d17cd7671d9fc6accb932
+      size: 9479492
+    - path: scripts/train_deep_learning_scorer.py
+      md5: 2210f6e1f7b061c662e113e29137481f
+      size: 5555
+    params:
+      params.yaml:
+        deep_learning_scorer:
+          hyper_parameters:
+            final_common_dim: 32
+          training:
+            random_split:
+              training_size: 0.8
+              validation_size: 0.2
+            batch_size: 10
+            n_epochs: 100
+            model_checkpoint:
+              monitor: validation_loss
+              mode: min
+              save_top_k: 1
+              verbose: false
+            early_stopping:
+              monitor: validation_loss
+              mode: min
+              patience: 10
+              verbose: false
+    outs:
+    - path: results/models//deep_learning_scorer.ckpt
+      md5: 21cb2eb0ac6a69cb25e7ee3a0f7e8d3d
+      size: 425133
