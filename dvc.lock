@@ -5,28 +5,28 @@ stages:
       random,random --log_directory_path data/game_logs/ --metrics_json_path metrics/collect_data.json\n"
     deps:
     - path: scripts/run_competition_between_players.py
-      md5: c885d5d663c1ed89199af580fb40dec7
-      size: 4796
+      md5: 56a4f0c1930a84c79cf7f47181be5f18
+      size: 5206
     outs:
     - path: data/game_logs/
-      md5: b4b8cf9a4d428f1e7b4f7c54fe77f2fd.dir
-      size: 75913040
+      md5: 032fbc00d50e780a58b32db73d22a291.dir
+      size: 85359481
       nfiles: 10
     - path: metrics/collect_data.json
-      md5: f0ea5575ea12f736d8de9daa71e9b5e0
+      md5: 9adcd304fbab89791f87c756b395daa4
       size: 168
   preprocess_data:
     cmd: "python scripts/preprocess_game_logs.py --game_logs_folder_path data/game_logs/
       --output_h5_path data/preprocessed_game_logs.h5\n"
     deps:
     - path: data/game_logs/
-      md5: b4b8cf9a4d428f1e7b4f7c54fe77f2fd.dir
-      size: 75913040
+      md5: 032fbc00d50e780a58b32db73d22a291.dir
+      size: 85359481
       nfiles: 10
     - path: scripts/preprocess_game_logs.py
-      md5: b1d10d2154246c08ba9b76a5ca02fcad
-      size: 6344
+      md5: f31be2ce9f3aae2807e36d772efed0e5
+      size: 6574
     outs:
     - path: data/preprocessed_game_logs.h5
-      md5: f56a333c03df44f48249392c27026e62
-      size: 56258280
+      md5: 52919a9e8ddb4e793e28a45f58c676b1
+      size: 12260792
