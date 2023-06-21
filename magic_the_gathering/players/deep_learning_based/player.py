@@ -19,7 +19,9 @@ class DeepLearningBasedPlayer(ChooseHighestScoreActionPlayer):
         scorer: BaseDeepLearningScorer = None,
     ):
         super().__init__(index=index, life_points=life_points, mana_pool=mana_pool, is_alive=is_alive)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.scorer = scorer
+        self.scorer.to(self.device)
         self.scorer.eval()
 
     def _score_actions(self, game_state: GameState, actions: List[Action]) -> np.ndarray:
@@ -39,24 +41,32 @@ class DeepLearningBasedPlayer(ChooseHighestScoreActionPlayer):
                 action_vectors.append(action.to_vectors(game_state=game_state))
 
         batch_game_state_vectors_torch = {
-            "global": torch.tensor(
-                np.array([game_state_vector["global"] for game_state_vector in game_state_vectors])
-            ).float(),
+            "global": torch.tensor(np.array([game_state_vector["global"] for game_state_vector in game_state_vectors]))
+            .float()
+            .to(self.device),
             "players": torch.tensor(
                 np.array([game_state_vector["players"] for game_state_vector in game_state_vectors])
-            ).float(),
-            "zones": torch.tensor(
-                np.array([game_state_vector["zones"] for game_state_vector in game_state_vectors])
-            ).float(),
+            )
+            .float()
+            .to(self.device),
+            "zones": torch.tensor(np.array([game_state_vector["zones"] for game_state_vector in game_state_vectors]))
+            .float()
+            .to(self.device),
         }
         batch_action_vectors_torch = {
-            "general": torch.tensor(np.array([action_vector["general"] for action_vector in action_vectors])).float(),
+            "general": torch.tensor(np.array([action_vector["general"] for action_vector in action_vectors]))
+            .float()
+            .to(self.device),
             "source_card_uuids": torch.tensor(
                 np.array([action_vector["source_card_uuids"] for action_vector in action_vectors])
-            ).bool(),
+            )
+            .bool()
+            .to(self.device),
             "target_card_uuids": torch.tensor(
                 np.array([action_vector["target_card_uuids"] for action_vector in action_vectors])
-            ).bool(),
+            )
+            .bool()
+            .to(self.device),
         }
 
         scores = (

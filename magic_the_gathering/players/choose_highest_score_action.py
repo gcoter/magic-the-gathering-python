@@ -11,6 +11,7 @@ from magic_the_gathering.players.base import Player
 class ChooseHighestScoreActionPlayer(Player):
     def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         action_scores = self._score_actions(game_state=game_state, actions=possible_actions)
+        self.logger.debug(f"Action scores: {action_scores}")
         highest_score_action_index = np.argmax(action_scores)
         return possible_actions[highest_score_action_index]
 

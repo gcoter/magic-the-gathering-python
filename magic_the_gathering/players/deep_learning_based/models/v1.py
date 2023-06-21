@@ -10,7 +10,6 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         player_dim: int,
         card_dim: int,
         action_general_dim: int,
-        max_action_sequence_length: int,
         final_common_dim: int,
     ):
         super().__init__()
@@ -18,7 +17,6 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         self.player_dim = player_dim
         self.card_dim = card_dim
         self.action_general_dim = action_general_dim
-        self.max_action_sequence_length = max_action_sequence_length
         self.final_common_dim = final_common_dim
 
         # Define modules
@@ -32,9 +30,7 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
             action_general_dim=self.action_general_dim, output_dim=self.final_common_dim
         )
         self.action_card_mlp = ActionCardMLP(card_dim=card_dim, output_dim=final_common_dim)
-        self.action_transformer_encoder = ActionTransformerEncoder(
-            max_sequence_length=self.max_action_sequence_length, input_dim=final_common_dim
-        )
+        self.action_transformer_encoder = ActionTransformerEncoder(input_dim=final_common_dim)
         self.final_classification_mlp = FinalClassificationMLP(
             input_dim=3 * final_common_dim,
         )
@@ -47,6 +43,7 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
             "global": (batch_size, global_game_state_dim),
             "players": (batch_size, n_players, player_dim),
             "zones": (batch_size, n_cards, card_dim),
+            "zones_padding_mask": (batch_size, n_cards)
         }
 
         batch_action_vectors:
@@ -54,7 +51,9 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         {
             "general": (batch_size, action_general_dim),
             "source_card_uuids": (batch_size, n_cards),
-            "target_card_uuids": (batch_size, n_cards)
+            "source_card_uuids_padding_mask": (batch_size, n_cards),
+            "target_card_uuids": (batch_size, n_cards),
+            "target_card_uuids_padding_mask": (batch_size, n_cards)
         }
         """
         batch_size = batch_game_state_vectors["global"].shape[0]
@@ -181,7 +180,8 @@ class ActionGeneralMLP(torch.nn.Module):
         # - 3rd: 1 if the vector corresponds to a target card vector of the Action
         # As here we are only considering general actions, the 2nd and 3rd dimensions
         # are always 0
-        self.action_type = torch.nn.Parameter(torch.tensor([1.0, 0.0, 0.0]))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.action_type = torch.nn.Parameter(torch.tensor([1.0, 0.0, 0.0])).to(self.device)
 
     def forward(self, x):
         """
@@ -200,6 +200,7 @@ class ActionCardMLP(torch.nn.Module):
         self.output_dim = output_dim
         self.fc1 = torch.nn.Linear(self.card_dim, self.output_dim - 3)
         self.relu = torch.nn.ReLU()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def forward(self, x, is_source=True):
         """
@@ -220,15 +221,14 @@ class ActionCardMLP(torch.nn.Module):
             action_type = torch.tensor([[[0.0, 1.0, 0.0]]])
         else:
             action_type = torch.tensor([[[0.0, 0.0, 1.0]]])
-        action_type = torch.nn.Parameter(action_type).repeat(x.shape[0], x.shape[1], 1)
+        action_type = torch.nn.Parameter(action_type).repeat(x.shape[0], x.shape[1], 1).to(self.device)
         x = torch.cat([x, action_type], dim=2)
         return x
 
 
 class ActionTransformerEncoder(torch.nn.Module):
-    def __init__(self, max_sequence_length, input_dim, n_heads=4, n_layers=2, dropout=0.1):
+    def __init__(self, input_dim, n_heads=4, n_layers=2, dropout=0.1):
         super().__init__()
-        self.max_sequence_length = max_sequence_length
         self.input_dim = input_dim
         self.n_heads = n_heads
         self.n_layers = n_layers
@@ -247,7 +247,7 @@ class ActionTransformerEncoder(torch.nn.Module):
 
     def forward(self, x):
         """
-        x: (batch_size, max_sequence_length, input_dim)
+        x: (batch_size, sequence_length, input_dim)
         """
         x = self.transformer_encoder(x)
         return x[:, -1, :]

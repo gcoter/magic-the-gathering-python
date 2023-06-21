@@ -1,0 +1,19 @@
+deep_learning_scorer:
+  hyper_parameters:
+    final_common_dim: 32
+  training:
+    random_split:
+      training_size: 0.8
+      validation_size: 0.2
+    batch_size: 10
+    n_epochs: 100
+    model_checkpoint:
+      monitor: validation_loss
+      mode: min
+      save_top_k: 1
+      verbose: false
+    early_stopping:
+      monitor: validation_loss
+      mode: min
+      patience: 10
+      verbose: false
