@@ -28,17 +28,7 @@ class DeepLearningBasedPlayer(ChooseHighestScoreActionPlayer):
         game_state_vectors = [game_state.to_vectors()] * len(actions)
         action_vectors = []
         for action in actions:
-            if action is None:
-                n_cards = len(game_state_vectors[0]["zones"])
-                action_vectors.append(
-                    {
-                        "general": np.zeros(self.scorer.action_general_dim),
-                        "source_card_uuids": np.zeros(n_cards),
-                        "target_card_uuids": np.zeros(n_cards),
-                    }
-                )
-            else:
-                action_vectors.append(action.to_vectors(game_state=game_state))
+            action_vectors.append(action.to_vectors(game_state=game_state))
 
         batch_game_state_vectors_torch = {
             "global": torch.tensor(np.array([game_state_vector["global"] for game_state_vector in game_state_vectors]))

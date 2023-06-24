@@ -2,6 +2,7 @@ from typing import List
 
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.declare_blocker import DeclareBlockerAction
+from magic_the_gathering.actions.none import NoneAction
 from magic_the_gathering.game_state import GameState
 from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGetPriority
 
@@ -9,7 +10,10 @@ from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGet
 class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
     @staticmethod
     def list_possible_actions(game_state: GameState) -> List[Action]:
-        return [None] + DeclareBlockerAction.list_possible_actions(game_state=game_state)
+        return [
+            NoneAction(source_player_index=blocker_player_index)
+            for blocker_player_index in game_state.current_player_attackers.keys()
+        ] + DeclareBlockerAction.list_possible_actions(game_state=game_state)
 
     def __init__(self, force_combat: bool = False):
         super().__init__(name="Combat: Declare Blockers Phase")
@@ -24,24 +28,28 @@ class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
                 possible_actions = [
                     action
                     for action in CombatDeclareBlockersPhase.list_possible_actions(game_state)
-                    if action is None or action.blocker_player_index == blocker_player_index
+                    if action.source_player_index == blocker_player_index
                 ]
                 action = blocker_player._choose_action(
                     game_state=game_state,
                     possible_actions=possible_actions,
                 )
-                if action is not None:
+                if not isinstance(action, NoneAction):
                     n_blockers += 1
-                if n_blockers == 0 and self.force_combat and action is None and possible_actions != [None]:
-                    while action is None:
+                if (
+                    n_blockers == 0
+                    and self.force_combat
+                    and isinstance(action, NoneAction)
+                    and possible_actions != [NoneAction(source_player_index=blocker_player_index)]
+                ):
+                    while isinstance(action, NoneAction):
                         action = blocker_player.choose_action(
                             game_state=game_state,
                             possible_actions=possible_actions,
                         )
-                if action is None:
+                game_state = action.execute(game_state)
+                if isinstance(action, NoneAction):
                     break
-                else:
-                    game_state = action.execute(game_state)
             for attacker_card_uuid in game_state.current_player_attackers[blocker_player_index]:
                 if blocker_player_index not in game_state.other_players_blockers:
                     game_state.other_players_blockers[blocker_player_index] = {}
