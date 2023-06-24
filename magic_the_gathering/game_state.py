@@ -141,13 +141,12 @@ class GameState:
 
     def to_vectors(self) -> Dict[str, np.ndarray]:
         return {
-            "game_id": self.game_id,
-            "global": self.__global_to_vector(),
-            "players": self.__players_to_vector(),
-            "zones": self.__zones_to_vector(),
+            "global": self.global_to_vector(),
+            "players": self.players_to_vector(),
+            "zones": self.zones_to_vector(),
         }
 
-    def __players_to_vector(self) -> np.ndarray:
+    def players_to_vector(self) -> np.ndarray:
         players_vectors = []
         for player_index, player in enumerate(self.players):
             player_vector = player.to_vector()
@@ -156,11 +155,12 @@ class GameState:
             players_vectors.append(vector)
         return np.array(players_vectors).astype(np.float32)
 
-    def __global_to_vector(self) -> np.ndarray:
+    def global_to_vector(self) -> np.ndarray:
         return np.array([self.current_turn_counter, self.current_player_has_played_a_land_this_turn]).astype(np.float32)
 
-    def __zones_to_vector(self) -> np.ndarray:
+    def zones_to_vector(self, return_uuids=False) -> np.ndarray:
         zones_vectors = []
+        uuids = []
         for zone in ZonePosition:
             if zone == ZonePosition.STACK:
                 for card_uuid, card in self.zones[zone].items():
@@ -171,6 +171,7 @@ class GameState:
                     )
                     player_index_vector = np.zeros(self.n_players)
                     zone_vector = self.zone_position_to_one_hot_vector(zone)
+                    uuids.append(card_uuid)
                     vector = np.concatenate(
                         [
                             card_vector,
@@ -193,6 +194,7 @@ class GameState:
                         )
                         player_index_vector = self.player_index_to_one_hot_vector(player_index)
                         zone_vector = self.zone_position_to_one_hot_vector(zone)
+                        uuids.append(card_uuid)
                         vector = np.concatenate(
                             [
                                 card_vector,
@@ -203,7 +205,10 @@ class GameState:
                             ]
                         )
                         zones_vectors.append(vector)
-        return np.array(zones_vectors).astype(np.float32)
+        final_array = np.array(zones_vectors).astype(np.float32)
+        if return_uuids:
+            return final_array, uuids
+        return final_array
 
     def player_index_to_one_hot_vector(self, player_index: int = None) -> np.ndarray:
         one_hot_vector = np.zeros(self.n_players)
@@ -216,23 +221,3 @@ class GameState:
         if zone is not None:
             one_hot_vector[zone.value] = 1
         return one_hot_vector
-
-    def card_uuids_to_multi_hot_vector(self, card_uuids: List[str] = None) -> np.ndarray:
-        all_card_uuids = self.__all_card_uuids()
-        multi_hot_vector = np.zeros(len(all_card_uuids))
-        if card_uuids is None:
-            return multi_hot_vector
-        for index, card_uuid in enumerate(all_card_uuids):
-            if card_uuid in card_uuids:
-                multi_hot_vector[index] = 1
-        return multi_hot_vector
-
-    def __all_card_uuids(self) -> List[str]:
-        card_uuids = []
-        for zone in ZonePosition:
-            if zone == ZonePosition.STACK:
-                card_uuids.extend(list(self.zones[zone].keys()))
-            elif zone != ZonePosition.LIBRARY:
-                for player_index in range(self.n_players):
-                    card_uuids.extend(list(self.zones[zone][player_index].keys()))
-        return card_uuids
