@@ -2,6 +2,7 @@ from typing import List
 
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.declare_attacker import DeclareAttackerAction
+from magic_the_gathering.actions.none import NoneAction
 from magic_the_gathering.game_state import GameState
 from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGetPriority
 
@@ -9,7 +10,9 @@ from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGet
 class CombatDeclareAttackersPhase(PhaseWherePlayersGetPriority):
     @staticmethod
     def list_possible_actions(game_state: GameState) -> List[Action]:
-        return [None] + DeclareAttackerAction.list_possible_actions(game_state=game_state)
+        return [
+            NoneAction(source_player_index=game_state.current_player_index)
+        ] + DeclareAttackerAction.list_possible_actions(game_state=game_state)
 
     def __init__(self, force_combat: bool = False):
         super().__init__(name="Combat: Declare Attackers Phase")
@@ -24,17 +27,22 @@ class CombatDeclareAttackersPhase(PhaseWherePlayersGetPriority):
                 game_state=game_state,
                 possible_actions=possible_actions,
             )
-            if action is not None:
+            if not isinstance(action, NoneAction):
                 n_attackers += 1
-            if n_attackers == 0 and self.force_combat and action is None and possible_actions != [None]:
-                while action is None:
+            if (
+                n_attackers == 0
+                and self.force_combat
+                and isinstance(action, NoneAction)
+                and possible_actions != [NoneAction(source_player_index=game_state.current_player_index)]
+            ):
+                while isinstance(action, NoneAction):
                     action = current_player.choose_action(
                         game_state=game_state,
                         possible_actions=possible_actions,
                     )
-            if action is None:
-                break
             game_state = action.execute(game_state)
+            if isinstance(action, NoneAction):
+                break
 
         self.logger.info(f"Declared attackers: {game_state.current_player_attackers}")
         return game_state

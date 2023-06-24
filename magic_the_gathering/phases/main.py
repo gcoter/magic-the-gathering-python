@@ -2,6 +2,7 @@ from typing import List
 
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.cast_card import CastCardAction
+from magic_the_gathering.actions.none import NoneAction
 from magic_the_gathering.actions.play_land import PlayLandAction
 from magic_the_gathering.actions.resolve_stack import ResolveTopOfStackAction
 from magic_the_gathering.actions.tap import TapAction
@@ -12,7 +13,7 @@ from magic_the_gathering.phases.players_get_priority import PhaseWherePlayersGet
 class MainPhase(PhaseWherePlayersGetPriority):
     @staticmethod
     def list_possible_actions(game_state: GameState) -> List[Action]:
-        possible_actions = [None]
+        possible_actions = [NoneAction(source_player_index=game_state.current_player_index)]
         possible_actions.extend(
             [
                 action
@@ -51,9 +52,9 @@ class MainPhase(PhaseWherePlayersGetPriority):
                 game_state=game_state,
                 possible_actions=possible_actions,
             )
-            if action is None:
-                break
             game_state = action.execute(game_state)
+            if isinstance(action, NoneAction):
+                break
 
             # TODO: Other players can respond to the action
 
