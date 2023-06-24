@@ -8,8 +8,31 @@ from magic_the_gathering.game_state import GameState, ZonePosition
 
 
 class Action:
-    GLOBAL_ACTION_COUNT = 0
-    DATASET = []
+    HISTORY = []
+
+    @staticmethod
+    def type_to_one_hot_vector(action_type: str) -> np.ndarray:
+        all_action_types = [
+            "NoneAction",
+            "CastCardAction",
+            "DealDamageAction",
+            "DeclareAttackerAction",
+            "DeclareBlockerAction",
+            "DrawAction",
+            "KillPlayerAction",
+            "MoveToGraveyardAction",
+            "PassToNextPlayerAction",
+            "PlayLandAction",
+            "ResolveTopOfStackAction",
+            "ShuffleAction",
+            "TapAction",
+            "UntapAction",
+            "UntapAllAction",
+        ]
+        action_type_index = all_action_types.index(action_type)
+        one_hot_vector = np.zeros(len(all_action_types))
+        one_hot_vector[action_type_index] = 1
+        return one_hot_vector
 
     @classmethod
     @abstractmethod
@@ -39,9 +62,8 @@ class Action:
 
     def execute(self, game_state: GameState) -> GameState:
         self.logger.debug(f"Executing action: {self}")
-        Action.DATASET.append({"game_state": game_state.to_vectors(), "action": self.to_vectors(game_state=game_state)})
+        Action.HISTORY.append(self.to_vectors(game_state=game_state))
         game_state = self._execute(game_state)
-        Action.GLOBAL_ACTION_COUNT += 1
         game_state.check_if_game_is_over()
         return game_state
 
@@ -72,13 +94,12 @@ class Action:
     def to_vectors(self, game_state: GameState) -> Dict[str, np.ndarray]:
         source_player_one_hot_vector = game_state.player_index_to_one_hot_vector(self.source_player_index)
         target_player_one_hot_vector = game_state.player_index_to_one_hot_vector(self.target_player_index)
-        source_card_uuids_multi_hot_vector = game_state.card_uuids_to_multi_hot_vector(self.source_card_uuids)
-        target_card_uuids_multi_hot_vector = game_state.card_uuids_to_multi_hot_vector(self.target_card_uuids)
         source_zone_one_hot_vector = game_state.zone_position_to_one_hot_vector(self.source_zone)
         target_zone_one_hot_vector = game_state.zone_position_to_one_hot_vector(self.target_zone)
 
         general_vector = np.concatenate(
             [
+                Action.type_to_one_hot_vector(self.__class__.__name__),
                 source_player_one_hot_vector,
                 target_player_one_hot_vector,
                 source_zone_one_hot_vector,
@@ -86,9 +107,26 @@ class Action:
             ]
         )
 
+        zones_vector, uuids = game_state.zones_to_vector(return_uuids=True)
+        source_card_vectors = []
+        target_card_vectors = []
+        if self.source_card_uuids is not None:
+            for source_card_uuid in self.source_card_uuids:
+                source_card_index = uuids.index(source_card_uuid)
+                source_card_vector = zones_vector[source_card_index]
+                source_card_vectors.append(source_card_vector)
+        if self.target_card_uuids is not None:
+            for target_card_uuid in self.target_card_uuids:
+                target_card_index = uuids.index(target_card_uuid)
+                target_card_vector = zones_vector[target_card_index]
+                target_card_vectors.append(target_card_vector)
+
+        source_card_vectors = np.array(source_card_vectors, dtype=np.float32)
+        target_card_vectors = np.array(target_card_vectors, dtype=np.float32)
+
         return {
             "source_player_index": self.source_player_index,
             "general": general_vector,
-            "source_card_uuids": source_card_uuids_multi_hot_vector,
-            "target_card_uuids": target_card_uuids_multi_hot_vector,
+            "source_card_vectors": source_card_vectors,
+            "target_card_vectors": target_card_vectors,
         }
