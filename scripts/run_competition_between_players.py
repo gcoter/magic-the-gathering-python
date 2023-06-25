@@ -69,7 +69,7 @@ def create_players(game_mode: GameMode, players_classes: List[str], deep_learnin
                 n_players=n_players,
                 player_dim=8,
                 card_dim=34,
-                action_general_dim=16,
+                action_general_dim=31,
                 final_common_dim=32,
             )
             if deep_learning_scorer_path is not None:
