@@ -3,10 +3,11 @@ import logging
 import os
 import random
 from pathlib import Path
-from typing import List, OrderedDict
+from typing import Dict, List, OrderedDict
 
 import pandas as pd
 import torch
+import yaml
 from fire import Fire
 
 from magic_the_gathering.actions.draw import DrawAction
@@ -59,18 +60,20 @@ def create_hands(game_state: GameState):
     return game_state
 
 
-def create_players(game_mode: GameMode, players_classes: List[str], deep_learning_scorer_path: str = None):
+def create_players(
+    game_mode: GameMode,
+    players_classes: List[str],
+    deep_learning_scorer_path: str = None,
+    hyper_parameters: Dict = None,
+):
     n_players = len(players_classes)
     string_to_player = {"random": RandomPlayer, "deep_learning": DeepLearningBasedPlayer}
     players = []
     for index, player_class in enumerate(players_classes):
         if player_class == "deep_learning":
+            assert hyper_parameters is not None
             scorer = DeepLearningScorerV1(
-                n_players=n_players,
-                player_dim=8,
-                card_dim=34,
-                action_general_dim=31,
-                final_common_dim=32,
+                n_players=n_players, player_dim=8, card_dim=34, action_general_dim=31, **hyper_parameters
             )
             if deep_learning_scorer_path is not None:
                 checkpoint = torch.load(deep_learning_scorer_path)
@@ -84,14 +87,24 @@ def create_players(game_mode: GameMode, players_classes: List[str], deep_learnin
     return players
 
 
+def read_params(path: str) -> Dict:
+    with open(path, "r") as f:
+        params = yaml.safe_load(f)
+    return params
+
+
 def run_competition_between_players(
     n_games: int,
     player_classes: List[str],
+    params_path: str,
     metrics_json_path: str = None,
     log_directory_path: str = None,
     deep_learning_scorer_path: str = None,
 ):
     set_logging_level()
+
+    print(f"Load parameters from '{params_path}'")
+    params = read_params(params_path)["deep_learning_scorer"]
 
     n_players = len(player_classes)
     game_mode = DefaultGameMode()
@@ -102,7 +115,10 @@ def run_competition_between_players(
     for n in range(n_games):
         print(f"\n***** Game {n + 1} / {n_games} *****")
         players = create_players(
-            game_mode=game_mode, players_classes=player_classes, deep_learning_scorer_path=deep_learning_scorer_path
+            game_mode=game_mode,
+            players_classes=player_classes,
+            deep_learning_scorer_path=deep_learning_scorer_path,
+            hyper_parameters=params["hyper_parameters"],
         )
         decks = create_decks(n_players=n_players)
         game_state = GameState(

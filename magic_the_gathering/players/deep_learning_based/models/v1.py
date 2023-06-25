@@ -11,6 +11,9 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         card_dim: int,
         action_general_dim: int,
         final_common_dim: int,
+        transformer_n_layers: int,
+        transformer_n_heads: int,
+        dropout: float,
     ):
         super().__init__()
         self.n_players = n_players
@@ -18,19 +21,31 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         self.card_dim = card_dim
         self.action_general_dim = action_general_dim
         self.final_common_dim = final_common_dim
+        self.transformer_n_layers = transformer_n_layers
+        self.transformer_n_heads = transformer_n_heads
+        self.dropout = dropout
 
         # Define modules
         self.players_mlp = PlayersMLP(
             n_players=self.n_players, player_dim=self.player_dim, output_dim=self.final_common_dim
         )
         self.zones_transformer_encoder = ZonesTransformerEncoder(
-            card_dim=self.card_dim, output_dim=self.final_common_dim
+            card_dim=self.card_dim,
+            output_dim=self.final_common_dim,
+            n_layers=self.transformer_n_layers,
+            n_heads=self.transformer_n_heads,
+            dropout=self.dropout,
         )
         self.action_general_mlp = ActionGeneralMLP(
             action_general_dim=self.action_general_dim, output_dim=self.final_common_dim
         )
         self.action_card_mlp = ActionCardMLP(card_dim=card_dim, output_dim=final_common_dim)
-        self.action_transformer_encoder = ActionTransformerEncoder(input_dim=final_common_dim)
+        self.action_transformer_encoder = ActionTransformerEncoder(
+            input_dim=final_common_dim,
+            n_layers=self.transformer_n_layers,
+            n_heads=self.transformer_n_heads,
+            dropout=self.dropout,
+        )
         self.final_classification_mlp = FinalClassificationMLP(
             input_dim=3 * final_common_dim,
         )

@@ -14,10 +14,14 @@ stages:
       python scripts/run_competition_between_players.py
       --n_games ${n_games}
       --player_classes ${player_classes}
+      --params_path ${params_path}
       --log_directory_path ${log_directory_path}
       --metrics_json_path ${collect_data_metrics_path}
     deps:
       - scripts/run_competition_between_players.py
+    params:
+      - ${params_path}:
+          - deep_learning_scorer
     outs:
       - ${log_directory_path}
     metrics:
