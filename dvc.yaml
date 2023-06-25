@@ -1,5 +1,5 @@
 vars:
-  - n_games: 10
+  - n_games: 100
   - player_classes: random,deep_learning
   - log_directory_path: data/game_logs/
   - params_path: params.yaml
