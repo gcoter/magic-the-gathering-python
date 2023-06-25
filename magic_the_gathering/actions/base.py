@@ -105,7 +105,7 @@ class Action:
                 source_zone_one_hot_vector,
                 target_zone_one_hot_vector,
             ]
-        )
+        ).astype(np.float32)
 
         zones_vector, uuids = game_state.zones_to_vector(return_uuids=True)
         source_card_vectors = []
