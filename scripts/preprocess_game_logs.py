@@ -24,36 +24,43 @@ def preprocess_game_logs(game_logs_folder_path: str, output_h5_path: str):
     }
 
     file_paths = os.listdir(game_logs_folder_path)
-    for n, file_name in enumerate(file_paths[:2]):
+    for n, file_name in enumerate(file_paths):
         file_path = os.path.join(game_logs_folder_path, file_name)
         print(f"Read game log from '{file_path}' ({n + 1} / {len(file_paths)})")
         with open(file_path, "rb") as f:
             data_dict = pickle.load(f)
 
-        dataset = data_dict["dataset"]
+        game_id = data_dict["game_id"]
+        player_datasets = data_dict["player_datasets"]
         winner_player_index = data_dict["winner_player_index"]
+        n_players = len(player_datasets)
+
+        dataset = []
+        for player_dataset in player_datasets:
+            dataset.extend(player_dataset)
 
         for i, item_dict in enumerate(dataset):
             # if (i + 1) % 1000 == 0:
             #     print(f"Process item {i + 1} / {len(dataset)}")
 
-            game_state_vectors = item_dict["game_state"]
-            game_id = game_state_vectors["game_id"]
-            action_vectors = item_dict["action"]
+            game_state_vectors = item_dict["current_game_state"]
+            chosen_action_index = item_dict["chosen_action_index"]
+            action_vectors = item_dict["possible_actions"][chosen_action_index]
             source_player_index = action_vectors["source_player_index"]
 
-            label = -1
-            # FIXME: Handle the case of action None properly (considering that it can be chosen by the winning player, thus affecting the label)
-            if source_player_index is not None:
-                label = int(source_player_index == winner_player_index)
+            assert source_player_index in range(n_players)
+            label = int(source_player_index == winner_player_index)
 
             preprocessed_dataset_dict["game_id"].append(game_id)
-            for key, vector in game_state_vectors.items():
-                if key != "game_id":
-                    preprocessed_dataset_dict["game_state"][key].append(vector)
-            for key, vector in action_vectors.items():
-                if key != "source_player_index":
-                    preprocessed_dataset_dict["action"][key].append(vector)
+
+            preprocessed_dataset_dict["game_state"]["global"].append(game_state_vectors["global"])
+            preprocessed_dataset_dict["game_state"]["players"].append(game_state_vectors["players"])
+            preprocessed_dataset_dict["game_state"]["zones"].append(game_state_vectors["zones"])
+
+            preprocessed_dataset_dict["action"]["general"].append(action_vectors["general"])
+            preprocessed_dataset_dict["action"]["source_card_uuids"].append(action_vectors["source_card_uuids"])
+            preprocessed_dataset_dict["action"]["target_card_uuids"].append(action_vectors["target_card_uuids"])
+
             preprocessed_dataset_dict["label"].append(label)
 
     preprocessed_dataset_dict["game_id"] = np.array(preprocessed_dataset_dict["game_id"], dtype="S")

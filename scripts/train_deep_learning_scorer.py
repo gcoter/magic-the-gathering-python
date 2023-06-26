@@ -96,7 +96,7 @@ def train_deep_learning_scorer(
         player_dim=player_dim,
         card_dim=card_dim,
         action_general_dim=action_general_dim,
-        final_common_dim=params["hyper_parameters"]["final_common_dim"],
+        **params["hyper_parameters"],
     ).to(device)
 
     print("Initialize data loaders")

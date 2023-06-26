@@ -24,6 +24,8 @@ class Player:
         self.is_alive = is_alive  # FIXME: Maybe is_alive is just the same as life_points > 0?
         self.logger = logging.getLogger(self.__class__.__name__)
 
+        self.dataset = []
+
     @abstractmethod
     def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         raise NotImplementedError
@@ -31,6 +33,14 @@ class Player:
     def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         self.logger.debug(f"{self} is choosing an action among: {possible_actions}")
         action = self._choose_action(game_state, possible_actions)
+        self.dataset.append(
+            {
+                "action_history": Action.HISTORY[-10:],
+                "current_game_state": game_state.to_vectors(),
+                "possible_actions": [action.to_vectors(game_state=game_state) for action in possible_actions],
+                "chosen_action_index": possible_actions.index(action),
+            }
+        )
         self.logger.debug(f"Chosen action: {action}")
         return action
 

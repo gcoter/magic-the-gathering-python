@@ -39,7 +39,7 @@ class BaseDeepLearningScorer(LightningModule):
             batch_game_state_vectors=batch_game_state_vectors, batch_action_vectors=batch_action_vectors
         )
         batch_loss = self.loss(batch_predicted_scores, batch_labels)
-        self.log(f"{base_metric_name}_loss", batch_loss, on_epoch=True)
+        self.log(f"{base_metric_name}_loss", batch_loss, on_epoch=True, prog_bar=True)
         return batch_loss
 
     def training_step(self, batch, batch_idx):
