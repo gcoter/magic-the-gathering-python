@@ -124,9 +124,27 @@ class Action:
         source_card_vectors = np.array(source_card_vectors, dtype=np.float32)
         target_card_vectors = np.array(target_card_vectors, dtype=np.float32)
 
+        source_card_uuids_multi_hot_vector = self.__card_uuids_to_multi_hot_vector(
+            all_uuids=uuids, card_uuids=self.source_card_uuids
+        )
+        target_card_uuids_multi_hot_vector = self.__card_uuids_to_multi_hot_vector(
+            all_uuids=uuids, card_uuids=self.target_card_uuids
+        )
+
         return {
             "source_player_index": self.source_player_index,
             "general": general_vector,
+            "source_card_uuids": source_card_uuids_multi_hot_vector,
+            "target_card_uuids": target_card_uuids_multi_hot_vector,
             "source_card_vectors": source_card_vectors,
             "target_card_vectors": target_card_vectors,
         }
+
+    def __card_uuids_to_multi_hot_vector(self, all_uuids, card_uuids):
+        multi_hot_vector = np.zeros(len(all_uuids))
+        if card_uuids is None:
+            return multi_hot_vector
+        for index, card_uuid in enumerate(all_uuids):
+            if card_uuid in card_uuids:
+                multi_hot_vector[index] = 1
+        return multi_hot_vector
