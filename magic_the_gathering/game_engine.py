@@ -35,7 +35,7 @@ class GameEngine:
                 if self.log_directory_path:
                     data_dict = {
                         "game_id": self.game_state.game_id,
-                        "dataset": Action.DATASET,
+                        "dataset": self.game_state.players[winner_player_index].dataset,
                         "winner_player_index": winner_player_index,
                     }
                     pickle_file_path = os.path.join(self.log_directory_path, f"game_{self.game_state.game_id}.pickle")
