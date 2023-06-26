@@ -34,8 +34,8 @@ stages:
               verbose: false
     outs:
     - path: data/game_logs/
-      md5: bae24a2d887cf67862d7093b647ff0cd.dir
-      size: 84243932
+      md5: 2cddb01e88585fe44dd5250887e66238.dir
+      size: 35579053
       nfiles: 10
     - path: results/metrics/collect_data.json
       md5: 34616e992e82fdc857eebdd71a5e210a
@@ -45,24 +45,24 @@ stages:
       --output_h5_path data/preprocessed_game_logs.h5\n"
     deps:
     - path: data/game_logs/
-      md5: bae24a2d887cf67862d7093b647ff0cd.dir
-      size: 84243932
+      md5: 2cddb01e88585fe44dd5250887e66238.dir
+      size: 35579053
       nfiles: 10
     - path: scripts/preprocess_game_logs.py
-      md5: f31be2ce9f3aae2807e36d772efed0e5
-      size: 6574
+      md5: 268a32986ca8551a8908345e6d214945
+      size: 6934
     outs:
     - path: data/preprocessed_game_logs.h5
-      md5: 3ae3b493762309119bc232fb218d3a86
-      size: 34533347
+      md5: 05d8b18622cd6d843e78e810b72f60d8
+      size: 21810746
   train_deep_learning_scorer:
     cmd: "python scripts/train_deep_learning_scorer.py --params_path params.yaml --preprocessed_game_logs_path
       data/preprocessed_game_logs.h5 --model_folder_path results/models/ --model_file_name
       deep_learning_scorer\n"
     deps:
     - path: data/preprocessed_game_logs.h5
-      md5: 3ae3b493762309119bc232fb218d3a86
-      size: 34533347
+      md5: 05d8b18622cd6d843e78e810b72f60d8
+      size: 21810746
     - path: scripts/train_deep_learning_scorer.py
       md5: c1e60c7321ddc41a1469e168eccaf705
       size: 5520
@@ -92,7 +92,7 @@ stages:
               verbose: false
     outs:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: 4e35aafd77b6661822db47daeb699587
+      md5: 08c4dc6bb4a0f9ef1127147dca94dac0
       size: 430317
   evaluate_deep_learning_player:
     cmd: "python scripts/run_competition_between_players.py --n_games 10 --player_classes
@@ -100,12 +100,12 @@ stages:
       --deep_learning_scorer_path results/models//deep_learning_scorer.ckpt\n"
     deps:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: 4e35aafd77b6661822db47daeb699587
+      md5: 08c4dc6bb4a0f9ef1127147dca94dac0
       size: 430317
     - path: scripts/run_competition_between_players.py
       md5: d37b63bf92e4ce401e85af6d835d8890
       size: 5695
     outs:
     - path: results/metrics/evaluate_deep_learning_player.json
-      md5: f0ea5575ea12f736d8de9daa71e9b5e0
+      md5: 9adcd304fbab89791f87c756b395daa4
       size: 168
