@@ -9,7 +9,7 @@ deep_learning_scorer:
       training_size: 0.8
       validation_size: 0.2
     batch_size: 10
-    n_epochs: 100
+    n_epochs: 1000
     model_checkpoint:
       monitor: validation_loss
       mode: min
