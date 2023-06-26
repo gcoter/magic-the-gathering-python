@@ -34,30 +34,6 @@ class Action:
         one_hot_vector[action_type_index] = 1
         return one_hot_vector
 
-    @staticmethod
-    def type_to_one_hot_vector(action_type: str) -> np.ndarray:
-        all_action_types = [
-            "NoneAction",
-            "CastCardAction",
-            "DealDamageAction",
-            "DeclareAttackerAction",
-            "DeclareBlockerAction",
-            "DrawAction",
-            "KillPlayerAction",
-            "MoveToGraveyardAction",
-            "PassToNextPlayerAction",
-            "PlayLandAction",
-            "ResolveTopOfStackAction",
-            "ShuffleAction",
-            "TapAction",
-            "UntapAction",
-            "UntapAllAction",
-        ]
-        action_type_index = all_action_types.index(action_type)
-        one_hot_vector = np.zeros(len(all_action_types))
-        one_hot_vector[action_type_index] = 1
-        return one_hot_vector
-
     @classmethod
     @abstractmethod
     def list_possible_actions(cls, game_state: GameState) -> List["Action"]:
