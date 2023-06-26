@@ -1,5 +1,5 @@
 vars:
-  - n_games: 100
+  - n_games: 10
   - player_classes: random,deep_learning
   - log_directory_path: data/game_logs/
   - params_path: params.yaml
@@ -57,6 +57,7 @@ stages:
       python scripts/run_competition_between_players.py
       --n_games ${n_games}
       --player_classes ${player_classes}
+      --params_path ${params_path}
       --metrics_json_path ${evaluate_deep_learning_player_metrics_path}
       --deep_learning_scorer_path ${model_folder_path}/deep_learning_scorer.ckpt
     deps:
