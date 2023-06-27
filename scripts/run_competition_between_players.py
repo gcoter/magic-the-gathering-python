@@ -10,6 +10,7 @@ import torch
 import yaml
 from fire import Fire
 
+from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.draw import DrawAction
 from magic_the_gathering.cards.deck_creator import RandomVanillaDeckCreator
 from magic_the_gathering.game_engine import GameEngine
@@ -114,6 +115,7 @@ def run_competition_between_players(
 
     for n in range(n_games):
         print(f"\n***** Game {n + 1} / {n_games} *****")
+        Action.HISTORY = []
         players = create_players(
             game_mode=game_mode,
             players_classes=player_classes,
