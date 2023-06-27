@@ -3,7 +3,6 @@ import os
 import pickle
 from pathlib import Path
 
-from magic_the_gathering.actions.base import Action
 from magic_the_gathering.exceptions import GameOverException
 from magic_the_gathering.game_state import GameState
 from magic_the_gathering.phases.mulligan import MulliganPhase
