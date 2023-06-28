@@ -1,13 +1,21 @@
 from abc import abstractmethod
+from typing import List
 
+import numpy as np
 import torch
-from pytorch_lightning import LightningModule
+
+from magic_the_gathering.actions.base import Action
+from magic_the_gathering.game_state import GameState
+from magic_the_gathering.players.deep_learning_based.base_scorer import BaseDeepLearningScorer
 
 
-class BaseDeepLearningScorer(LightningModule):
+class BaseSingleActionScorer(BaseDeepLearningScorer):
     def __init__(self):
         super().__init__()
         self.loss = torch.nn.BCELoss()
+
+    def score_actions(self, game_state: GameState, actions: List[Action]) -> np.ndarray:
+        pass
 
     @abstractmethod
     def forward(self, batch_game_state_vectors, batch_action_vectors):

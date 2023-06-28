@@ -1,9 +1,9 @@
 import torch
 
-from magic_the_gathering.players.deep_learning_based.models.base import BaseDeepLearningScorer
+from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.base import BaseSingleActionScorer
 
 
-class DeepLearningScorerV1(BaseDeepLearningScorer):
+class SingleActionScorerV1(BaseSingleActionScorer):
     def __init__(
         self,
         n_players: int,
