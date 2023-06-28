@@ -55,13 +55,14 @@ def train_deep_learning_scorer(
     card_dim = game_logs_dataset.get_zone_dim()
     action_general_dim = game_logs_dataset.get_action_general_dim()
 
+    assert params["hyper_parameters"]["n_players"] == n_players
+    assert params["hyper_parameters"]["player_dim"] == player_dim
+    assert params["hyper_parameters"]["card_dim"] == card_dim
+    assert params["hyper_parameters"]["action_general_dim"] == action_general_dim
+
     print("Initialize model")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = SingleActionScorerV1(
-        n_players=n_players,
-        player_dim=player_dim,
-        card_dim=card_dim,
-        action_general_dim=action_general_dim,
         **params["hyper_parameters"],
     ).to(device)
 
