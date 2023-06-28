@@ -6,11 +6,11 @@ import torch
 from magic_the_gathering.actions.base import Action
 from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.game_state import GameState
-from magic_the_gathering.players.choose_highest_score_action import ChooseHighestScoreActionPlayer
 from magic_the_gathering.players.deep_learning_based.models.base import BaseDeepLearningScorer
+from magic_the_gathering.players.sample_action_from_scores import SampleActionFromScoresPlayer
 
 
-class DeepLearningBasedPlayer(ChooseHighestScoreActionPlayer):
+class DeepLearningBasedPlayer(SampleActionFromScoresPlayer):
     def __init__(
         self,
         index: int,
