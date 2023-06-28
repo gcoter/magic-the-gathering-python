@@ -20,11 +20,11 @@ stages:
       size: 25071
       nfiles: 8
     - path: magic_the_gathering/game_engine.py
-      md5: e91eded27e35bcb843975a5d5f110776
-      size: 1806
+      md5: ccbfe8906bee120793fc5e989ddc2443
+      size: 1758
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: 2ac22449dbf592b38c47081956ac7b8a
-      size: 3825
+      md5: b867c9cb5104b912ed21cc804f77f8c2
+      size: 3758
     - path: magic_the_gathering/game_modes/
       md5: 0ddb7cb1fde81ef7f49487bc1fddb935.dir
       size: 2301
@@ -37,8 +37,8 @@ stages:
       size: 34643
       nfiles: 30
     - path: magic_the_gathering/players/base.py
-      md5: 104def2fca81330333a08556a18e06b5
-      size: 2609
+      md5: e1f9018c35626872fa56a441cdf76a14
+      size: 2665
     - path: magic_the_gathering/players/random.py
       md5: 33c63d1d7888c7877b4f5c8200b4619e
       size: 368
@@ -46,8 +46,8 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: scripts/run_competition_between_players.py
-      md5: c344789da689154f699595aace76e2d2
-      size: 6406
+      md5: a4147e2a98f2e26dbdb2d8d2a5e778e9
+      size: 6485
     outs:
     - path: data/game_logs_dataset.pickle
       md5: e150e29f0644c7ce937fa09c2ecc75d7
@@ -79,17 +79,17 @@ stages:
       md5: e150e29f0644c7ce937fa09c2ecc75d7
       size: 289509678
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: 2ac22449dbf592b38c47081956ac7b8a
-      size: 3825
+      md5: b867c9cb5104b912ed21cc804f77f8c2
+      size: 3758
     - path: magic_the_gathering/players/deep_learning_based/models/v1.py
       md5: c760866e92dd249c28efaab712a64536
       size: 10667
     - path: magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
-      md5: 43668183a3eabf04a35ebbde25d4e9f6
-      size: 4255
+      md5: 9264ee9582e69631ad8f85cbf4a6f01e
+      size: 4200
     - path: scripts/train_deep_learning_scorer.py
-      md5: 87926f91609de3ebc0b6ea43ccf1f556
-      size: 3840
+      md5: 0bc90fa543609d8495a9ac48064e02a8
+      size: 3810
     params:
       params.yaml:
         deep_learning_scorer:
@@ -138,11 +138,11 @@ stages:
       size: 25071
       nfiles: 8
     - path: magic_the_gathering/game_engine.py
-      md5: e91eded27e35bcb843975a5d5f110776
-      size: 1806
+      md5: ccbfe8906bee120793fc5e989ddc2443
+      size: 1758
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: 2ac22449dbf592b38c47081956ac7b8a
-      size: 3825
+      md5: b867c9cb5104b912ed21cc804f77f8c2
+      size: 3758
     - path: magic_the_gathering/game_modes/
       md5: 0ddb7cb1fde81ef7f49487bc1fddb935.dir
       size: 2301
@@ -155,17 +155,17 @@ stages:
       size: 34643
       nfiles: 30
     - path: magic_the_gathering/players/base.py
-      md5: 104def2fca81330333a08556a18e06b5
-      size: 2609
+      md5: e1f9018c35626872fa56a441cdf76a14
+      size: 2665
     - path: magic_the_gathering/players/deep_learning_based/models/v1.py
       md5: c760866e92dd249c28efaab712a64536
       size: 10667
     - path: magic_the_gathering/players/deep_learning_based/player.py
-      md5: 546bb892e2d9003ef8b95f06f6e0d024
-      size: 2868
+      md5: a52b16f7d34462c65b48463390d01e43
+      size: 2939
     - path: magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
-      md5: 43668183a3eabf04a35ebbde25d4e9f6
-      size: 4255
+      md5: 9264ee9582e69631ad8f85cbf4a6f01e
+      size: 4200
     - path: magic_the_gathering/turn.py
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
@@ -173,8 +173,8 @@ stages:
       md5: 5c7303ad4d6b89275f7ebe68429bdecb
       size: 430317
     - path: scripts/run_competition_between_players.py
-      md5: c344789da689154f699595aace76e2d2
-      size: 6406
+      md5: a4147e2a98f2e26dbdb2d8d2a5e778e9
+      size: 6485
     params:
       params.yaml:
         deep_learning_scorer:
