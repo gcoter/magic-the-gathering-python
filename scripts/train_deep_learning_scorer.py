@@ -42,12 +42,12 @@ def train_deep_learning_scorer(
     model_folder_path: str,
     model_file_name: str,
 ):
-    set_random_seed(seed=42)
-
     print(f"Load parameters from '{params_path}'")
     params = read_params(params_path)["deep_learning_scorer"]
     log_params_to_mlflow(params)
     mlflow.pytorch.autolog()
+
+    set_random_seed(seed=42)
 
     print(f"Load game logs dataset from '{game_logs_dataset_path}'")
     with open(game_logs_dataset_path, "rb") as f:
