@@ -5,11 +5,19 @@ from typing import Dict, List
 import numpy as np
 
 from magic_the_gathering.actions.base import Action
+from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.game_state import GameState
 
 
 class Player:
-    def __init__(self, index: int, life_points: int = 20, mana_pool: Dict[str, int] = None, is_alive: bool = True):
+    def __init__(
+        self,
+        index: int,
+        life_points: int = 20,
+        mana_pool: Dict[str, int] = None,
+        is_alive: bool = True,
+        game_logs_dataset: GameLogsDataset = None,
+    ):
         self.index = index
         self.life_points = life_points
         self.mana_pool = mana_pool
@@ -22,9 +30,8 @@ class Player:
                 "G": 0,
             }
         self.is_alive = is_alive  # FIXME: Maybe is_alive is just the same as life_points > 0?
+        self.game_logs_dataset = game_logs_dataset
         self.logger = logging.getLogger(self.__class__.__name__)
-
-        self.dataset = []
 
     @abstractmethod
     def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
@@ -33,15 +40,16 @@ class Player:
     def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         self.logger.debug(f"{self} is choosing an action among: {possible_actions}")
         action = self._choose_action(game_state, possible_actions)
-        self.dataset.append(
-            {
-                "action_history": Action.HISTORY[-10:],
-                "current_game_state": game_state.to_vectors(),
-                "possible_actions": [action.to_vectors(game_state=game_state) for action in possible_actions],
-                "chosen_action_index": possible_actions.index(action),
-            }
-        )
         self.logger.debug(f"Chosen action: {action}")
+        if self.game_logs_dataset is not None:
+            self.game_logs_dataset.add(
+                game_id=game_state.game_id,
+                player_index=self.index,
+                action_history_index=len(Action.HISTORY),
+                game_state=game_state.to_vectors(),
+                possible_actions=[action.to_vectors(game_state=game_state) for action in possible_actions],
+                chosen_action_index=possible_actions.index(action),
+            )
         return action
 
     def __str__(self) -> str:

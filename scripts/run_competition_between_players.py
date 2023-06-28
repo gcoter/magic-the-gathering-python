@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pickle
 import random
 from pathlib import Path
 from typing import Dict, List, OrderedDict
@@ -14,6 +15,7 @@ from magic_the_gathering.actions.base import Action
 from magic_the_gathering.actions.draw import DrawAction
 from magic_the_gathering.cards.deck_creator import RandomVanillaDeckCreator
 from magic_the_gathering.game_engine import GameEngine
+from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.game_modes.base import GameMode
 from magic_the_gathering.game_modes.default import DefaultGameMode
 from magic_the_gathering.game_state import GameState
@@ -64,6 +66,7 @@ def create_hands(game_state: GameState):
 def create_players(
     game_mode: GameMode,
     players_classes: List[str],
+    game_logs_dataset: GameLogsDataset = None,
     deep_learning_scorer_path: str = None,
     hyper_parameters: Dict = None,
 ):
@@ -80,10 +83,15 @@ def create_players(
                 checkpoint = torch.load(deep_learning_scorer_path)
                 scorer.load_state_dict(checkpoint["state_dict"])
             player = string_to_player[player_class](
-                index=index, life_points=game_mode.initial_life_points, scorer=scorer
+                index=index,
+                life_points=game_mode.initial_life_points,
+                scorer=scorer,
+                game_logs_dataset=game_logs_dataset,
             )
         else:
-            player = string_to_player[player_class](index=index, life_points=game_mode.initial_life_points)
+            player = string_to_player[player_class](
+                index=index, life_points=game_mode.initial_life_points, game_logs_dataset=game_logs_dataset
+            )
         players.append(player)
     return players
 
@@ -99,7 +107,7 @@ def run_competition_between_players(
     player_classes: List[str],
     params_path: str,
     metrics_json_path: str = None,
-    log_directory_path: str = None,
+    game_logs_dataset_path: str = None,
     deep_learning_scorer_path: str = None,
 ):
     set_logging_level()
@@ -111,6 +119,10 @@ def run_competition_between_players(
     game_mode = DefaultGameMode()
     win_counts = {i: 0 for i in range(n_players)}
 
+    game_logs_dataset = None
+    if game_logs_dataset_path is not None:
+        game_logs_dataset = GameLogsDataset()
+
     print(f"\n===== Start competition between players: {player_classes} =====\n")
 
     for n in range(n_games):
@@ -119,6 +131,7 @@ def run_competition_between_players(
         players = create_players(
             game_mode=game_mode,
             players_classes=player_classes,
+            game_logs_dataset=game_logs_dataset,
             deep_learning_scorer_path=deep_learning_scorer_path,
             hyper_parameters=params["hyper_parameters"],
         )
@@ -129,7 +142,7 @@ def run_competition_between_players(
         )
         game_state.set_libraries(libraries=decks)
         game_state = create_hands(game_state=game_state)
-        game_engine = GameEngine(game_state=game_state, log_directory_path=log_directory_path)
+        game_engine = GameEngine(game_state=game_state, game_logs_dataset=game_logs_dataset)
         winner_player_index = game_engine.run()
         win_counts[winner_player_index] += 1
 
@@ -154,6 +167,12 @@ def run_competition_between_players(
         }
         with open(metrics_json_path, "w") as f:
             json.dump(metrics_dict, f, indent=4)
+
+    if game_logs_dataset_path is not None:
+        assert game_logs_dataset is not None
+        print(f"Save game logs dataset to '{game_logs_dataset_path}'")
+        with open(game_logs_dataset_path, "wb") as f:
+            pickle.dump(game_logs_dataset, f)
 
 
 if __name__ == "__main__":
