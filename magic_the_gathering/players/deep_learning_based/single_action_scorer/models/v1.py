@@ -1,3 +1,5 @@
+from typing import Dict
+
 import torch
 
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.base import BaseSingleActionScorer
@@ -50,9 +52,15 @@ class SingleActionScorerV1(BaseSingleActionScorer):
             input_dim=3 * final_common_dim,
         )
 
-    def forward(self, batch_game_state_vectors, batch_action_vectors):
+    def forward(
+        self,
+        batch_preprocessed_game_state_vectors: Dict[str, torch.Tensor],
+        batch_preprocessed_action_vectors: Dict[str, torch.Tensor],
+    ):
         """
-        batch_game_state_vectors:
+        Inputs:
+
+        - batch_preprocessed_game_state_vectors:
 
         {
             "global": (batch_size, global_game_state_dim),
@@ -61,7 +69,7 @@ class SingleActionScorerV1(BaseSingleActionScorer):
             "zones_padding_mask": (batch_size, n_cards)
         }
 
-        batch_action_vectors:
+        - batch_preprocessed_action_vectors:
 
         {
             "general": (batch_size, action_general_dim),
@@ -70,27 +78,32 @@ class SingleActionScorerV1(BaseSingleActionScorer):
             "target_card_uuids": (batch_size, n_cards),
             "target_card_uuids_padding_mask": (batch_size, n_cards)
         }
+
+        Outputs:
+        - scores: (batch_size,)
         """
-        batch_size = batch_game_state_vectors["global"].shape[0]
+        batch_size = batch_preprocessed_game_state_vectors["global"].shape[0]
 
         # Compute players embedding
         # Shape: (batch_size, final_common_dim)
-        players_embedding = self.players_mlp(batch_game_state_vectors["players"])
+        players_embedding = self.players_mlp(batch_preprocessed_game_state_vectors["players"])
 
         # Compute zones embedding
         # Shape: (batch_size, final_common_dim)
-        zones_embedding = self.zones_transformer_encoder(batch_game_state_vectors["zones"])
+        zones_embedding = self.zones_transformer_encoder(batch_preprocessed_game_state_vectors["zones"])
 
         # Compute actions embedding
         ## Compute general actions embedding first
         ## Shape: (batch_size, final_common_dim)
-        action_general_embedding = self.action_general_mlp(batch_action_vectors["general"])
+        action_general_embedding = self.action_general_mlp(batch_preprocessed_action_vectors["general"])
 
         ## Compute source cards embeddings
         ## Shape: (batch_size, n_source_cards, final_common_dim)
         selected_source_card_vectors = torch.nn.utils.rnn.pad_sequence(
             [
-                batch_game_state_vectors["zones"][i][batch_action_vectors["source_card_uuids"][i]]
+                batch_preprocessed_game_state_vectors["zones"][i][
+                    batch_preprocessed_action_vectors["source_card_uuids"][i]
+                ]
                 for i in range(batch_size)
             ],
             batch_first=True,
@@ -101,7 +114,9 @@ class SingleActionScorerV1(BaseSingleActionScorer):
         ## Shape: (batch_size, n_target_cards, final_common_dim)
         selected_target_card_vectors = torch.nn.utils.rnn.pad_sequence(
             [
-                batch_game_state_vectors["zones"][i][batch_action_vectors["target_card_uuids"][i]]
+                batch_preprocessed_game_state_vectors["zones"][i][
+                    batch_preprocessed_action_vectors["target_card_uuids"][i]
+                ]
                 for i in range(batch_size)
             ],
             batch_first=True,
