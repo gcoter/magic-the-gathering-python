@@ -38,7 +38,7 @@ class BaseSingleActionScorer(BaseDeepLearningScorer):
             batch_preprocessed_game_state_vectors=batch_preprocessed_game_state_vectors,
             batch_preprocessed_action_vectors=batch_preprocessed_action_vectors,
         )
-        scores = torch.softmax(scores)
+        scores = torch.nn.functional.softmax(scores, dim=0)
         return scores.cpu().detach().numpy()
 
     def __concat_across_keys(self, list_of_dict_of_tensors: List[Dict[str, torch.Tensor]]) -> Dict[str, torch.Tensor]:
@@ -50,7 +50,7 @@ class BaseSingleActionScorer(BaseDeepLearningScorer):
                 concatenated_dict[key].append(tensor[None])  # Add one dimension for batch
 
         for key, tensors in concatenated_dict.items():
-            concatenated_dict[key] = torch.cat(tensors, dim=0)
+            concatenated_dict[key] = torch.cat(tensors, dim=0).to(self.device)
 
         return concatenated_dict
 
