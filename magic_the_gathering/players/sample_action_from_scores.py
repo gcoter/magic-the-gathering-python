@@ -12,7 +12,9 @@ class SampleActionFromScoresPlayer(Player):
     def _choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         action_scores = self._score_actions(game_state=game_state, actions=possible_actions)
         assert (action_scores >= 0.0).all(), "Expected scores to be positives (as probabilities)"
-        assert action_scores.sum() == 1.0, "Expected scores to sum to 1 (as probabilities)"
+        assert (
+            np.abs(action_scores.sum() - 1.0) < 1e-6
+        ), f"Expected scores to sum to 1 (as probabilities), got {action_scores.sum()} instead"
         self.logger.debug(f"Action scores: {action_scores}")
         highest_score_action_index = np.random.choice(
             np.arange(len(possible_actions)), size=1, replace=False, p=action_scores
