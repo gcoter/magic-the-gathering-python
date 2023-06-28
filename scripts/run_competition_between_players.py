@@ -19,8 +19,8 @@ from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.game_modes.base import GameMode
 from magic_the_gathering.game_modes.default import DefaultGameMode
 from magic_the_gathering.game_state import GameState
-from magic_the_gathering.players.deep_learning_based.models.v1 import DeepLearningScorerV1
 from magic_the_gathering.players.deep_learning_based.player import DeepLearningBasedPlayer
+from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v1 import SingleActionScorerV1
 from magic_the_gathering.players.random import RandomPlayer
 
 
@@ -76,9 +76,7 @@ def create_players(
     for index, player_class in enumerate(players_classes):
         if player_class == "deep_learning":
             assert hyper_parameters is not None
-            scorer = DeepLearningScorerV1(
-                n_players=n_players, player_dim=8, card_dim=34, action_general_dim=31, **hyper_parameters
-            )
+            scorer = SingleActionScorerV1(**hyper_parameters)
             if deep_learning_scorer_path is not None:
                 checkpoint = torch.load(deep_learning_scorer_path)
                 scorer.load_state_dict(checkpoint["state_dict"])
