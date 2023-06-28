@@ -12,6 +12,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.dataset import SingleActionScorerDataset
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v1 import SingleActionScorerV1
+from magic_the_gathering.utils import set_random_seed
 
 
 def read_params(path: str) -> Dict:
@@ -41,6 +42,8 @@ def train_deep_learning_scorer(
     model_folder_path: str,
     model_file_name: str,
 ):
+    set_random_seed(seed=42)
+
     print(f"Load parameters from '{params_path}'")
     params = read_params(params_path)["deep_learning_scorer"]
     log_params_to_mlflow(params)

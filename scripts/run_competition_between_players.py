@@ -22,6 +22,7 @@ from magic_the_gathering.game_state import GameState
 from magic_the_gathering.players.deep_learning_based.player import DeepLearningBasedPlayer
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v1 import SingleActionScorerV1
 from magic_the_gathering.players.random import RandomPlayer
+from magic_the_gathering.utils import set_random_seed
 
 
 def set_logging_level():
@@ -108,6 +109,7 @@ def run_competition_between_players(
     game_logs_dataset_path: str = None,
     deep_learning_scorer_path: str = None,
 ):
+    set_random_seed(seed=42)
     set_logging_level()
 
     print(f"Load parameters from '{params_path}'")
