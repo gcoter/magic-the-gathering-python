@@ -126,7 +126,7 @@ class DeepLearningScorerV1(BaseDeepLearningScorer):
         # Shape: (batch_size, 1)
         final_classification = self.final_classification_mlp(final_embedding)
 
-        return final_classification
+        return final_classification[:, 0]
 
 
 class PlayersMLP(torch.nn.Module):

@@ -1,53 +1,17 @@
+import pickle
 from pathlib import Path
 from typing import Dict
 
-import h5py
 import mlflow
-import numpy as np
 import torch
 import yaml
 from fire import Fire
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
+from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.players.deep_learning_based.models.v1 import DeepLearningScorerV1
-
-
-class MTGDataset(torch.utils.data.Dataset):
-    def __init__(self, h5_file, device, return_labels=True):
-        self.h5_file = h5_file
-        self.return_labels = return_labels
-        self.device = device
-        self.indices_with_a_label = np.where(self.h5_file["label"][:] != -1)[0]
-
-    def __len__(self):
-        return len(self.indices_with_a_label)
-
-    def __getitem__(self, idx):
-        idx = self.indices_with_a_label[idx]
-        batch_game_state_vectors = {
-            "global": torch.from_numpy(self.h5_file["game_state"]["global"][idx]).to(self.device),
-            "players": torch.from_numpy(self.h5_file["game_state"]["players"][idx]).to(self.device),
-            "zones": torch.from_numpy(self.h5_file["game_state"]["zones"][idx]).to(self.device),
-            "zones_padding_mask": torch.from_numpy(self.h5_file["game_state"]["zones_padding_mask"][idx]).to(
-                self.device
-            ),
-        }
-        batch_action_vectors = {
-            "general": torch.from_numpy(self.h5_file["action"]["general"][idx]).to(self.device),
-            "source_card_uuids": torch.from_numpy(self.h5_file["action"]["source_card_uuids"][idx]).to(self.device),
-            "source_card_uuids_padding_mask": torch.from_numpy(
-                self.h5_file["action"]["source_card_uuids_padding_mask"][idx]
-            ).to(self.device),
-            "target_card_uuids": torch.from_numpy(self.h5_file["action"]["target_card_uuids"][idx]).to(self.device),
-            "target_card_uuids_padding_mask": torch.from_numpy(
-                self.h5_file["action"]["target_card_uuids_padding_mask"][idx]
-            ).to(self.device),
-        }
-        if self.return_labels:
-            batch_labels = torch.from_numpy(self.h5_file["label"][[idx]]).float().to(self.device)
-            return batch_game_state_vectors, batch_action_vectors, batch_labels
-        return batch_game_state_vectors, batch_action_vectors
+from magic_the_gathering.players.deep_learning_based.single_action_scorer.dataset import SingleActionScorerDataset
 
 
 def read_params(path: str) -> Dict:
@@ -73,7 +37,7 @@ def log_params_to_mlflow(params, prefix=None):
 
 def train_deep_learning_scorer(
     params_path: str,
-    preprocessed_game_logs_path: str,
+    game_logs_dataset_path: str,
     model_folder_path: str,
     model_file_name: str,
 ):
@@ -82,12 +46,14 @@ def train_deep_learning_scorer(
     log_params_to_mlflow(params)
     mlflow.pytorch.autolog()
 
-    print(f"Load preprocessed game logs from '{preprocessed_game_logs_path}'")
-    h5_file = h5py.File(preprocessed_game_logs_path, "r")
-    n_players = h5_file["game_state"]["players"].shape[1]
-    player_dim = h5_file["game_state"]["players"].shape[-1]
-    card_dim = h5_file["game_state"]["zones"].shape[-1]
-    action_general_dim = h5_file["action"]["general"].shape[-1]
+    print(f"Load game logs dataset from '{game_logs_dataset_path}'")
+    with open(game_logs_dataset_path, "rb") as f:
+        game_logs_dataset: GameLogsDataset = pickle.load(f)
+
+    n_players = game_logs_dataset.get_n_players()
+    player_dim = game_logs_dataset.get_player_dim()
+    card_dim = game_logs_dataset.get_zone_dim()
+    action_general_dim = game_logs_dataset.get_action_general_dim()
 
     print("Initialize model")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -100,7 +66,7 @@ def train_deep_learning_scorer(
     ).to(device)
 
     print("Initialize data loaders")
-    dataset = MTGDataset(h5_file=h5_file, return_labels=True, device=device)
+    dataset = SingleActionScorerDataset(game_logs_dataset=game_logs_dataset, device=device, return_label=True)
     training_dataset, validation_dataset = torch.utils.data.random_split(
         dataset,
         lengths=[
