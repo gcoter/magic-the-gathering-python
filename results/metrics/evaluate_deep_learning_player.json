@@ -1,11 +1,11 @@
 {
-    "n_games": 100,
+    "n_games": 1000,
     "win_counts": {
-        "player_0": 55,
-        "player_1": 45
+        "player_0": 476,
+        "player_1": 524
     },
     "win_rates": {
-        "player_0": 0.55,
-        "player_1": 0.45
+        "player_0": 0.476,
+        "player_1": 0.524
     }
 }

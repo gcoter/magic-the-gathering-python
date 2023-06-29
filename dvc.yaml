@@ -1,6 +1,6 @@
 vars:
-  - n_games_for_collection: 100
-  - n_games_for_evaluation: 100
+  - n_games_for_collection: 1000
+  - n_games_for_evaluation: 1000
   - params_path: params.yaml
   - game_logs_dataset_path: data/game_logs_dataset.pickle
   - model_folder_path: results/models/

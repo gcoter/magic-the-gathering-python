@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   collect_data:
-    cmd: "python scripts/run_competition_between_players.py --n_games 100 --player_classes
+    cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
       random,random --params_path params.yaml --game_logs_dataset_path data/game_logs_dataset.pickle
       --metrics_json_path results/metrics/collect_data.json\n"
     deps:
@@ -46,15 +46,15 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: scripts/run_competition_between_players.py
-      md5: 8cacb242aee5463df8b15a42d7da12e2
-      size: 6405
+      md5: 8be43d51711d93f03ff75006d54b633a
+      size: 6488
     outs:
     - path: data/game_logs_dataset.pickle
-      md5: 0cdb1ec16eaa72b016cb091c79c67215
-      size: 266121727
+      md5: 3792ef06c1da3b8dad930eabf1350867
+      size: 2999403393
     - path: results/metrics/collect_data.json
-      md5: 661113328d9899690601db363d3deb4f
-      size: 173
+      md5: 5bc0551b74a8f13d5cf4387151f1749f
+      size: 176
   preprocess_data:
     cmd: "python scripts/preprocess_game_logs.py --game_logs_folder_path data/game_logs/
       --output_h5_path data/preprocessed_game_logs.h5\n"
@@ -76,8 +76,8 @@ stages:
       deep_learning_scorer\n"
     deps:
     - path: data/game_logs_dataset.pickle
-      md5: 0cdb1ec16eaa72b016cb091c79c67215
-      size: 266121727
+      md5: 3792ef06c1da3b8dad930eabf1350867
+      size: 2999403393
     - path: magic_the_gathering/game_logs_dataset.py
       md5: b867c9cb5104b912ed21cc804f77f8c2
       size: 3758
@@ -93,8 +93,8 @@ stages:
       md5: 623c93c24c04866c828f9684724e7a97
       size: 11097
     - path: scripts/train_deep_learning_scorer.py
-      md5: 010c58036500bca2d69964e5feeeedd9
-      size: 3972
+      md5: 2e77ec06cc8b09a3925d2b014b693ef4
+      size: 4056
     params:
       params.yaml:
         deep_learning_scorer:
@@ -111,7 +111,7 @@ stages:
             random_split:
               training_size: 0.8
               validation_size: 0.2
-            batch_size: 10
+            batch_size: 100
             n_epochs: 1000
             model_checkpoint:
               monitor: validation_loss
@@ -125,10 +125,10 @@ stages:
               verbose: false
     outs:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: 7a59487de2a823d2293e72f8781de204
+      md5: c2df864b74523fc7bc7c861de75e5910
       size: 430317
   evaluate_deep_learning_player:
-    cmd: "python scripts/run_competition_between_players.py --n_games 100 --player_classes
+    cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
       random,deep_learning --params_path params.yaml --metrics_json_path results/metrics/evaluate_deep_learning_player.json
       --deep_learning_scorer_path results/models//deep_learning_scorer.ckpt\n"
     deps:
@@ -187,11 +187,11 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: results/models//deep_learning_scorer.ckpt
-      md5: 7a59487de2a823d2293e72f8781de204
+      md5: c2df864b74523fc7bc7c861de75e5910
       size: 430317
     - path: scripts/run_competition_between_players.py
-      md5: 8cacb242aee5463df8b15a42d7da12e2
-      size: 6405
+      md5: 8be43d51711d93f03ff75006d54b633a
+      size: 6488
     params:
       params.yaml:
         deep_learning_scorer:
@@ -208,7 +208,7 @@ stages:
             random_split:
               training_size: 0.8
               validation_size: 0.2
-            batch_size: 10
+            batch_size: 100
             n_epochs: 1000
             model_checkpoint:
               monitor: validation_loss
@@ -222,5 +222,5 @@ stages:
               verbose: false
     outs:
     - path: results/metrics/evaluate_deep_learning_player.json
-      md5: f9f27e9c7bf8ca625f8916d419ad4d89
-      size: 173
+      md5: 3671bb99cc0563ca67c6f698c04f2776
+      size: 178

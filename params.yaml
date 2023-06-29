@@ -12,7 +12,7 @@ deep_learning_scorer:
     random_split:
       training_size: 0.8
       validation_size: 0.2
-    batch_size: 10
+    batch_size: 100
     n_epochs: 1000
     model_checkpoint:
       monitor: validation_loss
