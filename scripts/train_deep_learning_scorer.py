@@ -48,6 +48,7 @@ def train_deep_learning_scorer(
     mlflow.pytorch.autolog()
 
     set_random_seed(seed=42)
+    generator = torch.Generator().manual_seed(42)
 
     print(f"Load game logs dataset from '{game_logs_dataset_path}'")
     with open(game_logs_dataset_path, "rb") as f:
@@ -70,13 +71,19 @@ def train_deep_learning_scorer(
     ).to(device)
 
     print("Initialize data loaders")
-    dataset = SingleActionScorerDataset(game_logs_dataset=game_logs_dataset, device=device, return_label=True)
+    dataset = SingleActionScorerDataset(
+        game_logs_dataset=game_logs_dataset,
+        max_n_cards=params["hyper_parameters"]["max_n_cards"],
+        device=device,
+        return_label=True,
+    )
     training_dataset, validation_dataset = torch.utils.data.random_split(
         dataset,
         lengths=[
             params["training"]["random_split"]["training_size"],
             params["training"]["random_split"]["validation_size"],
         ],
+        generator=generator,
     )
     training_data_loader = torch.utils.data.DataLoader(
         training_dataset,
@@ -84,6 +91,7 @@ def train_deep_learning_scorer(
         shuffle=True,
         drop_last=True,
         num_workers=0,
+        generator=generator,
     )
     validation_data_loader = torch.utils.data.DataLoader(
         validation_dataset,
@@ -91,6 +99,7 @@ def train_deep_learning_scorer(
         shuffle=False,
         drop_last=False,
         num_workers=0,
+        generator=generator,
     )
 
     print("Initialize trainer")

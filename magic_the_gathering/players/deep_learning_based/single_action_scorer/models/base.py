@@ -11,23 +11,23 @@ from magic_the_gathering.players.deep_learning_based.single_action_scorer.datase
 
 
 class BaseSingleActionScorer(BaseDeepLearningScorer):
-    def __init__(self):
+    def __init__(self, max_n_cards: int):
         super().__init__()
+        self.max_n_cards = max_n_cards
         self.loss = torch.nn.BCELoss()
         self.preprocessor = SingleActionScorerPreprocessor(device=self.device)
 
     def score_actions(self, game_state: GameState, actions: List[Action]) -> np.ndarray:
         game_state_vectors = game_state.to_vectors()
-        max_n_cards = len(game_state_vectors["zones"])
         preprocessed_game_state_vectors = self.preprocessor.preprocess_game_state_vectors(
-            game_state_vectors=game_state_vectors, max_n_cards=max_n_cards
+            game_state_vectors=game_state_vectors, max_n_cards=self.max_n_cards
         )
         batch_preprocessed_game_state_vectors = []
         batch_preprocessed_action_vectors = []
         for action in actions:
             action_vectors = action.to_vectors(game_state=game_state)
             preprocessed_action_vectors = self.preprocessor.preprocess_action_vectors(
-                action_vectors=action_vectors, max_n_cards=max_n_cards
+                action_vectors=action_vectors, max_n_cards=self.max_n_cards
             )
             batch_preprocessed_game_state_vectors.append(preprocessed_game_state_vectors)
             batch_preprocessed_action_vectors.append(preprocessed_action_vectors)

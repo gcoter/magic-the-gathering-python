@@ -54,6 +54,7 @@ class SingleActionScorerPreprocessor:
 
     def __pad_to_max_zone_length(self, vectors: np.ndarray, max_n_cards: int) -> Tuple[np.ndarray, np.ndarray]:
         assert len(vectors) > 0
+        assert max_n_cards >= len(vectors)
         padding_mask = np.zeros(max_n_cards)
         padding_mask[: len(vectors)] = 1
         if len(vectors.shape) == 1:
@@ -67,12 +68,12 @@ class SingleActionScorerPreprocessor:
 
 
 class SingleActionScorerDataset(torch.utils.data.Dataset):
-    def __init__(self, device, game_logs_dataset: GameLogsDataset, return_label: bool = False):
+    def __init__(self, device, max_n_cards: int, game_logs_dataset: GameLogsDataset, return_label: bool = False):
         self.device = device
         self.game_logs_dataset = game_logs_dataset
         self.return_label = return_label
         self.index_df = self.game_logs_dataset.get_index()
-        self.max_n_cards = self.game_logs_dataset.get_max_zones_length()
+        self.max_n_cards = max_n_cards
         self.preprocessor = SingleActionScorerPreprocessor(device=self.device)
 
     def __len__(self) -> int:

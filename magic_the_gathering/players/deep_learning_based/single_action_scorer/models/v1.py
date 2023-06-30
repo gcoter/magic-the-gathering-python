@@ -10,6 +10,7 @@ class SingleActionScorerV1(BaseSingleActionScorer):
         self,
         n_players: int,
         player_dim: int,
+        max_n_cards: int,
         card_dim: int,
         action_general_dim: int,
         final_common_dim: int,
@@ -17,7 +18,7 @@ class SingleActionScorerV1(BaseSingleActionScorer):
         transformer_n_heads: int,
         dropout: float,
     ):
-        super().__init__()
+        super().__init__(max_n_cards=max_n_cards)
         self.n_players = n_players
         self.player_dim = player_dim
         self.card_dim = card_dim
