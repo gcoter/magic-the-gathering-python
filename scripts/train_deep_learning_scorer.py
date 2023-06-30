@@ -11,7 +11,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.dataset import SingleActionScorerDataset
-from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v1 import SingleActionScorerV1
+from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v2 import SingleActionScorerV2
 from magic_the_gathering.utils import set_random_seed
 
 
@@ -56,24 +56,30 @@ def train_deep_learning_scorer(
 
     n_players = game_logs_dataset.get_n_players()
     player_dim = game_logs_dataset.get_player_dim()
-    card_dim = game_logs_dataset.get_zone_dim()
+    zone_vector_dim = game_logs_dataset.get_zone_vector_dim()
     action_general_dim = game_logs_dataset.get_action_general_dim()
 
     assert params["hyper_parameters"]["n_players"] == n_players
     assert params["hyper_parameters"]["player_dim"] == player_dim
-    assert params["hyper_parameters"]["card_dim"] == card_dim
+    assert params["hyper_parameters"]["zone_vector_dim"] == zone_vector_dim
     assert params["hyper_parameters"]["action_general_dim"] == action_general_dim
 
     print("Initialize model")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SingleActionScorerV1(
+    model = SingleActionScorerV2(
         **params["hyper_parameters"],
     ).to(device)
+
+    mlflow.log_param("model_name", model.__class__.__name__)
+    mlflow.log_param("n_parameters", sum(p.numel() for p in model.parameters()))
 
     print("Initialize data loaders")
     dataset = SingleActionScorerDataset(
         game_logs_dataset=game_logs_dataset,
-        max_n_cards=params["hyper_parameters"]["max_n_cards"],
+        max_n_zone_vectors=params["hyper_parameters"]["max_n_zone_vectors"],
+        zone_vector_dim=params["hyper_parameters"]["zone_vector_dim"],
+        max_n_action_source_cards=params["hyper_parameters"]["max_n_action_source_cards"],
+        max_n_action_target_cards=params["hyper_parameters"]["max_n_action_target_cards"],
         device=device,
         return_label=True,
     )

@@ -45,7 +45,7 @@ stages:
     deps:
       - magic_the_gathering/game_logs_dataset.py
       - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/base.py
-      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v1.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v2.py
       - magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
       - scripts/train_deep_learning_scorer.py
       - ${game_logs_dataset_path}
@@ -73,7 +73,7 @@ stages:
       - magic_the_gathering/players/deep_learning_based/player.py
       - magic_the_gathering/players/deep_learning_based/base_scorer.py
       - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/base.py
-      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v1.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v2.py
       - magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
       - magic_the_gathering/game_engine.py
       - magic_the_gathering/game_logs_dataset.py
