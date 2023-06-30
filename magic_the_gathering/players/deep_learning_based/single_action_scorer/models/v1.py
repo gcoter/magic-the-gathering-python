@@ -10,18 +10,25 @@ class SingleActionScorerV1(BaseSingleActionScorer):
         self,
         n_players: int,
         player_dim: int,
-        max_n_cards: int,
-        card_dim: int,
+        max_n_zone_vectors: int,
+        zone_vector_dim: int,
+        max_n_action_source_cards: int,
+        max_n_action_target_cards: int,
         action_general_dim: int,
         final_common_dim: int,
         transformer_n_layers: int,
         transformer_n_heads: int,
         dropout: float,
     ):
-        super().__init__(max_n_cards=max_n_cards)
+        super().__init__(
+            max_n_zone_vectors=max_n_zone_vectors,
+            zone_vector_dim=zone_vector_dim,
+            max_n_action_source_cards=max_n_action_source_cards,
+            max_n_action_target_cards=max_n_action_target_cards,
+        )
         self.n_players = n_players
         self.player_dim = player_dim
-        self.card_dim = card_dim
+        self.zone_vector_dim = zone_vector_dim
         self.action_general_dim = action_general_dim
         self.final_common_dim = final_common_dim
         self.transformer_n_layers = transformer_n_layers
@@ -33,7 +40,7 @@ class SingleActionScorerV1(BaseSingleActionScorer):
             n_players=self.n_players, player_dim=self.player_dim, output_dim=self.final_common_dim
         )
         self.zones_transformer_encoder = ZonesTransformerEncoder(
-            card_dim=self.card_dim,
+            zone_vector_dim=self.zone_vector_dim,
             output_dim=self.final_common_dim,
             n_layers=self.transformer_n_layers,
             n_heads=self.transformer_n_heads,
@@ -42,7 +49,7 @@ class SingleActionScorerV1(BaseSingleActionScorer):
         self.action_general_mlp = ActionGeneralMLP(
             action_general_dim=self.action_general_dim, output_dim=self.final_common_dim
         )
-        self.action_card_mlp = ActionCardMLP(card_dim=card_dim, output_dim=final_common_dim)
+        self.action_card_mlp = ActionCardMLP(zone_vector_dim=zone_vector_dim, output_dim=final_common_dim)
         self.action_transformer_encoder = ActionTransformerEncoder(
             input_dim=final_common_dim,
             n_layers=self.transformer_n_layers,
@@ -66,7 +73,7 @@ class SingleActionScorerV1(BaseSingleActionScorer):
         {
             "global": (batch_size, global_game_state_dim),
             "players": (batch_size, n_players, player_dim),
-            "zones": (batch_size, n_cards, card_dim),
+            "zones": (batch_size, n_cards, zone_vector_dim),
             "zones_padding_mask": (batch_size, n_cards)
         }
 
@@ -166,14 +173,14 @@ class PlayersMLP(torch.nn.Module):
 
 
 class ZonesTransformerEncoder(torch.nn.Module):
-    def __init__(self, card_dim, output_dim, n_heads=4, n_layers=2, dropout=0.1):
+    def __init__(self, zone_vector_dim, output_dim, n_heads=4, n_layers=2, dropout=0.1):
         super().__init__()
-        self.card_dim = card_dim
+        self.zone_vector_dim = zone_vector_dim
         self.output_dim = output_dim
         self.n_heads = n_heads
         self.n_layers = n_layers
         self.dropout = dropout
-        self.initial_fc = torch.nn.Linear(self.card_dim, self.output_dim)
+        self.initial_fc = torch.nn.Linear(self.zone_vector_dim, self.output_dim)
         self.relu = torch.nn.ReLU()
         self.transformer_encoder = torch.nn.TransformerEncoder(
             encoder_layer=torch.nn.TransformerEncoderLayer(
@@ -189,7 +196,7 @@ class ZonesTransformerEncoder(torch.nn.Module):
 
     def forward(self, x):
         """
-        x: (batch_size, n_cards, card_dim)
+        x: (batch_size, n_cards, zone_vector_dim)
         """
         x = self.initial_fc(x)
         x = self.relu(x)
@@ -225,17 +232,17 @@ class ActionGeneralMLP(torch.nn.Module):
 
 
 class ActionCardMLP(torch.nn.Module):
-    def __init__(self, card_dim, output_dim):
+    def __init__(self, zone_vector_dim, output_dim):
         super().__init__()
-        self.card_dim = card_dim
+        self.zone_vector_dim = zone_vector_dim
         self.output_dim = output_dim
-        self.fc1 = torch.nn.Linear(self.card_dim, self.output_dim - 3)
+        self.fc1 = torch.nn.Linear(self.zone_vector_dim, self.output_dim - 3)
         self.relu = torch.nn.ReLU()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def forward(self, x, is_source=True):
         """
-        x: (batch_size, n_cards, card_dim)
+        x: (batch_size, n_cards, zone_vector_dim)
         """
         x = self.fc1(x)
         x = self.relu(x)

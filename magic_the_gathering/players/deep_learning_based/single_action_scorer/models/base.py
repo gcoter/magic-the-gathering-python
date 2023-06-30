@@ -11,23 +11,38 @@ from magic_the_gathering.players.deep_learning_based.single_action_scorer.datase
 
 
 class BaseSingleActionScorer(BaseDeepLearningScorer):
-    def __init__(self, max_n_cards: int):
+    def __init__(
+        self,
+        max_n_zone_vectors: int,
+        zone_vector_dim: int,
+        max_n_action_source_cards: int,
+        max_n_action_target_cards: int,
+    ):
         super().__init__()
-        self.max_n_cards = max_n_cards
-        self.loss = torch.nn.BCELoss()
+        self.max_n_zone_vectors = max_n_zone_vectors
+        self.zone_vector_dim = zone_vector_dim
+        self.max_n_action_source_cards = max_n_action_source_cards
+        self.max_n_action_target_cards = max_n_action_target_cards
         self.preprocessor = SingleActionScorerPreprocessor(device=self.device)
+        self.loss = torch.nn.BCELoss()
 
     def score_actions(self, game_state: GameState, actions: List[Action]) -> np.ndarray:
         game_state_vectors = game_state.to_vectors()
         preprocessed_game_state_vectors = self.preprocessor.preprocess_game_state_vectors(
-            game_state_vectors=game_state_vectors, max_n_cards=self.max_n_cards
+            game_state_vectors=game_state_vectors,
+            max_n_zone_vectors=self.max_n_zone_vectors,
+            zone_vector_dim=self.zone_vector_dim,
         )
         batch_preprocessed_game_state_vectors = []
         batch_preprocessed_action_vectors = []
         for action in actions:
             action_vectors = action.to_vectors(game_state=game_state)
             preprocessed_action_vectors = self.preprocessor.preprocess_action_vectors(
-                action_vectors=action_vectors, max_n_cards=self.max_n_cards
+                action_vectors=action_vectors,
+                max_n_zone_vectors=self.max_n_zone_vectors,
+                zone_vector_dim=self.zone_vector_dim,
+                max_n_action_source_cards=self.max_n_action_source_cards,
+                max_n_action_target_cards=self.max_n_action_target_cards,
             )
             batch_preprocessed_game_state_vectors.append(preprocessed_game_state_vectors)
             batch_preprocessed_action_vectors.append(preprocessed_action_vectors)
@@ -68,7 +83,7 @@ class BaseSingleActionScorer(BaseDeepLearningScorer):
         {
             "global": (batch_size, global_game_state_dim),
             "players": (batch_size, n_players, player_dim),
-            "zones": (batch_size, n_cards, card_dim),
+            "zones": (batch_size, n_cards, zone_vector_dim),
             "zones_padding_mask": (batch_size, n_cards)
         }
 
