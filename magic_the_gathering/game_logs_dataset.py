@@ -99,7 +99,7 @@ class GameLogsDataset:
         game_id = self.list_game_ids()[0]
         return self.__data[game_id]["items"][0]["game_state"]["players"].shape[1]
 
-    def get_zone_dim(self) -> int:
+    def get_zone_vector_dim(self) -> int:
         game_id = self.list_game_ids()[0]
         return self.__data[game_id]["items"][0]["game_state"]["zones"].shape[1]
 
