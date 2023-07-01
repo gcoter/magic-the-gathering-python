@@ -10,7 +10,7 @@ deep_learning_scorer:
     max_n_action_target_cards: 10
     embedding_dim: 64
     transformer_n_layers: 2
-    transformer_n_heads: 4
+    transformer_n_heads: 8
     transformer_dim_feedforward: 128
     dropout: 0.1
   training:

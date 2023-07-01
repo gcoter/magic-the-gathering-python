@@ -109,7 +109,7 @@ stages:
             max_n_action_target_cards: 10
             embedding_dim: 64
             transformer_n_layers: 2
-            transformer_n_heads: 4
+            transformer_n_heads: 8
             transformer_dim_feedforward: 128
             dropout: 0.1
           training:
@@ -130,7 +130,7 @@ stages:
               verbose: false
     outs:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: 1297c65f87b493405b8078670be3f944
+      md5: 157ba60c53125965ff67c7921415bd17
       size: 1783245
   evaluate_deep_learning_player:
     cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
@@ -192,7 +192,7 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: results/models//deep_learning_scorer.ckpt
-      md5: 1297c65f87b493405b8078670be3f944
+      md5: 157ba60c53125965ff67c7921415bd17
       size: 1783245
     - path: scripts/run_competition_between_players.py
       md5: 4cc1bb16305b0de7851ce030a300fa6d
@@ -211,7 +211,7 @@ stages:
             max_n_action_target_cards: 10
             embedding_dim: 64
             transformer_n_layers: 2
-            transformer_n_heads: 4
+            transformer_n_heads: 8
             transformer_dim_feedforward: 128
             dropout: 0.1
           training:
@@ -232,5 +232,5 @@ stages:
               verbose: false
     outs:
     - path: results/metrics/evaluate_deep_learning_player.json
-      md5: 3bdf7262ac5d3bbf3ffcffdb7f236207
+      md5: d851f202db41baaff76e998862741c5c
       size: 178
