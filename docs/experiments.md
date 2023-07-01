@@ -79,7 +79,7 @@ Here are some information regarding the game logs dataset which is created in th
 
 | Git commit Hash | Number of games for data collection | Number of games for evaluation | Player Class 0 | Player Class 1 | Total number of instances | Training Proportion | Validation Proportion |
 | ----------------| ----------------------------------- | ------------------------------ | -------------- | -------------- | ------------------------- | ------------------- | --------------------- |
-| b65b4134        | 1,000                               | 1,000                          | RandomPlayer   | RandomPlayer   | ???                       | 80%                 | 20%                   |
+| b65b4134        | 1,000                               | 1,000                          | RandomPlayer   | RandomPlayer   | 268,388                   | 80%                 | 20%                   |
 
 #### Summary Table
 Several experiments were run using the same dataset as input:
