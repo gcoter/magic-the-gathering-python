@@ -23,8 +23,8 @@ stages:
       md5: ccbfe8906bee120793fc5e989ddc2443
       size: 1758
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: b867c9cb5104b912ed21cc804f77f8c2
-      size: 3758
+      md5: 30fd4062fb2332e7587b3cf89abb6c48
+      size: 3765
     - path: magic_the_gathering/game_modes/
       md5: 0ddb7cb1fde81ef7f49487bc1fddb935.dir
       size: 2301
@@ -46,7 +46,7 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: scripts/run_competition_between_players.py
-      md5: 8be43d51711d93f03ff75006d54b633a
+      md5: 4cc1bb16305b0de7851ce030a300fa6d
       size: 6488
     outs:
     - path: data/game_logs_dataset.pickle
@@ -79,34 +79,38 @@ stages:
       md5: 3792ef06c1da3b8dad930eabf1350867
       size: 2999403393
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: b867c9cb5104b912ed21cc804f77f8c2
-      size: 3758
+      md5: 30fd4062fb2332e7587b3cf89abb6c48
+      size: 3765
     - path: magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
-      md5: 83672b98efd8d4603782e8572ed6a404
-      size: 5304
+      md5: a5a0051d6ce476719f8b5671e2a53e2c
+      size: 8545
     - path: 
         magic_the_gathering/players/deep_learning_based/single_action_scorer/models/base.py
-      md5: 2214dcbabdde4245254a5d26c8b1bd56
-      size: 5168
+      md5: e0921c27518a0a9c2f9ffb760b79a2c4
+      size: 5820
     - path: 
-        magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v1.py
-      md5: e98821270dd27ff69fad04fad6aa843d
-      size: 11146
+        magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v2.py
+      md5: cf859820ebf37928fd0f909f9894c6c6
+      size: 14465
     - path: scripts/train_deep_learning_scorer.py
-      md5: 1df67565836d5b1ab8320e8b2a0bcaa8
-      size: 4285
+      md5: 70bd12cda1a0df653c53d03351d12768
+      size: 4725
     params:
       params.yaml:
         deep_learning_scorer:
           hyper_parameters:
+            game_state_global_dim: 2
             n_players: 2
             player_dim: 8
-            max_n_cards: 120
-            card_dim: 34
+            max_n_zone_vectors: 120
+            zone_vector_dim: 34
             action_general_dim: 31
-            final_common_dim: 32
+            max_n_action_source_cards: 10
+            max_n_action_target_cards: 10
+            embedding_dim: 64
             transformer_n_layers: 2
             transformer_n_heads: 4
+            transformer_dim_feedforward: 128
             dropout: 0.1
           training:
             random_split:
@@ -126,8 +130,8 @@ stages:
               verbose: false
     outs:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: bf546cf9f4ae8032dd62bb8d64c93e62
-      size: 430317
+      md5: 1297c65f87b493405b8078670be3f944
+      size: 1783245
   evaluate_deep_learning_player:
     cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
       random,deep_learning --params_path params.yaml --metrics_json_path results/metrics/evaluate_deep_learning_player.json
@@ -151,8 +155,8 @@ stages:
       md5: ccbfe8906bee120793fc5e989ddc2443
       size: 1758
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: b867c9cb5104b912ed21cc804f77f8c2
-      size: 3758
+      md5: 30fd4062fb2332e7587b3cf89abb6c48
+      size: 3765
     - path: magic_the_gathering/game_modes/
       md5: 0ddb7cb1fde81ef7f49487bc1fddb935.dir
       size: 2301
@@ -174,37 +178,41 @@ stages:
       md5: 5006a18ea7c9d33947e84100c41f68b8
       size: 1307
     - path: magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
-      md5: 83672b98efd8d4603782e8572ed6a404
-      size: 5304
+      md5: a5a0051d6ce476719f8b5671e2a53e2c
+      size: 8545
     - path: 
         magic_the_gathering/players/deep_learning_based/single_action_scorer/models/base.py
-      md5: 2214dcbabdde4245254a5d26c8b1bd56
-      size: 5168
+      md5: e0921c27518a0a9c2f9ffb760b79a2c4
+      size: 5820
     - path: 
-        magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v1.py
-      md5: e98821270dd27ff69fad04fad6aa843d
-      size: 11146
+        magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v2.py
+      md5: cf859820ebf37928fd0f909f9894c6c6
+      size: 14465
     - path: magic_the_gathering/turn.py
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: results/models//deep_learning_scorer.ckpt
-      md5: bf546cf9f4ae8032dd62bb8d64c93e62
-      size: 430317
+      md5: 1297c65f87b493405b8078670be3f944
+      size: 1783245
     - path: scripts/run_competition_between_players.py
-      md5: 8be43d51711d93f03ff75006d54b633a
+      md5: 4cc1bb16305b0de7851ce030a300fa6d
       size: 6488
     params:
       params.yaml:
         deep_learning_scorer:
           hyper_parameters:
+            game_state_global_dim: 2
             n_players: 2
             player_dim: 8
-            max_n_cards: 120
-            card_dim: 34
+            max_n_zone_vectors: 120
+            zone_vector_dim: 34
             action_general_dim: 31
-            final_common_dim: 32
+            max_n_action_source_cards: 10
+            max_n_action_target_cards: 10
+            embedding_dim: 64
             transformer_n_layers: 2
             transformer_n_heads: 4
+            transformer_dim_feedforward: 128
             dropout: 0.1
           training:
             random_split:
@@ -224,5 +232,5 @@ stages:
               verbose: false
     outs:
     - path: results/metrics/evaluate_deep_learning_player.json
-      md5: d6ba50748de8704d6177dd878ec4cafa
+      md5: 3bdf7262ac5d3bbf3ffcffdb7f236207
       size: 178
