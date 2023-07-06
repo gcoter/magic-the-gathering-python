@@ -179,7 +179,7 @@ stages:
             max_n_action_source_cards: 10
             max_n_action_target_cards: 10
             embedding_dim: 64
-            transformer_n_layers: 4
+            transformer_n_layers: 2
             transformer_n_heads: 8
             transformer_dim_feedforward: 128
             dropout: 0.1
@@ -201,8 +201,8 @@ stages:
               verbose: false
     outs:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: d9a52a16726afd2cf7214f094ab62019
-      size: 3450509
+      md5: 169a9c126cd5aa31094c539413d2a4bb
+      size: 1783245
   evaluate_deep_learning_player:
     cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
       random,deep_learning --params_path params.yaml --metrics_json_path results/metrics/evaluate_deep_learning_player.json
@@ -349,8 +349,8 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: results/models//deep_learning_scorer.ckpt
-      md5: d9a52a16726afd2cf7214f094ab62019
-      size: 3450509
+      md5: 169a9c126cd5aa31094c539413d2a4bb
+      size: 1783245
     - path: scripts/run_competition_between_players.py
       md5: 4cc1bb16305b0de7851ce030a300fa6d
       size: 6488
@@ -367,7 +367,7 @@ stages:
             max_n_action_source_cards: 10
             max_n_action_target_cards: 10
             embedding_dim: 64
-            transformer_n_layers: 4
+            transformer_n_layers: 2
             transformer_n_heads: 8
             transformer_dim_feedforward: 128
             dropout: 0.1
@@ -389,7 +389,7 @@ stages:
               verbose: false
     outs:
     - path: results/metrics/evaluate_deep_learning_player.json
-      md5: 1e918f82ff828846609b944b36dde571
+      md5: 35665575ba1e7c339a00ad3f1c9c6b73
       size: 178
   compute_game_logs_stats:
     cmd: "python scripts/compute_game_logs_stats.py --game_logs_dataset_path data/game_logs_dataset.pickle
