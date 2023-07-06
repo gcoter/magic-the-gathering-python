@@ -17,6 +17,7 @@ def compute_game_logs_stats(game_logs_dataset_path: str, metrics_json_path: str 
     print("Compute stats")
     n_instances_per_player = {}
     n_instances_per_action_type = {}
+    n_instances_per_player_per_action_type = {}
     n_total_instances = 0
     n_winning_instances = 0
     for game_id in game_logs_dataset.list_game_ids():
@@ -44,7 +45,14 @@ def compute_game_logs_stats(game_logs_dataset_path: str, metrics_json_path: str 
                 n_instances_per_action_type[action_type] = 0
             n_instances_per_action_type[action_type] += 1
 
+            if source_player_index not in n_instances_per_player_per_action_type:
+                n_instances_per_player_per_action_type[source_player_index] = {}
+            if action_type not in n_instances_per_player_per_action_type[source_player_index]:
+                n_instances_per_player_per_action_type[source_player_index][action_type] = 0
+            n_instances_per_player_per_action_type[source_player_index][action_type] += 1
+
     metrics_dict = {
+        "n_instances_per_player_per_action_type": n_instances_per_player_per_action_type,
         "n_instances_per_player": n_instances_per_player,
         "n_instances_per_action_type": n_instances_per_action_type,
         "n_total_instances": n_total_instances,
