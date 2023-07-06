@@ -3,7 +3,7 @@ stages:
   collect_data:
     cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
       random,random --params_path params.yaml --game_logs_dataset_path data/game_logs_dataset.pickle
-      --metrics_json_path results/metrics/collect_data.json\n"
+      --evaluation_metrics_json_path results/metrics/collect_data.json\n"
     deps:
     - path: data/basic_land_cards.csv
       md5: 64b65f2ffffe186aa55a8b32b77647e8
@@ -132,8 +132,8 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: scripts/run_competition_between_players.py
-      md5: 4cc1bb16305b0de7851ce030a300fa6d
-      size: 6488
+      md5: 95735a2eef11e006a5c7b7d98082eb51
+      size: 6853
     outs:
     - path: data/game_logs_dataset.pickle
       md5: 43b60bbedcbc40a86e8e0c3f6fde6d68
@@ -205,8 +205,10 @@ stages:
       size: 1783245
   evaluate_deep_learning_player:
     cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
-      random,deep_learning --params_path params.yaml --metrics_json_path results/metrics/evaluate_deep_learning_player.json
-      --deep_learning_scorer_path results/models//deep_learning_scorer.ckpt\n"
+      random,deep_learning --params_path params.yaml --evaluation_metrics_json_path
+      results/metrics/evaluate_deep_learning_player.json --game_logs_stats_json_path
+      results/metrics/game_logs_stats_after_evaluation.json --deep_learning_scorer_path
+      results/models//deep_learning_scorer.ckpt\n"
     deps:
     - path: data/basic_land_cards.csv
       md5: 64b65f2ffffe186aa55a8b32b77647e8
@@ -352,8 +354,8 @@ stages:
       md5: 169a9c126cd5aa31094c539413d2a4bb
       size: 1783245
     - path: scripts/run_competition_between_players.py
-      md5: 4cc1bb16305b0de7851ce030a300fa6d
-      size: 6488
+      md5: 95735a2eef11e006a5c7b7d98082eb51
+      size: 6853
     params:
       params.yaml:
         deep_learning_scorer:
@@ -391,9 +393,12 @@ stages:
     - path: results/metrics/evaluate_deep_learning_player.json
       md5: 35665575ba1e7c339a00ad3f1c9c6b73
       size: 178
+    - path: results/metrics/game_logs_stats_after_evaluation.json
+      md5: 65afba060b06825072932fbacc6a11a2
+      size: 977
   compute_game_logs_stats:
     cmd: "python scripts/compute_game_logs_stats.py --game_logs_dataset_path data/game_logs_dataset.pickle
-      --metrics_json_path results/metrics/game_logs_stats.json\n"
+      --metrics_json_path results/metrics/game_logs_stats_after_data_collection.json\n"
     deps:
     - path: data/game_logs_dataset.pickle
       md5: 43b60bbedcbc40a86e8e0c3f6fde6d68
@@ -408,6 +413,6 @@ stages:
       md5: 1d7ae2af667ed51267c18b4a6b0523e8
       size: 819
     outs:
-    - path: results/metrics/game_logs_stats.json
+    - path: results/metrics/game_logs_stats_after_data_collection.json
       md5: b305c613d299f3c6fb046274fcdc9a1b
       size: 976
