@@ -20,9 +20,26 @@ stages:
     deps:
       - data/basic_land_cards.csv
       - data/vanilla_creature_cards.csv
-      - magic_the_gathering/actions/
-      - magic_the_gathering/cards/
-      - magic_the_gathering/game_modes/
+      - magic_the_gathering/actions/base.py
+      - magic_the_gathering/actions/cast_card.py
+      - magic_the_gathering/actions/deal_damage.py
+      - magic_the_gathering/actions/declare_attacker.py
+      - magic_the_gathering/actions/declare_blocker.py
+      - magic_the_gathering/actions/draw.py
+      - magic_the_gathering/actions/kill_player.py
+      - magic_the_gathering/actions/move_to_graveyard.py
+      - magic_the_gathering/actions/none.py
+      - magic_the_gathering/actions/pass_to_next_player.py
+      - magic_the_gathering/actions/play_land.py
+      - magic_the_gathering/actions/resolve_stack.py
+      - magic_the_gathering/actions/shuffle.py
+      - magic_the_gathering/actions/tap.py
+      - magic_the_gathering/actions/untap.py
+      - magic_the_gathering/cards/base.py
+      - magic_the_gathering/cards/deck_creator.py
+      - magic_the_gathering/cards/state.py
+      - magic_the_gathering/game_modes/base.py
+      - magic_the_gathering/game_modes/default.py
       - magic_the_gathering/phases/base.py
       - magic_the_gathering/phases/beginning.py
       - magic_the_gathering/phases/combat_beginning.py
@@ -92,9 +109,26 @@ stages:
     deps:
       - data/basic_land_cards.csv
       - data/vanilla_creature_cards.csv
-      - magic_the_gathering/actions/
-      - magic_the_gathering/cards/
-      - magic_the_gathering/game_modes/
+      - magic_the_gathering/actions/base.py
+      - magic_the_gathering/actions/cast_card.py
+      - magic_the_gathering/actions/deal_damage.py
+      - magic_the_gathering/actions/declare_attacker.py
+      - magic_the_gathering/actions/declare_blocker.py
+      - magic_the_gathering/actions/draw.py
+      - magic_the_gathering/actions/kill_player.py
+      - magic_the_gathering/actions/move_to_graveyard.py
+      - magic_the_gathering/actions/none.py
+      - magic_the_gathering/actions/pass_to_next_player.py
+      - magic_the_gathering/actions/play_land.py
+      - magic_the_gathering/actions/resolve_stack.py
+      - magic_the_gathering/actions/shuffle.py
+      - magic_the_gathering/actions/tap.py
+      - magic_the_gathering/actions/untap.py
+      - magic_the_gathering/cards/base.py
+      - magic_the_gathering/cards/deck_creator.py
+      - magic_the_gathering/cards/state.py
+      - magic_the_gathering/game_modes/base.py
+      - magic_the_gathering/game_modes/default.py
       - magic_the_gathering/phases/base.py
       - magic_the_gathering/phases/beginning.py
       - magic_the_gathering/phases/combat_beginning.py
