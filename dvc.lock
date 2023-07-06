@@ -405,9 +405,9 @@ stages:
       md5: 30fd4062fb2332e7587b3cf89abb6c48
       size: 3765
     - path: scripts/compute_game_logs_stats.py
-      md5: d77864575d8698ec8ee5966b3445feb0
-      size: 2568
+      md5: 01fe7ef3f2c885731bf85335297654ba
+      size: 3148
     outs:
     - path: results/metrics/game_logs_stats.json
-      md5: 7f87099caa44904e628a0fa0c0f7b173
-      size: 427
+      md5: b305c613d299f3c6fb046274fcdc9a1b
+      size: 976
