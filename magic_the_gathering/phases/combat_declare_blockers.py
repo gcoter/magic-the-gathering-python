@@ -30,7 +30,7 @@ class CombatDeclareBlockersPhase(PhaseWherePlayersGetPriority):
                     for action in CombatDeclareBlockersPhase.list_possible_actions(game_state)
                     if action.source_player_index == blocker_player_index
                 ]
-                action = blocker_player._choose_action(
+                action = blocker_player.choose_action(
                     game_state=game_state,
                     possible_actions=possible_actions,
                 )
