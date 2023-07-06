@@ -10,27 +10,28 @@ from magic_the_gathering.game_state import GameState, ZonePosition
 class Action:
     HISTORY = []
 
+    TYPES = [
+        "NoneAction",
+        "CastCardAction",
+        "DealDamageAction",
+        "DeclareAttackerAction",
+        "DeclareBlockerAction",
+        "DrawAction",
+        "KillPlayerAction",
+        "MoveToGraveyardAction",
+        "PassToNextPlayerAction",
+        "PlayLandAction",
+        "ResolveTopOfStackAction",
+        "ShuffleAction",
+        "TapAction",
+        "UntapAction",
+        "UntapAllAction",
+    ]
+
     @staticmethod
     def type_to_one_hot_vector(action_type: str) -> np.ndarray:
-        all_action_types = [
-            "NoneAction",
-            "CastCardAction",
-            "DealDamageAction",
-            "DeclareAttackerAction",
-            "DeclareBlockerAction",
-            "DrawAction",
-            "KillPlayerAction",
-            "MoveToGraveyardAction",
-            "PassToNextPlayerAction",
-            "PlayLandAction",
-            "ResolveTopOfStackAction",
-            "ShuffleAction",
-            "TapAction",
-            "UntapAction",
-            "UntapAllAction",
-        ]
-        action_type_index = all_action_types.index(action_type)
-        one_hot_vector = np.zeros(len(all_action_types))
+        action_type_index = Action.TYPES.index(action_type)
+        one_hot_vector = np.zeros(len(Action.TYPES))
         one_hot_vector[action_type_index] = 1
         return one_hot_vector
 

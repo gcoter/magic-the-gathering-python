@@ -5,6 +5,7 @@ vars:
   - game_logs_dataset_path: data/game_logs_dataset.pickle
   - model_folder_path: results/models/
   - collect_data_metrics_path: results/metrics/collect_data.json
+  - game_logs_stats_path: results/metrics/game_logs_stats.json
   - evaluate_deep_learning_player_metrics_path: results/metrics/evaluate_deep_learning_player.json
 
 stages:
@@ -34,6 +35,19 @@ stages:
       - ${game_logs_dataset_path}
     metrics:
       - ${collect_data_metrics_path}:
+          cache: false
+  compute_game_logs_stats:
+    cmd: >
+      python scripts/compute_game_logs_stats.py
+      --game_logs_dataset_path ${game_logs_dataset_path}
+      --metrics_json_path ${game_logs_stats_path}
+    deps:
+      - magic_the_gathering/actions/base.py
+      - magic_the_gathering/game_logs_dataset.py
+      - scripts/compute_game_logs_stats.py
+      - ${game_logs_dataset_path}
+    metrics:
+      - ${game_logs_stats_path}:
           cache: false
   train_deep_learning_scorer:
     cmd: >
