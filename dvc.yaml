@@ -22,7 +22,20 @@ stages:
       - magic_the_gathering/actions/
       - magic_the_gathering/cards/
       - magic_the_gathering/game_modes/
-      - magic_the_gathering/phases/
+      - magic_the_gathering/phases/base.py
+      - magic_the_gathering/phases/beginning.py
+      - magic_the_gathering/phases/combat_beginning.py
+      - magic_the_gathering/phases/combat_damage.py
+      - magic_the_gathering/phases/combat_declare_attackers.py
+      - magic_the_gathering/phases/combat_declare_blockers.py
+      - magic_the_gathering/phases/combat_end.py
+      - magic_the_gathering/phases/draw.py
+      - magic_the_gathering/phases/end.py
+      - magic_the_gathering/phases/main.py
+      - magic_the_gathering/phases/mulligan.py
+      - magic_the_gathering/phases/players_get_priority.py
+      - magic_the_gathering/phases/untap.py
+      - magic_the_gathering/phases/upkeep.py
       - magic_the_gathering/players/base.py
       - magic_the_gathering/players/random.py
       - magic_the_gathering/game_engine.py
@@ -68,7 +81,20 @@ stages:
       - magic_the_gathering/actions/
       - magic_the_gathering/cards/
       - magic_the_gathering/game_modes/
-      - magic_the_gathering/phases/
+      - magic_the_gathering/phases/base.py
+      - magic_the_gathering/phases/beginning.py
+      - magic_the_gathering/phases/combat_beginning.py
+      - magic_the_gathering/phases/combat_damage.py
+      - magic_the_gathering/phases/combat_declare_attackers.py
+      - magic_the_gathering/phases/combat_declare_blockers.py
+      - magic_the_gathering/phases/combat_end.py
+      - magic_the_gathering/phases/draw.py
+      - magic_the_gathering/phases/end.py
+      - magic_the_gathering/phases/main.py
+      - magic_the_gathering/phases/mulligan.py
+      - magic_the_gathering/phases/players_get_priority.py
+      - magic_the_gathering/phases/untap.py
+      - magic_the_gathering/phases/upkeep.py
       - magic_the_gathering/players/base.py
       - magic_the_gathering/players/deep_learning_based/player.py
       - magic_the_gathering/players/deep_learning_based/base_scorer.py
