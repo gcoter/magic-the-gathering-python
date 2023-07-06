@@ -1,14 +1,23 @@
 deep_learning_scorer:
   hyper_parameters:
-    final_common_dim: 32
-    transformer_n_layers: 2
-    transformer_n_heads: 4
+    game_state_global_dim: 2
+    n_players: 2
+    player_dim: 8
+    max_n_zone_vectors: 120
+    zone_vector_dim: 34
+    action_general_dim: 31
+    max_n_action_source_cards: 10
+    max_n_action_target_cards: 10
+    embedding_dim: 64
+    transformer_n_layers: 4
+    transformer_n_heads: 8
+    transformer_dim_feedforward: 128
     dropout: 0.1
   training:
     random_split:
       training_size: 0.8
       validation_size: 0.2
-    batch_size: 10
+    batch_size: 100
     n_epochs: 1000
     model_checkpoint:
       monitor: validation_loss

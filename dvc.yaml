@@ -1,52 +1,54 @@
 vars:
-  - n_games: 100
-  - player_classes: random,deep_learning
-  - log_directory_path: data/game_logs/
+  - n_games_for_collection: 1000
+  - n_games_for_evaluation: 1000
   - params_path: params.yaml
-  - preprocessed_h5_path: data/preprocessed_game_logs.h5
+  - game_logs_dataset_path: data/game_logs_dataset.pickle
+  - model_folder_path: results/models/
   - collect_data_metrics_path: results/metrics/collect_data.json
   - evaluate_deep_learning_player_metrics_path: results/metrics/evaluate_deep_learning_player.json
-  - model_folder_path: results/models/
 
 stages:
   collect_data:
     cmd: >
       python scripts/run_competition_between_players.py
-      --n_games ${n_games}
-      --player_classes ${player_classes}
+      --n_games ${n_games_for_collection}
+      --player_classes random,random
       --params_path ${params_path}
-      --log_directory_path ${log_directory_path}
+      --game_logs_dataset_path ${game_logs_dataset_path}
       --metrics_json_path ${collect_data_metrics_path}
     deps:
+      - data/basic_land_cards.csv
+      - data/vanilla_creature_cards.csv
+      - magic_the_gathering/actions/
+      - magic_the_gathering/cards/
+      - magic_the_gathering/game_modes/
+      - magic_the_gathering/phases/
+      - magic_the_gathering/players/base.py
+      - magic_the_gathering/players/random.py
+      - magic_the_gathering/game_engine.py
+      - magic_the_gathering/game_logs_dataset.py
+      - magic_the_gathering/game_state.py
+      - magic_the_gathering/turn.py
       - scripts/run_competition_between_players.py
-    params:
-      - ${params_path}:
-          - deep_learning_scorer
     outs:
-      - ${log_directory_path}
+      - ${game_logs_dataset_path}
     metrics:
       - ${collect_data_metrics_path}:
           cache: false
-  preprocess_data:
-    cmd: >
-      python scripts/preprocess_game_logs.py
-      --game_logs_folder_path ${log_directory_path}
-      --output_h5_path ${preprocessed_h5_path}
-    deps:
-      - scripts/preprocess_game_logs.py
-      - ${log_directory_path}
-    outs:
-      - ${preprocessed_h5_path}
   train_deep_learning_scorer:
     cmd: >
       python scripts/train_deep_learning_scorer.py
       --params_path ${params_path}
-      --preprocessed_game_logs_path ${preprocessed_h5_path}
+      --game_logs_dataset_path ${game_logs_dataset_path}
       --model_folder_path ${model_folder_path}
       --model_file_name deep_learning_scorer
     deps:
+      - magic_the_gathering/game_logs_dataset.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/base.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v2.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
       - scripts/train_deep_learning_scorer.py
-      - ${preprocessed_h5_path}
+      - ${game_logs_dataset_path}
     params:
       - ${params_path}:
           - deep_learning_scorer
@@ -55,14 +57,33 @@ stages:
   evaluate_deep_learning_player:
     cmd: >
       python scripts/run_competition_between_players.py
-      --n_games ${n_games}
-      --player_classes ${player_classes}
+      --n_games ${n_games_for_evaluation}
+      --player_classes random,deep_learning
       --params_path ${params_path}
       --metrics_json_path ${evaluate_deep_learning_player_metrics_path}
       --deep_learning_scorer_path ${model_folder_path}/deep_learning_scorer.ckpt
     deps:
+      - data/basic_land_cards.csv
+      - data/vanilla_creature_cards.csv
+      - magic_the_gathering/actions/
+      - magic_the_gathering/cards/
+      - magic_the_gathering/game_modes/
+      - magic_the_gathering/phases/
+      - magic_the_gathering/players/base.py
+      - magic_the_gathering/players/deep_learning_based/player.py
+      - magic_the_gathering/players/deep_learning_based/base_scorer.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/base.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/models/v2.py
+      - magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
+      - magic_the_gathering/game_engine.py
+      - magic_the_gathering/game_logs_dataset.py
+      - magic_the_gathering/game_state.py
+      - magic_the_gathering/turn.py
       - scripts/run_competition_between_players.py
       - ${model_folder_path}/deep_learning_scorer.ckpt
+    params:
+      - ${params_path}:
+          - deep_learning_scorer
     metrics:
       - ${evaluate_deep_learning_player_metrics_path}:
           cache: false
