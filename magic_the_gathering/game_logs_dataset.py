@@ -3,6 +3,8 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
+from magic_the_gathering.actions.base import Action
+
 
 class GameLogsDataset:
     def __init__(self):
@@ -106,3 +108,49 @@ class GameLogsDataset:
     def get_action_general_dim(self) -> int:
         game_id = self.list_game_ids()[0]
         return len(self.__data[game_id]["items"][0]["possible_actions"][0]["general"])
+
+    def compute_stats(self) -> Dict:
+        n_instances_per_player = {}
+        n_instances_per_action_type = {}
+        n_instances_per_player_per_action_type = {}
+        n_total_instances = 0
+        n_winning_instances = 0
+        for game_id in self.list_game_ids():
+            items = self.get_one_game_items(game_id=game_id)
+            winner_player_index = self.get_winner_player_index(game_id=game_id)
+            for item_index in range(len(items)):
+                item_dict = items[item_index]
+                chosen_action_index = item_dict["chosen_action_index"]
+                chosen_action_vectors = item_dict["possible_actions"][chosen_action_index]
+                action_type_one_hot_vector = chosen_action_vectors["general"][: len(Action.TYPES)]
+                action_type_index = int(np.argmax(action_type_one_hot_vector))
+                action_type = Action.TYPES[action_type_index]
+                source_player_index = chosen_action_vectors["source_player_index"]
+
+                n_total_instances += 1
+
+                if source_player_index == winner_player_index:
+                    n_winning_instances += 1
+
+                if source_player_index not in n_instances_per_player:
+                    n_instances_per_player[source_player_index] = 0
+                n_instances_per_player[source_player_index] += 1
+
+                if action_type not in n_instances_per_action_type:
+                    n_instances_per_action_type[action_type] = 0
+                n_instances_per_action_type[action_type] += 1
+
+                if source_player_index not in n_instances_per_player_per_action_type:
+                    n_instances_per_player_per_action_type[source_player_index] = {}
+                if action_type not in n_instances_per_player_per_action_type[source_player_index]:
+                    n_instances_per_player_per_action_type[source_player_index][action_type] = 0
+                n_instances_per_player_per_action_type[source_player_index][action_type] += 1
+
+        return {
+            "n_instances_per_player_per_action_type": n_instances_per_player_per_action_type,
+            "n_instances_per_player": n_instances_per_player,
+            "n_instances_per_action_type": n_instances_per_action_type,
+            "n_total_instances": n_total_instances,
+            "n_winning_instances": n_winning_instances,
+            "winning_proportion": round(n_winning_instances / n_total_instances, 3),
+        }
