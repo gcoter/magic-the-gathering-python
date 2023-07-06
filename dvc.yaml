@@ -5,8 +5,9 @@ vars:
   - game_logs_dataset_path: data/game_logs_dataset.pickle
   - model_folder_path: results/models/
   - collect_data_metrics_path: results/metrics/collect_data.json
-  - game_logs_stats_path: results/metrics/game_logs_stats.json
+  - game_logs_stats_after_data_collection_path: results/metrics/game_logs_stats_after_data_collection.json
   - evaluate_deep_learning_player_metrics_path: results/metrics/evaluate_deep_learning_player.json
+  - game_logs_stats_after_evaluation_path: results/metrics/game_logs_stats_after_evaluation.json
 
 stages:
   collect_data:
@@ -16,7 +17,7 @@ stages:
       --player_classes random,random
       --params_path ${params_path}
       --game_logs_dataset_path ${game_logs_dataset_path}
-      --metrics_json_path ${collect_data_metrics_path}
+      --evaluation_metrics_json_path ${collect_data_metrics_path}
     deps:
       - data/basic_land_cards.csv
       - data/vanilla_creature_cards.csv
@@ -70,14 +71,14 @@ stages:
     cmd: >
       python scripts/compute_game_logs_stats.py
       --game_logs_dataset_path ${game_logs_dataset_path}
-      --metrics_json_path ${game_logs_stats_path}
+      --metrics_json_path ${game_logs_stats_after_data_collection_path}
     deps:
       - magic_the_gathering/actions/base.py
       - magic_the_gathering/game_logs_dataset.py
       - scripts/compute_game_logs_stats.py
       - ${game_logs_dataset_path}
     metrics:
-      - ${game_logs_stats_path}:
+      - ${game_logs_stats_after_data_collection_path}:
           cache: false
   train_deep_learning_scorer:
     cmd: >
@@ -104,7 +105,8 @@ stages:
       --n_games ${n_games_for_evaluation}
       --player_classes random,deep_learning
       --params_path ${params_path}
-      --metrics_json_path ${evaluate_deep_learning_player_metrics_path}
+      --evaluation_metrics_json_path ${evaluate_deep_learning_player_metrics_path}
+      --game_logs_stats_json_path ${game_logs_stats_after_evaluation_path}
       --deep_learning_scorer_path ${model_folder_path}/deep_learning_scorer.ckpt
     deps:
       - data/basic_land_cards.csv
@@ -160,4 +162,6 @@ stages:
           - deep_learning_scorer
     metrics:
       - ${evaluate_deep_learning_player_metrics_path}:
+          cache: false
+      - ${game_logs_stats_after_evaluation_path}:
           cache: false
