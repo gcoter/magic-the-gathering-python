@@ -32,10 +32,48 @@ stages:
     - path: magic_the_gathering/game_state.py
       md5: 1fed89061b3fc30f03592d4bce8eb371
       size: 10443
-    - path: magic_the_gathering/phases/
-      md5: b311709efff1e1ea27666bf5a7861cc4.dir
-      size: 34643
-      nfiles: 30
+    - path: magic_the_gathering/phases/base.py
+      md5: 53629da810f5b243262bbf8e3de5a227
+      size: 602
+    - path: magic_the_gathering/phases/beginning.py
+      md5: c15c1816223f015feb9562a3de4a0c5b
+      size: 824
+    - path: magic_the_gathering/phases/combat_beginning.py
+      md5: 3fa5df67e941c7dc539352764eea6600
+      size: 383
+    - path: magic_the_gathering/phases/combat_damage.py
+      md5: fef49b4aad68eadaf0a1bec13265b79e
+      size: 634
+    - path: magic_the_gathering/phases/combat_declare_attackers.py
+      md5: dfc37bf6948e4ab8d77a2daf9b99abfa
+      size: 2064
+    - path: magic_the_gathering/phases/combat_declare_blockers.py
+      md5: 805f5b47b9054092b73bf8e6f3e8a6a5
+      size: 2961
+    - path: magic_the_gathering/phases/combat_end.py
+      md5: 58899289bd65758b372cd8c27322f7ee
+      size: 491
+    - path: magic_the_gathering/phases/draw.py
+      md5: a6e15eda17557361aa0c597fdeb04b95
+      size: 516
+    - path: magic_the_gathering/phases/end.py
+      md5: ece917b39b89264c6b1832883f47f64d
+      size: 906
+    - path: magic_the_gathering/phases/main.py
+      md5: a2964322eea3a368bb6db562dfb3a86a
+      size: 2565
+    - path: magic_the_gathering/phases/mulligan.py
+      md5: d6f9ee42ec8193f1c3596aefae361f35
+      size: 2269
+    - path: magic_the_gathering/phases/players_get_priority.py
+      md5: f729e8ef9eff2041e63c0523318395aa
+      size: 654
+    - path: magic_the_gathering/phases/untap.py
+      md5: 6c1b40ba388a9d8deb71b6d88fe1a8ed
+      size: 437
+    - path: magic_the_gathering/phases/upkeep.py
+      md5: 15af8bfbff635d7bd11713718fb1e346
+      size: 327
     - path: magic_the_gathering/players/base.py
       md5: e1f9018c35626872fa56a441cdf76a14
       size: 2665
@@ -50,34 +88,19 @@ stages:
       size: 6488
     outs:
     - path: data/game_logs_dataset.pickle
-      md5: 3792ef06c1da3b8dad930eabf1350867
-      size: 2999403393
+      md5: 43b60bbedcbc40a86e8e0c3f6fde6d68
+      size: 3104208439
     - path: results/metrics/collect_data.json
       md5: 5bc0551b74a8f13d5cf4387151f1749f
       size: 176
-  preprocess_data:
-    cmd: "python scripts/preprocess_game_logs.py --game_logs_folder_path data/game_logs/
-      --output_h5_path data/preprocessed_game_logs.h5\n"
-    deps:
-    - path: data/game_logs/
-      md5: d4a60ebb5119966c8972c5785d0f6601.dir
-      size: 333412608
-      nfiles: 100
-    - path: scripts/preprocess_game_logs.py
-      md5: 268a32986ca8551a8908345e6d214945
-      size: 6934
-    outs:
-    - path: data/preprocessed_game_logs.h5
-      md5: a082f2f6ca92f5955258dd71a0839e79
-      size: 237392552
   train_deep_learning_scorer:
     cmd: "python scripts/train_deep_learning_scorer.py --params_path params.yaml --game_logs_dataset_path
       data/game_logs_dataset.pickle --model_folder_path results/models/ --model_file_name
       deep_learning_scorer\n"
     deps:
     - path: data/game_logs_dataset.pickle
-      md5: 3792ef06c1da3b8dad930eabf1350867
-      size: 2999403393
+      md5: 43b60bbedcbc40a86e8e0c3f6fde6d68
+      size: 3104208439
     - path: magic_the_gathering/game_logs_dataset.py
       md5: 30fd4062fb2332e7587b3cf89abb6c48
       size: 3765
@@ -93,8 +116,8 @@ stages:
       md5: cf859820ebf37928fd0f909f9894c6c6
       size: 14465
     - path: scripts/train_deep_learning_scorer.py
-      md5: 70bd12cda1a0df653c53d03351d12768
-      size: 4725
+      md5: 193b3d4b7dcdb3e4242b0fd279e33806
+      size: 4741
     params:
       params.yaml:
         deep_learning_scorer:
@@ -130,7 +153,7 @@ stages:
               verbose: false
     outs:
     - path: results/models//deep_learning_scorer.ckpt
-      md5: c04b120989481cd3f78f78560ff1ae9e
+      md5: d9a52a16726afd2cf7214f094ab62019
       size: 3450509
   evaluate_deep_learning_player:
     cmd: "python scripts/run_competition_between_players.py --n_games 1000 --player_classes
@@ -164,10 +187,48 @@ stages:
     - path: magic_the_gathering/game_state.py
       md5: 1fed89061b3fc30f03592d4bce8eb371
       size: 10443
-    - path: magic_the_gathering/phases/
-      md5: b311709efff1e1ea27666bf5a7861cc4.dir
-      size: 34643
-      nfiles: 30
+    - path: magic_the_gathering/phases/base.py
+      md5: 53629da810f5b243262bbf8e3de5a227
+      size: 602
+    - path: magic_the_gathering/phases/beginning.py
+      md5: c15c1816223f015feb9562a3de4a0c5b
+      size: 824
+    - path: magic_the_gathering/phases/combat_beginning.py
+      md5: 3fa5df67e941c7dc539352764eea6600
+      size: 383
+    - path: magic_the_gathering/phases/combat_damage.py
+      md5: fef49b4aad68eadaf0a1bec13265b79e
+      size: 634
+    - path: magic_the_gathering/phases/combat_declare_attackers.py
+      md5: dfc37bf6948e4ab8d77a2daf9b99abfa
+      size: 2064
+    - path: magic_the_gathering/phases/combat_declare_blockers.py
+      md5: 805f5b47b9054092b73bf8e6f3e8a6a5
+      size: 2961
+    - path: magic_the_gathering/phases/combat_end.py
+      md5: 58899289bd65758b372cd8c27322f7ee
+      size: 491
+    - path: magic_the_gathering/phases/draw.py
+      md5: a6e15eda17557361aa0c597fdeb04b95
+      size: 516
+    - path: magic_the_gathering/phases/end.py
+      md5: ece917b39b89264c6b1832883f47f64d
+      size: 906
+    - path: magic_the_gathering/phases/main.py
+      md5: a2964322eea3a368bb6db562dfb3a86a
+      size: 2565
+    - path: magic_the_gathering/phases/mulligan.py
+      md5: d6f9ee42ec8193f1c3596aefae361f35
+      size: 2269
+    - path: magic_the_gathering/phases/players_get_priority.py
+      md5: f729e8ef9eff2041e63c0523318395aa
+      size: 654
+    - path: magic_the_gathering/phases/untap.py
+      md5: 6c1b40ba388a9d8deb71b6d88fe1a8ed
+      size: 437
+    - path: magic_the_gathering/phases/upkeep.py
+      md5: 15af8bfbff635d7bd11713718fb1e346
+      size: 327
     - path: magic_the_gathering/players/base.py
       md5: e1f9018c35626872fa56a441cdf76a14
       size: 2665
@@ -192,7 +253,7 @@ stages:
       md5: db8503ace93b2a3760baf818c00a2ffc
       size: 2016
     - path: results/models//deep_learning_scorer.ckpt
-      md5: c04b120989481cd3f78f78560ff1ae9e
+      md5: d9a52a16726afd2cf7214f094ab62019
       size: 3450509
     - path: scripts/run_competition_between_players.py
       md5: 4cc1bb16305b0de7851ce030a300fa6d
