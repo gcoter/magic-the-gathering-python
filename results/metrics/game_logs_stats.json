@@ -1,0 +1,17 @@
+{
+    "n_instances_per_player": {
+        "0": 141459,
+        "1": 141654
+    },
+    "n_instances_per_action_type": {
+        "PlayLandAction": 14979,
+        "NoneAction": 86703,
+        "TapAction": 141359,
+        "CastCardAction": 16079,
+        "DeclareAttackerAction": 19673,
+        "DeclareBlockerAction": 4320
+    },
+    "n_total_instances": 283113,
+    "n_winning_instances": 147353,
+    "winning_proportion": 0.52
+}
