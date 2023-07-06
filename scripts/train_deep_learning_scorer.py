@@ -45,7 +45,7 @@ def train_deep_learning_scorer(
     print(f"Load parameters from '{params_path}'")
     params = read_params(params_path)["deep_learning_scorer"]
     log_params_to_mlflow(params)
-    mlflow.pytorch.autolog()
+    mlflow.pytorch.autolog(log_models=False)
 
     set_random_seed(seed=42)
     generator = torch.Generator().manual_seed(42)
