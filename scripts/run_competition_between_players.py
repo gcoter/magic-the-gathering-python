@@ -105,7 +105,8 @@ def run_competition_between_players(
     n_games: int,
     player_classes: List[str],
     params_path: str,
-    metrics_json_path: str = None,
+    evaluation_metrics_json_path: str = None,
+    game_logs_stats_json_path: str = None,
     game_logs_dataset_path: str = None,
     deep_learning_scorer_path: str = None,
 ):
@@ -119,9 +120,7 @@ def run_competition_between_players(
     game_mode = DefaultGameMode()
     win_counts = {i: 0 for i in range(n_players)}
 
-    game_logs_dataset = None
-    if game_logs_dataset_path is not None:
-        game_logs_dataset = GameLogsDataset()
+    game_logs_dataset = GameLogsDataset()
 
     print(f"\n===== Start competition between players: {player_classes} =====\n")
 
@@ -151,9 +150,9 @@ def run_competition_between_players(
         win_rate = win_count / n_games
         print(f"- Player '{player_classes[player_index]}': {win_rate * 100:.2f}%")
 
-    if metrics_json_path is not None:
-        Path(metrics_json_path).parent.mkdir(parents=True, exist_ok=True)
-        print("\n===== Save metrics =====")
+    if evaluation_metrics_json_path is not None:
+        Path(evaluation_metrics_json_path).parent.mkdir(parents=True, exist_ok=True)
+        print("\n===== Save evaluation metrics =====")
         metrics_dict = {
             "n_games": n_games,
             "win_counts": {
@@ -165,7 +164,14 @@ def run_competition_between_players(
                 for index, (player_class, win_count) in enumerate(zip(player_classes, win_counts.values()))
             },
         }
-        with open(metrics_json_path, "w") as f:
+        with open(evaluation_metrics_json_path, "w") as f:
+            json.dump(metrics_dict, f, indent=4)
+
+    if game_logs_stats_json_path is not None:
+        Path(game_logs_stats_json_path).parent.mkdir(parents=True, exist_ok=True)
+        print("\n===== Save game logs stats =====")
+        metrics_dict = game_logs_dataset.compute_stats()
+        with open(game_logs_stats_json_path, "w") as f:
             json.dump(metrics_dict, f, indent=4)
 
     if game_logs_dataset_path is not None:
