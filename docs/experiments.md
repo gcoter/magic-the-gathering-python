@@ -14,6 +14,99 @@ mlflow ui
 
 In the results, the git commit hashes and the MLflow experiment names are always given for reference.
 
+## 2023-07-14
+### Description
+#### Bug in data collection
+I found a bug in the definition of `CombatDeclareBlockersPhase` which resulted in a bad data collection.
+
+Indeed, we can see at line 33 that the method to choose an action is not named correctly:
+
+```python
+action = blocker_player._choose_action(
+    ...
+)
+
+# Should be 'choose_action' without the underscore
+```
+
+Because of this, all actions during this phase were not recorded.
+
+#### A new DVC stage to measure statistics about the dataset
+In order to verify my hypothesis (and to prevent this kind of issues to happen again), I added a DVC stage which computes basic statistics about the game logs dataset:
+
+```
+                            +--------------+                                
+                            | collect_data |                                
+                           *+--------------+*                               
+                       ****                  ****                           
+                   ****                          ****                       
+                 **                                  **                     
++-------------------------+                +----------------------------+   
+| compute_game_logs_stats |                | train_deep_learning_scorer |   
++-------------------------+                +----------------------------+   
+                                                          *                 
+                                                          *                 
+                                                          *                 
+                                          +-------------------------------+ 
+                                          | evaluate_deep_learning_player | 
+                                          +-------------------------------+ 
+```
+
+### Results
+#### Dataset
+I fixed the bug and ran `dvc repro`. A new dataset was created and we can notice thanks to the statistics that `DeclareBlockerAction` was not represented in the previous dataset:
+
+| Dataset    | Git commit hash | Number of instances | Proportion of winning instances | Number of PlayLandAction | Number of NoneAction | Number of TapAction | Number of CastCardAction | Number of DeclareAttackerAction | Number of DeclareBlockerAction |
+| ---------- | --------------- | ------------------- | ------------------------------- | ------------------------ | -------------------- | ------------------- | ------------------------ | ------------------------------- | ------------------------------ |
+| Before fix | b65b4134        | 268,388             | 52.5%                           | 14,979                   | 76,298               | 141,359             | 16,079                   | 19,673                          | 0                              |
+| After fix  | 7c8f43fa        | 283,113             | 52%                             | 14,979                   | 86,703               | 141,359             | 16,079                   | 19,673                          | 4,320                          |
+
+__Note:__ the number of games is still 1,000 and the class of the two players is still `RandomPlayer`. The training and validation proportions are still 80% and 20%.
+
+#### Summary Table
+I ran experiments with similar parameters as previously but using the new dataset. Here is a comparison of the results before and after the fix.
+
+##### Before fixing the bug
+| Git commit Hash | MLflow experiment name | Player Class                 | Scorer Model Class   | Number of parameters | transformer_n_layers | transformer_n_heads | Win Rate against a random player |
+| --------------- | -----------------------| ---------------------------- | -------------------- | -------------------- | -------------------- | ------------------- | -------------------------------- |
+| 0a1f0c67        | able-cub-192           | SampleActionFromScoresPlayer | SingleActionScorerV2 | 141,825              | 2                    | 8                   | 51.3%                |
+| b031673e        | stylish-lynx-414       | SampleActionFromScoresPlayer | SingleActionScorerV2 | 275,713              | 4                    | 8                   | 51.7%                |
+
+__Note:__ Copied from the experiments of `2023-07-01`.
+
+##### After fixing the bug
+| Git commit Hash | MLflow experiment name | Player Class                 | Scorer Model Class   | Number of parameters | transformer_n_layers | transformer_n_heads | Win Rate against a random player |
+| --------------- | -----------------------| ---------------------------- | -------------------- | -------------------- | -------------------- | ------------------- | -------------------------------- |
+| 42a84d22        | valuable-swan-948      | SampleActionFromScoresPlayer | SingleActionScorerV2 | 141,825              | 2                    | 8                   | 50.9%                |
+| 7c8f43fa        | sneaky-roo-349         | SampleActionFromScoresPlayer | SingleActionScorerV2 | 275,713              | 4                   | 8                   | 51.7%                            |
+
+#### Training Loss Comparison
+![](img/2023-07-13-21-23-23.png)
+
+#### Validation Loss Comparison
+![](img/2023-07-13-21-23-58.png)
+
+### Analysis of the results
+We can see that the models based on the new dataset have a higher loss than the previous ones, however the win rate is quite the same. No progress was made regarding the performance but at least now we are sure that the models get to see instances of `DeclareBlockerAction`.
+
+#### Comparison between the new models and a random player
+As we added the possibility to compute statistics about a game logs dataset, we can also do this after the evaluation against a random player.
+
+It becomes possible to compare the actions chosen by a random player compared to our trained player:
+
+| Git commit Hash | MLflow experiment name | Player Class                 | Scorer Model Class   | Number of instances | Number of PlayLandAction | Number of NoneAction | Number of TapAction | Number of CastCardAction | Number of DeclareAttackerAction | Number of DeclareBlockerAction |
+| --------------- | ---------------------- | ---------------------------- | -------------------- | ------------------- | ------------------------ | -------------------- | ------------- | ----------- | ---------------------- | ------------------------------- |
+| cfb8edec        | valuable-swan-948      | RandomPlayer                 | NA                   | 139,085             | 7,373                    | 42,782               | 69,241        | 7,927       | 9,588                  | 2,174                           |
+| cfb8edec        | valuable-swan-948      | SampleActionFromScoresPlayer | SingleActionScorerV2 | 138,176             | 7,370                    | 42,626               | 68,246        | 7,911       | 10,008                 | 2,015                           |
+
+The only noticeable difference is that the trained player seems to play `DeclareAttackerAction` a bit more often that a random player, apart from this their behaviors are similar.
+
+#### Possible improvements
+The improvements described in the section `2023-07-01` still apply.
+
+#### Possible biases and broken rules
+The biases and broken rules described in the section `2023-07-01` still apply.
+
 ## 2023-07-01
 ### Description
 #### Objectives
