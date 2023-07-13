@@ -12,8 +12,8 @@ stages:
       md5: 954695af44c0a4041cca760fd8134d49
       size: 138286
     - path: magic_the_gathering/actions/
-      md5: 43a952598818b5232c0fb7fa3068c550.dir
-      size: 59823
+      md5: 9df938a70d002d12cb91f98b773a2a22.dir
+      size: 59737
       nfiles: 31
     - path: magic_the_gathering/cards/
       md5: c9c378010358284cb5af93d18e9fa643.dir
@@ -23,8 +23,8 @@ stages:
       md5: ccbfe8906bee120793fc5e989ddc2443
       size: 1758
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: 30fd4062fb2332e7587b3cf89abb6c48
-      size: 3765
+      md5: dade94bc2c69187d4b529b75ffa1a7ba
+      size: 6272
     - path: magic_the_gathering/game_modes/
       md5: 0ddb7cb1fde81ef7f49487bc1fddb935.dir
       size: 2301
@@ -33,8 +33,8 @@ stages:
       md5: 1fed89061b3fc30f03592d4bce8eb371
       size: 10443
     - path: magic_the_gathering/phases/
-      md5: b311709efff1e1ea27666bf5a7861cc4.dir
-      size: 34643
+      md5: 728b0705be725d8f16b7ac77a74bf846.dir
+      size: 34627
       nfiles: 30
     - path: magic_the_gathering/players/base.py
       md5: e1f9018c35626872fa56a441cdf76a14
@@ -79,8 +79,8 @@ stages:
       md5: 3792ef06c1da3b8dad930eabf1350867
       size: 2999403393
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: 30fd4062fb2332e7587b3cf89abb6c48
-      size: 3765
+      md5: dade94bc2c69187d4b529b75ffa1a7ba
+      size: 6272
     - path: magic_the_gathering/players/deep_learning_based/single_action_scorer/dataset.py
       md5: a5a0051d6ce476719f8b5671e2a53e2c
       size: 8545
@@ -144,8 +144,8 @@ stages:
       md5: 954695af44c0a4041cca760fd8134d49
       size: 138286
     - path: magic_the_gathering/actions/
-      md5: 43a952598818b5232c0fb7fa3068c550.dir
-      size: 59823
+      md5: 9df938a70d002d12cb91f98b773a2a22.dir
+      size: 59737
       nfiles: 31
     - path: magic_the_gathering/cards/
       md5: c9c378010358284cb5af93d18e9fa643.dir
@@ -155,8 +155,8 @@ stages:
       md5: ccbfe8906bee120793fc5e989ddc2443
       size: 1758
     - path: magic_the_gathering/game_logs_dataset.py
-      md5: 30fd4062fb2332e7587b3cf89abb6c48
-      size: 3765
+      md5: dade94bc2c69187d4b529b75ffa1a7ba
+      size: 6272
     - path: magic_the_gathering/game_modes/
       md5: 0ddb7cb1fde81ef7f49487bc1fddb935.dir
       size: 2301
@@ -165,8 +165,8 @@ stages:
       md5: 1fed89061b3fc30f03592d4bce8eb371
       size: 10443
     - path: magic_the_gathering/phases/
-      md5: b311709efff1e1ea27666bf5a7861cc4.dir
-      size: 34643
+      md5: 728b0705be725d8f16b7ac77a74bf846.dir
+      size: 34627
       nfiles: 30
     - path: magic_the_gathering/players/base.py
       md5: e1f9018c35626872fa56a441cdf76a14
@@ -234,3 +234,23 @@ stages:
     - path: results/metrics/evaluate_deep_learning_player.json
       md5: 1e918f82ff828846609b944b36dde571
       size: 178
+  compute_game_logs_stats:
+    cmd: "python scripts/compute_game_logs_stats.py --game_logs_dataset_path data/game_logs_dataset.pickle
+      --metrics_json_path results/metrics/game_logs_stats.json\n"
+    deps:
+    - path: data/game_logs_dataset.pickle
+      md5: 3792ef06c1da3b8dad930eabf1350867
+      size: 2999403393
+    - path: magic_the_gathering/actions/base.py
+      md5: d62482db18bc7681547077c51d7015c2
+      size: 5693
+    - path: magic_the_gathering/game_logs_dataset.py
+      md5: dade94bc2c69187d4b529b75ffa1a7ba
+      size: 6272
+    - path: scripts/compute_game_logs_stats.py
+      md5: 1d7ae2af667ed51267c18b4a6b0523e8
+      size: 819
+    outs:
+    - path: results/metrics/game_logs_stats.json
+      md5: b8b41653e45d922849787fa12ad1490e
+      size: 855

@@ -1,0 +1,32 @@
+{
+    "n_instances_per_player_per_action_type": {
+        "0": {
+            "PlayLandAction": 7491,
+            "NoneAction": 38129,
+            "TapAction": 70674,
+            "CastCardAction": 8068,
+            "DeclareAttackerAction": 9644
+        },
+        "1": {
+            "NoneAction": 38169,
+            "PlayLandAction": 7488,
+            "TapAction": 70685,
+            "CastCardAction": 8011,
+            "DeclareAttackerAction": 10029
+        }
+    },
+    "n_instances_per_player": {
+        "0": 134006,
+        "1": 134382
+    },
+    "n_instances_per_action_type": {
+        "PlayLandAction": 14979,
+        "NoneAction": 76298,
+        "TapAction": 141359,
+        "CastCardAction": 16079,
+        "DeclareAttackerAction": 19673
+    },
+    "n_total_instances": 268388,
+    "n_winning_instances": 140824,
+    "winning_proportion": 0.525
+}
