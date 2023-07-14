@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -18,6 +18,7 @@ class SingleActionScorerPreprocessor:
         zone_vector_dim: int,
         max_n_action_source_cards: int,
         max_n_action_target_cards: int,
+        action_vectors_history: List[Dict[str, np.ndarray]] = None,
     ) -> Tuple[Dict[str, torch.Tensor], Dict[str, torch.Tensor]]:
         preprocessed_game_state_vectors = self.preprocess_game_state_vectors(
             game_state_vectors, max_n_zone_vectors=max_n_zone_vectors, zone_vector_dim=zone_vector_dim
@@ -29,7 +30,16 @@ class SingleActionScorerPreprocessor:
             max_n_action_source_cards=max_n_action_source_cards,
             max_n_action_target_cards=max_n_action_target_cards,
         )
-        return preprocessed_game_state_vectors, preprocessed_action_vectors
+        if action_vectors_history is None:
+            return preprocessed_game_state_vectors, preprocessed_action_vectors
+        preprocessed_action_vectors_history = self.preprocess_action_vectors_history(
+            action_vectors_history=action_vectors_history,
+            max_n_zone_vectors=max_n_zone_vectors,
+            zone_vector_dim=zone_vector_dim,
+            max_n_action_source_cards=max_n_action_source_cards,
+            max_n_action_target_cards=max_n_action_target_cards,
+        )
+        return preprocessed_game_state_vectors, preprocessed_action_vectors_history, preprocessed_action_vectors
 
     def preprocess_game_state_vectors(
         self,
@@ -47,6 +57,25 @@ class SingleActionScorerPreprocessor:
             "zones": torch.from_numpy(padded_zones_vectors).float().to(self.device),
             "zones_padding_mask": torch.from_numpy(zones_padding_mask).bool().to(self.device),
         }
+
+    def preprocess_action_vectors_history(
+        self,
+        action_vectors_history: List[Dict[str, np.ndarray]],
+        max_n_zone_vectors: int,
+        zone_vector_dim: int,
+        max_n_action_source_cards: int,
+        max_n_action_target_cards: int,
+    ):
+        return [
+            self.preprocess_action_vectors(
+                action_vectors=action_vectors,
+                max_n_zone_vectors=max_n_zone_vectors,
+                zone_vector_dim=zone_vector_dim,
+                max_n_action_source_cards=max_n_action_source_cards,
+                max_n_action_target_cards=max_n_action_target_cards,
+            )
+            for action_vectors in action_vectors_history
+        ]
 
     def preprocess_action_vectors(
         self,
@@ -137,10 +166,12 @@ class SingleActionScorerDataset(torch.utils.data.Dataset):
         max_n_action_target_cards: int,
         game_logs_dataset: GameLogsDataset,
         return_label: bool = False,
+        action_history_length: int = None,
     ):
         self.device = device
         self.game_logs_dataset = game_logs_dataset
         self.return_label = return_label
+        self.action_history_length = action_history_length
         self.index_df = self.game_logs_dataset.get_index()
         self.max_n_zone_vectors = max_n_zone_vectors
         self.zone_vector_dim = zone_vector_dim
@@ -159,22 +190,60 @@ class SingleActionScorerDataset(torch.utils.data.Dataset):
         chosen_action_index = item_dict["chosen_action_index"]
         chosen_action_vectors = item_dict["possible_actions"][chosen_action_index]
 
-        preprocessed_game_state_vectors, preprocessed_action_vectors = self.preprocessor.preprocess(
-            game_state_vectors=game_state_vectors,
-            action_vectors=chosen_action_vectors,
-            max_n_zone_vectors=self.max_n_zone_vectors,
-            zone_vector_dim=self.zone_vector_dim,
-            max_n_action_source_cards=self.max_n_action_source_cards,
-            max_n_action_target_cards=self.max_n_action_target_cards,
-        )
+        action_vectors_history = None
+        if self.action_history_length is not None:
+            action_history = self.game_logs_dataset.get_action_history(game_id=game_id)
+            end_action_history_index = item_dict["action_history_index"]
+            start_action_history_index = max(0, end_action_history_index - self.action_history_length)
+            action_vectors_history = action_history[start_action_history_index:end_action_history_index]
+
+        if action_vectors_history is None:
+            preprocessed_action_vectors_history = None
+            preprocessed_game_state_vectors, preprocessed_action_vectors = self.preprocessor.preprocess(
+                game_state_vectors=game_state_vectors,
+                action_vectors=chosen_action_vectors,
+                max_n_zone_vectors=self.max_n_zone_vectors,
+                zone_vector_dim=self.zone_vector_dim,
+                max_n_action_source_cards=self.max_n_action_source_cards,
+                max_n_action_target_cards=self.max_n_action_target_cards,
+                action_vectors_history=action_vectors_history,
+            )
+        else:
+            (
+                preprocessed_game_state_vectors,
+                preprocessed_action_vectors_history,
+                preprocessed_action_vectors,
+            ) = self.preprocessor.preprocess(
+                game_state_vectors=game_state_vectors,
+                action_vectors=chosen_action_vectors,
+                max_n_zone_vectors=self.max_n_zone_vectors,
+                zone_vector_dim=self.zone_vector_dim,
+                max_n_action_source_cards=self.max_n_action_source_cards,
+                max_n_action_target_cards=self.max_n_action_target_cards,
+                action_vectors_history=action_vectors_history,
+            )
+
+        label = None
 
         if self.return_label:
             winner_player_index = self.game_logs_dataset.get_winner_player_index(game_id=game_id)
             label = self.__get_label(
                 chosen_action_vectors=chosen_action_vectors, winner_player_index=winner_player_index
             )
-            return preprocessed_game_state_vectors, preprocessed_action_vectors, label
-        return preprocessed_game_state_vectors, preprocessed_action_vectors
+
+        if preprocessed_action_vectors_history is None:
+            if label is not None:
+                return preprocessed_game_state_vectors, preprocessed_action_vectors, label
+            return preprocessed_game_state_vectors, preprocessed_action_vectors
+        else:
+            if label is not None:
+                return (
+                    preprocessed_game_state_vectors,
+                    preprocessed_action_vectors_history,
+                    preprocessed_action_vectors,
+                    label,
+                )
+            return preprocessed_game_state_vectors, preprocessed_action_vectors_history, preprocessed_action_vectors
 
     def __get_label(self, chosen_action_vectors: Dict, winner_player_index: int) -> torch.Tensor:
         source_player_index = chosen_action_vectors["source_player_index"]
