@@ -1,35 +1,35 @@
 {
     "n_instances_per_player_per_action_type": {
         "0": {
-            "PlayLandAction": 7373,
-            "NoneAction": 42782,
-            "TapAction": 69241,
-            "CastCardAction": 7927,
-            "DeclareAttackerAction": 9588,
-            "DeclareBlockerAction": 2174
+            "PlayLandAction": 7484,
+            "NoneAction": 42761,
+            "TapAction": 69550,
+            "CastCardAction": 7949,
+            "DeclareAttackerAction": 9448,
+            "DeclareBlockerAction": 2069
         },
         "1": {
-            "PlayLandAction": 7370,
-            "NoneAction": 42626,
-            "TapAction": 68246,
-            "CastCardAction": 7911,
-            "DeclareAttackerAction": 10008,
-            "DeclareBlockerAction": 2015
+            "PlayLandAction": 7445,
+            "NoneAction": 42799,
+            "TapAction": 68095,
+            "CastCardAction": 7786,
+            "DeclareAttackerAction": 9607,
+            "DeclareBlockerAction": 2126
         }
     },
     "n_instances_per_player": {
-        "0": 139085,
-        "1": 138176
+        "0": 139261,
+        "1": 137858
     },
     "n_instances_per_action_type": {
-        "PlayLandAction": 14743,
-        "NoneAction": 85408,
-        "TapAction": 137487,
-        "CastCardAction": 15838,
-        "DeclareAttackerAction": 19596,
-        "DeclareBlockerAction": 4189
+        "PlayLandAction": 14929,
+        "NoneAction": 85560,
+        "TapAction": 137645,
+        "CastCardAction": 15735,
+        "DeclareAttackerAction": 19055,
+        "DeclareBlockerAction": 4195
     },
-    "n_total_instances": 277261,
-    "n_winning_instances": 145550,
-    "winning_proportion": 0.525
+    "n_total_instances": 277119,
+    "n_winning_instances": 146772,
+    "winning_proportion": 0.53
 }
