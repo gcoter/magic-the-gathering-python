@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import torch
 from pytorch_lightning import LightningModule
@@ -71,6 +71,7 @@ class SingleActionScorerV2(BaseSingleActionScorer):
         self,
         batch_preprocessed_game_state_vectors: Dict[str, torch.Tensor],
         batch_preprocessed_action_vectors: Dict[str, torch.Tensor],
+        batch_preprocessed_action_vectors_history: List[Dict[str, torch.Tensor]] = None,
     ):
         """
         Inputs:
