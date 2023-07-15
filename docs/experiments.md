@@ -14,7 +14,50 @@ mlflow ui
 
 In the results, the git commit hashes and the MLflow experiment names are always given for reference.
 
-## 2023-07-14
+## 2023-07-15
+### Description
+I implemented a model architecture which can take the last N actions into account. Thanks to this, it becomes possible for a model to look at the past, which was one of the improvements listed in the past.
+
+### New architecture: SingleActionScorerV3
+`SingleActionScorerV3` is very similar to `SingleActionScorerV2`, the only difference is that a transformer is used at the end to make the final prediction based on the current game state, one possible action and the previous N actions from the game history.
+
+### Results
+#### Dataset
+The dataset is the one used in the experiments of `2023-07-13`:
+| Git commit hash | Number of instances | Proportion of winning instances | Number of PlayLandAction | Number of NoneAction | Number of TapAction | Number of CastCardAction | Number of DeclareAttackerAction | Number of DeclareBlockerAction |
+| --------------- | ------------------- | ------------------------------- | ------------------------ | -------------------- | ------------------- | ------------------------ | ------------------------------- | ------------------------------ |
+| 7c8f43fa        | 283,113             | 52%                             | 14,979                   | 86,703               | 141,359             | 16,079                   | 19,673                          | 4,320                          |
+
+#### Summary Table
+| Git commit Hash | MLflow experiment name | Player Class                 | Scorer Model Class   | Number of parameters | transformer_n_layers | transformer_n_heads | action_history_length | Win Rate against a random player |
+| --------------- | -----------------------| ---------------------------- | -------------------- | -------------------- | -------------------- | ------------------- | --------------------- | -------------------------------- |
+| 42a84d22        | valuable-swan-948      | SampleActionFromScoresPlayer | SingleActionScorerV2 | 141,825              | 2                    | 8                   | NA                    | 50.9%                |
+| 2d681a2c        | upbeat-calf-801        | SampleActionFromScoresPlayer | SingleActionScorerV3 | 208,961              | 2                    | 8                   | 5                     | 51.7%                            |
+
+#### Training Loss Comparison
+![](img/2023-07-15-14-37-12.png)
+
+#### Validation Loss Comparison
+![](img/2023-07-15-14-37-46.png)
+
+### Analysis of the results
+Adding the history does not seem to improve the results, moreover it takes a lot of time to train (12.8 hours instead of ~5 hours for other models).
+
+#### Comparison between the new model and a random player
+| Git commit Hash | MLflow experiment name | Player Class                 | Scorer Model Class   | Number of instances | Number of PlayLandAction | Number of NoneAction | Number of TapAction | Number of CastCardAction | Number of DeclareAttackerAction | Number of DeclareBlockerAction |
+| --------------- | ---------------------- | ---------------------------- | -------------------- | ------------------- | ------------------------ | -------------------- | ------------- | ----------- | ---------------------- | ------------------------------- |
+| 2d681a2c        | upbeat-calf-801        | RandomPlayer                 | NA                   | 139,261             | 7,484                    | 42,761               | 69,550        | 7,949       | 9,448                  | 2,069                           |
+| 2d681a2c        | upbeat-calf-801        | SampleActionFromScoresPlayer | SingleActionScorerV3 | 137,858             | 7,445                    | 42,799               | 68,095        | 7,786       | 9,607                  | 2,126                           |
+
+We can see that the AI player casts and taps less while attacking and blocking more than a random player, but the difference are still small.
+
+#### Possible improvements
+Considering the weak improvement of adding the history, it would be interesting to now focus on creating players that can "look into the future" by simulating several actions ahead.
+
+#### Possible biases and broken rules
+The biases and broken rules described in the section `2023-07-01` still apply.
+
+## 2023-07-13
 ### Description
 #### Bug in data collection
 I found a bug in the definition of `CombatDeclareBlockersPhase` which resulted in a bad data collection.
