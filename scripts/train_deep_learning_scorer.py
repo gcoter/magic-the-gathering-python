@@ -11,7 +11,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 from magic_the_gathering.game_logs_dataset import GameLogsDataset
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.dataset import SingleActionScorerDataset
-from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v2 import SingleActionScorerV2
+from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.v3 import SingleActionScorerV3
 from magic_the_gathering.utils import set_random_seed
 
 
@@ -66,7 +66,7 @@ def train_deep_learning_scorer(
 
     print("Initialize model")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SingleActionScorerV2(
+    model = SingleActionScorerV3(
         **params["hyper_parameters"],
     ).to(device)
 
@@ -82,6 +82,7 @@ def train_deep_learning_scorer(
         max_n_action_target_cards=params["hyper_parameters"]["max_n_action_target_cards"],
         device=device,
         return_label=True,
+        action_history_length=params["hyper_parameters"].get("action_history_length", None),
     )
     training_dataset, validation_dataset = torch.utils.data.random_split(
         dataset,

@@ -8,6 +8,7 @@ deep_learning_scorer:
     action_general_dim: 31
     max_n_action_source_cards: 10
     max_n_action_target_cards: 10
+    action_history_length: 5
     embedding_dim: 64
     transformer_n_layers: 2
     transformer_n_heads: 8

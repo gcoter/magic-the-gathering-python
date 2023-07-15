@@ -6,7 +6,7 @@ from pytorch_lightning import LightningModule
 from magic_the_gathering.players.deep_learning_based.single_action_scorer.models.base import BaseSingleActionScorer
 
 
-class SingleActionScorerV2(BaseSingleActionScorer):
+class SingleActionScorerV3(BaseSingleActionScorer):
     def __init__(
         self,
         game_state_global_dim: int,
@@ -17,6 +17,7 @@ class SingleActionScorerV2(BaseSingleActionScorer):
         action_general_dim: int,
         max_n_action_source_cards: int,
         max_n_action_target_cards: int,
+        action_history_length: int,
         embedding_dim: int,
         transformer_n_layers: int,
         transformer_n_heads: int,
@@ -28,6 +29,7 @@ class SingleActionScorerV2(BaseSingleActionScorer):
             zone_vector_dim=zone_vector_dim,
             max_n_action_source_cards=max_n_action_source_cards,
             max_n_action_target_cards=max_n_action_target_cards,
+            action_history_length=action_history_length,
         )
         self.game_state_global_dim = game_state_global_dim
         self.n_players = n_players
@@ -65,6 +67,11 @@ class SingleActionScorerV2(BaseSingleActionScorer):
         )
         self.classification_block = ClassificationBlock(
             input_dim=self.embedding_dim,
+            action_history_length=self.action_history_length,
+            transformer_n_layers=self.transformer_n_layers,
+            transformer_n_heads=self.transformer_n_heads,
+            transformer_dim_feedforward=self.transformer_dim_feedforward,
+            dropout=self.dropout,
         )
 
     def forward(
@@ -92,15 +99,36 @@ class SingleActionScorerV2(BaseSingleActionScorer):
             "target_card_vectors": (batch_size, max_n_action_target_cards, zone_vector_dim)
         }
 
+        - batch_preprocessed_action_vectors_history:
+
+        [
+            {
+                "general": (batch_size, action_general_dim),
+                "source_card_uuids": (batch_size, n_cards),
+                "source_card_uuids_padding_mask": (batch_size, n_cards),
+                "target_card_uuids": (batch_size, n_cards),
+                "target_card_uuids_padding_mask": (batch_size, n_cards)
+            }
+        ] * action_history_length
+
         Outputs:
         - scores: (batch_size,)
         """
         batch_current_game_state_embedding = self.game_state_processing_block(batch_preprocessed_game_state_vectors)
 
+        assert batch_preprocessed_action_vectors_history is not None
+        batch_action_history_embeddings = torch.cat(
+            [
+                self.action_processing_block(action_vectors)[:, None]
+                for action_vectors in batch_preprocessed_action_vectors_history
+            ],
+            dim=1,
+        )
+
         batch_action_embedding = self.action_processing_block(batch_preprocessed_action_vectors)
 
         batch_predicted_action_score = self.classification_block(
-            batch_current_game_state_embedding, batch_action_embedding
+            batch_current_game_state_embedding, batch_action_history_embeddings, batch_action_embedding
         )
 
         return batch_predicted_action_score
@@ -314,23 +342,96 @@ class GameStateProcessingBlock(LightningModule):
 
 
 class ClassificationBlock(LightningModule):
-    def __init__(self, input_dim: int):
+    def __init__(
+        self,
+        input_dim: int,
+        action_history_length: int,
+        transformer_n_layers: int = 1,
+        transformer_n_heads: int = 1,
+        transformer_dim_feedforward: int = 128,
+        dropout: float = 0.0,
+    ):
         super().__init__()
         self.input_dim = input_dim
+        self.action_history_length = action_history_length
+        self.transformer_n_layers = transformer_n_layers
+        self.transformer_n_heads = transformer_n_heads
+        self.transformer_dim_feedforward = transformer_dim_feedforward
+        self.dropout = dropout
 
         # Modules
-        self.mlp = torch.nn.Sequential(torch.nn.Linear(2 * self.input_dim, 1), torch.nn.Sigmoid())
+        self.type_embeddings = torch.nn.Embedding(num_embeddings=4, embedding_dim=self.input_dim)
+        self.transformer_encoder = torch.nn.TransformerEncoder(
+            encoder_layer=torch.nn.TransformerEncoderLayer(
+                d_model=self.input_dim,
+                nhead=self.transformer_n_heads,
+                dim_feedforward=self.transformer_dim_feedforward,
+                dropout=self.dropout,
+                activation="relu",
+                batch_first=True,
+            ),
+            num_layers=self.transformer_n_layers,
+        )
+        self.mlp = torch.nn.Sequential(torch.nn.Linear(self.input_dim, 1), torch.nn.Sigmoid())
 
     def forward(
-        self, batch_current_game_state_embedding: torch.Tensor, batch_action_embedding: torch.Tensor
+        self,
+        batch_current_game_state_embedding: torch.Tensor,
+        batch_action_history_embeddings: List[torch.Tensor],
+        batch_action_embedding: torch.Tensor,
     ) -> torch.Tensor:
         """
         Inputs:
         - batch_current_game_state_embedding: (batch_size, input_dim)
+        - batch_action_history_embeddings: (batch_size, action_history_length, input_dim)
         - batch_action_embedding: (batch_size, input_dim)
 
         Outputs:
         - batch_predicted_action_score: (batch_size,)
         """
-        x = torch.cat([batch_current_game_state_embedding, batch_action_embedding], dim=1)
-        return self.mlp(x)[:, 0]
+
+        game_state_embedding = self.__get_game_state_embedding(batch_current_game_state_embedding)
+        action_history_embeddings = self.__get_action_history_embeddings(batch_action_history_embeddings)
+        action_embedding = self.__get_action_embedding(batch_action_embedding)
+
+        embedding_for_prediction = self.__get_embedding_for_prediction(game_state_embedding)
+
+        embeddings_sequence = torch.cat(
+            [
+                embedding_for_prediction[:, None],
+                game_state_embedding[:, None],
+                action_history_embeddings,
+                action_embedding[:, None],
+            ],
+            dim=1,
+        )
+
+        embeddings_sequence_after_transformer = self.transformer_encoder(embeddings_sequence)
+        transformer_output_embedding_for_classification = embeddings_sequence_after_transformer[:, 0, :]
+
+        return self.mlp(transformer_output_embedding_for_classification)[:, 0]
+
+    def __get_embedding_for_prediction(self, global_embedding: torch.Tensor):
+        batch_size = global_embedding.shape[0]
+        idx = torch.zeros(batch_size).to(global_embedding).long()
+        return self.type_embeddings(idx).to(global_embedding)
+
+    def __get_game_state_embedding(self, batch_current_game_state_embedding: torch.Tensor) -> torch.Tensor:
+        batch_size = batch_current_game_state_embedding.shape[0]
+        idx = 1 * torch.ones(batch_size).to(batch_current_game_state_embedding).long()
+        embedding_type = self.type_embeddings(idx).to(batch_current_game_state_embedding)
+        return batch_current_game_state_embedding + embedding_type
+
+    def __get_action_history_embeddings(self, batch_action_history_embeddings: List[torch.Tensor]) -> torch.Tensor:
+        batch_size = batch_action_history_embeddings.shape[0]
+        action_history_size = batch_action_history_embeddings.shape[1]
+        assert action_history_size <= self.action_history_length
+        idx = 2 * torch.ones(batch_size, action_history_size).to(batch_action_history_embeddings).long()
+        embeddings_type = self.type_embeddings(idx).to(batch_action_history_embeddings)
+        return batch_action_history_embeddings + embeddings_type
+
+    def __get_action_embedding(self, batch_action_embedding: torch.Tensor) -> torch.Tensor:
+        batch_size = batch_action_embedding.shape[0]
+        idx = 3 * torch.ones(batch_size).to(batch_action_embedding).long()
+        embedding_type = self.type_embeddings(idx).to(batch_action_embedding)
+        return batch_action_embedding + embedding_type
