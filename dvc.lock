@@ -60,8 +60,8 @@ stages:
       md5: da8f2877d3191b9ffdf44a06a990b7c1
       size: 7598
     - path: magic_the_gathering/cards/deck_creator.py
-      md5: 0328d2fda31d5c1f059c1f35bef94dc5
-      size: 3671
+      md5: 9d7f3368e262d9e833a3a25d6b8ecce5
+      size: 1933
     - path: magic_the_gathering/cards/state.py
       md5: 1c251a39ebbc2aaa48585db632367b84
       size: 1288
@@ -266,8 +266,8 @@ stages:
       md5: da8f2877d3191b9ffdf44a06a990b7c1
       size: 7598
     - path: magic_the_gathering/cards/deck_creator.py
-      md5: 0328d2fda31d5c1f059c1f35bef94dc5
-      size: 3671
+      md5: 9d7f3368e262d9e833a3a25d6b8ecce5
+      size: 1933
     - path: magic_the_gathering/cards/state.py
       md5: 1c251a39ebbc2aaa48585db632367b84
       size: 1288
