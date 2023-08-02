@@ -179,10 +179,27 @@ def get_k_in_n(k: int, n: int) -> float:
     return math.comb(n, k)
 
 
+def simple_print_deck(deck: OrderedDict[str, object]):
+    cards = list(deck.values())
+    sorted_cards = sorted(cards, key=lambda c: (c.mana_value, c.name))
+
+    lands = [card for card in sorted_cards if card.is_land]
+    nonlands = [card for card in sorted_cards if not card.is_land]
+
+    for nonland in nonlands:
+        simple_print_creature(nonland)
+
+    print(pd.Series([card.name for card in lands]).value_counts())
+
+
+def simple_print_creature(card: object):
+    print(f"{card.name} - {card.mana_cost} - ({int(card.power)}/{int(card.toughness)})")
+
+
 if __name__ == "__main__":
     champion_deck = search_for_arena_winner(
         consecutive_test_wins_threshold=10,
         games_limit_per_test=50,
         p_value=0.05,
     )
-    print(champion_deck)
+    simple_print_deck(champion_deck)
