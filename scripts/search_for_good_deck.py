@@ -3,6 +3,7 @@ import logging
 import math
 import os
 import random
+import time
 from functools import lru_cache
 from typing import List, OrderedDict
 
@@ -19,6 +20,24 @@ from magic_the_gathering.game_state import GameState
 from magic_the_gathering.players.random import RandomPlayer
 
 
+def print_execution_time(func):
+    """
+    Decorator that, when applied to a function/method, adds the functionality of printing the execution time
+    :param func: function to apply this decorator to
+    :return: what the func returns
+    """
+
+    def wrapper(*arg, **kw):
+        start_time = time.time()
+        result = func(*arg, **kw)
+        time_delta = time.time() - start_time
+        print(f"Function '{func.__name__}' executed in {round(time_delta, 1)} seconds")
+        return result
+
+    return wrapper
+
+
+@print_execution_time
 def search_for_arena_winner(
     consecutive_test_wins_threshold: int = 2,
     games_limit_per_test: int = 100,
@@ -50,7 +69,9 @@ def search_for_arena_winner_recursive(
     games_limit: int = 100,
     p_value: float = 0.05,
 ) -> OrderedDict[str, object]:
-    print(f"\nConsecutive test wins of deck 0 in the arena is {consecutive_test_wins}")
+    print(f"\nConsecutive test wins of deck in the arena is {consecutive_test_wins}")
+    print("Deck is")
+    simple_print_deck(decks[0])
 
     if consecutive_test_wins >= consecutive_test_wins_threshold:
         return decks[0]
@@ -181,6 +202,7 @@ def get_k_in_n(k: int, n: int) -> float:
 
 
 def simple_print_deck(deck: OrderedDict[str, object]):
+    print()
     cards = list(deck.values())
     sorted_cards = sorted(cards, key=lambda c: (c.mana_value, c.name))
 
