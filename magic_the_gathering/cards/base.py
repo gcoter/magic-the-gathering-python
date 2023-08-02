@@ -23,6 +23,7 @@ class Card:
             color_identity=color_identity,
             type=series["type_line"],
             text=series["oracle_text"] if not pd.isna(series["oracle_text"]) else "",
+            mana_cost=series["mana_cost"],  # FIXME: did not look for consequences of this addition
             mana_cost_dict=Card.convert_mana_cost_to_dict(series["mana_cost"])
             if not pd.isna(series["mana_cost"])
             else None,
@@ -53,6 +54,7 @@ class Card:
         color_identity: List[str],
         type: str,
         text: str,
+        mana_cost: str,
         mana_cost_dict: Optional[Dict[str, int]] = None,
         power: Optional[str] = "",
         toughness: Optional[str] = "",
@@ -64,6 +66,7 @@ class Card:
         self.color_identity = color_identity
         self.type = type
         self.text = text
+        self.mana_cost = mana_cost
         self.mana_cost_dict = mana_cost_dict
         self.power = power
         self.toughness = toughness
