@@ -79,6 +79,7 @@ class Card:
             color_identity=self.color_identity,
             type=self.type,
             text=self.text,
+            mana_cost=self.mana_cost,
             mana_cost_dict=self.mana_cost_dict,
             power=self.power,
             toughness=self.toughness,
