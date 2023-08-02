@@ -23,7 +23,7 @@ def search_for_arena_winner(
     consecutive_test_wins_threshold: int = 2,
     games_limit_per_test: int = 100,
     p_value: float = 0.05,
-) -> list[object]:
+) -> OrderedDict[str, object]:
     """
     Looks for an arena champion deck until one is found.
     A champion deck is a deck that is tested as significantly better than a random deck consecutive_test_wins_threshold
@@ -44,12 +44,12 @@ def search_for_arena_winner(
 
 
 def search_for_arena_winner_recursive(
-    decks: list[list[object]],
+    decks: list[OrderedDict[str, object]],
     consecutive_test_wins: int = 0,
     consecutive_test_wins_threshold: int = 2,
     games_limit: int = 100,
     p_value: float = 0.05,
-) -> list[object]:
+) -> OrderedDict[str, object]:
     print(f"\nConsecutive test wins of deck 0 in the arena is {consecutive_test_wins}")
 
     if consecutive_test_wins >= consecutive_test_wins_threshold:
@@ -76,7 +76,9 @@ def search_for_arena_winner_recursive(
     )
 
 
-def get_index_of_best_deck(decks: list[list[object]], games_limit: int = 100, p_value: float = 0.05) -> int | None:
+def get_index_of_best_deck(
+    decks: list[OrderedDict[str, object]], games_limit: int = 100, p_value: float = 0.05
+) -> int | None:
     games_count = 0
     wins_count = 0
     while games_count < games_limit:
@@ -96,7 +98,7 @@ def get_index_of_best_deck(decks: list[list[object]], games_limit: int = 100, p_
             return 0 if wins_count / games_count >= 0.5 else 1
 
 
-def simulate_one_game(decks: list[list[object]]) -> int:
+def simulate_one_game(decks: list[OrderedDict[str, object]]) -> int:
     game_mode = DefaultGameMode()
     Action.HISTORY = []
     players = create_players(2, game_mode)
@@ -124,21 +126,20 @@ def set_logging_level():
 
 def create_decks(
     n_players: int = 2,
-) -> List[List[object]]:  # FIXME: I had to remove Card because it caused a circular import
+) -> List[OrderedDict[str, object]]:  # FIXME: I had to remove Card because it caused a circular import
     legal_lands_df = pd.read_csv("data/basic_land_cards.csv")
     legal_creatures_df = pd.read_csv("data/vanilla_creature_cards.csv")
     deck_creator = RandomVanillaDeckCreator(
         legal_lands_df,
         legal_creatures_df,
-        deck_size=60,
-        lands_proportion=0.4,
+        deck_size=40,
+        lands_proportion=17 / 40,
     )
     decks = deck_creator.create_decks(n_players=n_players)
     for i, deck in enumerate(decks):
         items = list(deck.items())
         random.shuffle(items)
         decks[i] = OrderedDict(items)
-    # TODO: Need to add Mulligan phase
     return decks
 
 
