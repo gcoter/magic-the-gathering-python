@@ -107,8 +107,7 @@ class Card:
                 if player.mana_pool[mana_color] < mana_cost:
                     return False
         player_pool_value = sum(player.mana_pool.values())
-        mana_value = sum(self.mana_cost_dict.values())
-        if player_pool_value < mana_value:
+        if player_pool_value < self.mana_value:
             return False
         return True
 
@@ -160,6 +159,10 @@ class Card:
     def main_color(self) -> str:
         # FIXME: Handle multi-color cards
         return self.color_identity[0]
+
+    @property
+    def mana_value(self) -> int:
+        return sum(self.mana_cost_dict.values()) if self.mana_cost_dict is not None else 0
 
     def __repr__(self) -> str:
         return f"Card(uuid={self.uuid}, name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, power={self.get_power()}, toughness={self.get_toughness()}, state={self.state})"
