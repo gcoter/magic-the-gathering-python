@@ -82,7 +82,7 @@ def search_for_arena_winner_recursive(
     if winner_player_index is None:
         return search_for_arena_winner_recursive(
             decks=[copy.deepcopy(decks)[0], new_opponent_deck],
-            consecutive_test_wins=0,
+            consecutive_test_wins=consecutive_test_wins,
             consecutive_test_wins_threshold=consecutive_test_wins_threshold,
             games_limit=games_limit,
             p_value=p_value,
