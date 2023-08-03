@@ -38,6 +38,23 @@ def print_execution_time(func):
 
 
 @print_execution_time
+def search_for_arena_winners(
+    champions_to_find: int = 10,
+    consecutive_test_wins_threshold: int = 2,
+    games_limit_per_test: int = 100,
+    p_value: float = 0.05,
+):
+    return [
+        search_for_arena_winner(
+            consecutive_test_wins_threshold=consecutive_test_wins_threshold,
+            games_limit_per_test=games_limit_per_test,
+            p_value=p_value,
+        )
+        for _ in range(champions_to_find)
+    ]
+
+
+@print_execution_time
 def search_for_arena_winner(
     consecutive_test_wins_threshold: int = 2,
     games_limit_per_test: int = 100,
@@ -156,7 +173,7 @@ def create_decks(
     deck_creator = RandomVanillaDeckCreator(
         legal_lands_df,
         legal_creatures_df,
-        deck_size=40,
+        deck_size=20,
         lands_proportion=17 / 40,
     )
     decks = deck_creator.create_decks(n_players=n_players)
@@ -217,9 +234,10 @@ def get_deck_simple_repr(deck: OrderedDict[str, object]) -> str:
 
 
 if __name__ == "__main__":
-    champion_deck = search_for_arena_winner(
-        consecutive_test_wins_threshold=10,
-        games_limit_per_test=50,
+    champions = search_for_arena_winners(
+        champions_to_find=10,
+        consecutive_test_wins_threshold=5,
+        games_limit_per_test=100,
         p_value=0.05,
     )
-    simple_print_deck(champion_deck)
+    print("\n\n".join([get_deck_simple_repr(champion) for champion in champions]))
