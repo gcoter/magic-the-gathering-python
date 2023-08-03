@@ -70,8 +70,6 @@ def search_for_arena_winner_recursive(
     p_value: float = 0.05,
 ) -> OrderedDict[str, object]:
     print(f"\nConsecutive test wins of deck in the arena is {consecutive_test_wins}")
-    print("Deck is")
-    simple_print_deck(decks[0])
 
     if consecutive_test_wins >= consecutive_test_wins_threshold:
         return decks[0]
@@ -80,6 +78,7 @@ def search_for_arena_winner_recursive(
 
     new_opponent_deck = create_decks(n_players=1)[0]
     if winner_player_index is None:
+        print("No clear better deck has been identified, going to the next opponent")
         return search_for_arena_winner_recursive(
             decks=[copy.deepcopy(decks)[0], new_opponent_deck],
             consecutive_test_wins=consecutive_test_wins,
@@ -87,6 +86,10 @@ def search_for_arena_winner_recursive(
             games_limit=games_limit,
             p_value=p_value,
         )
+
+    if winner_player_index == 1:
+        print(f"Champion has been beaten after {consecutive_test_wins} consecutive wins by")
+        print(get_deck_simple_repr(decks[1]))
 
     return search_for_arena_winner_recursive(
         decks=[copy.deepcopy(decks)[winner_player_index], new_opponent_deck],
@@ -111,9 +114,9 @@ def get_index_of_best_deck(
         p_decks_are_equivalently_powerful = get_probability_of_at_least_k_heads_in_n_flips(
             wins_of_player_with_most_wins, games_count
         )
-        print(
-            f"Probability that decks are equivalently powerful with {wins_of_player_with_most_wins} wins out of {games_count}: {p_decks_are_equivalently_powerful}"
-        )
+        # print(
+        #    f"Probability that decks are equivalently powerful with {wins_of_player_with_most_wins} wins out of {games_count}: {p_decks_are_equivalently_powerful}"
+        # )
         if p_decks_are_equivalently_powerful <= p_value:
             print(f"After {games_count} games, a deck has been identified as being significantly better")
             return 0 if wins_count / games_count >= 0.5 else 1
@@ -201,22 +204,16 @@ def get_k_in_n(k: int, n: int) -> float:
     return math.comb(n, k)
 
 
-def simple_print_deck(deck: OrderedDict[str, object]):
-    print()
+def get_deck_simple_repr(deck: OrderedDict[str, object]) -> str:
     cards = list(deck.values())
     sorted_cards = sorted(cards, key=lambda c: (c.mana_value, c.name))
 
     lands = [card for card in sorted_cards if card.is_land]
     nonlands = [card for card in sorted_cards if not card.is_land]
 
-    for nonland in nonlands:
-        simple_print_creature(nonland)
+    nonland_str = "\n".join([str(card) for card in nonlands])
 
-    print(pd.Series([card.name for card in lands]).value_counts())
-
-
-def simple_print_creature(card: object):
-    print(f"{card.name} - {card.mana_cost} - ({int(card.power)}/{int(card.toughness)})")
+    return f"{nonland_str}\n{str(pd.Series([card.name for card in lands]).value_counts())[:-26]}"
 
 
 if __name__ == "__main__":
