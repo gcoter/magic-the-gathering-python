@@ -39,6 +39,7 @@ class Player:
 
     def choose_action(self, game_state: GameState, possible_actions: List[Action]) -> Action:
         self.logger.debug(f"{self} is choosing an action among: {possible_actions}")
+        game_state = game_state.hide_information_to_current_player()
         action = self._choose_action(game_state, possible_actions)
         self.logger.debug(f"Chosen action: {action}")
         if self.game_logs_dataset is not None:
