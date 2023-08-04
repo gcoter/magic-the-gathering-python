@@ -26,6 +26,7 @@ class Action:
         "TapAction",
         "UntapAction",
         "UntapAllAction",
+        "DiscardAction",
     ]
 
     @staticmethod
