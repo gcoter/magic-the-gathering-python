@@ -24,6 +24,10 @@ class GameEngine:
         self.game_state = self.turn.run(self.game_state)
 
     def run(self) -> int:
+        # Run the Mulligan phase at the beginning of the game
+        self.game_state = self.mulligan_phase.run(self.game_state)
+
+        # Loop over phases for the rest of the game
         while True:
             try:
                 self.run_one_turn()
