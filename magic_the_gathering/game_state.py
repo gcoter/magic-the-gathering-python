@@ -181,9 +181,11 @@ class GameState:
 
     def __create_one_zone_vector(self, card, zone) -> np.ndarray:
         card_vector = card.to_vector()
-        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(card.state.owner_player_id)
+        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
+            card.state.owner_player_id if card.state is not None else None
+        )
         started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
-            card.state.started_turn_controlled_by_player_id
+            card.state.started_turn_controlled_by_player_id if card.state is not None else None
         )
         player_index_vector = np.zeros(self.n_players)
         zone_vector = self.zone_position_to_one_hot_vector(zone)
@@ -211,10 +213,15 @@ class GameState:
 
     def hide_information_to_current_player(self):
         clone_game_state = deepcopy(self)
-        clone_game_state.zones[ZonePosition.LIBRARY] = [
-            clone_game_state.zones[ZonePosition.LIBRARY][clone_game_state.current_player_index]
-        ]
-        clone_game_state.zones[ZonePosition.HAND] = [
-            clone_game_state.zones[ZonePosition.HAND][clone_game_state.current_player_index]
-        ]
+        for player_index in range(self.n_players):
+            if player_index == clone_game_state.current_player_index:
+                clone_game_state.zones[ZonePosition.LIBRARY][player_index] = clone_game_state.zones[
+                    ZonePosition.LIBRARY
+                ][player_index]
+                clone_game_state.zones[ZonePosition.HAND][player_index] = clone_game_state.zones[ZonePosition.HAND][
+                    player_index
+                ]
+            else:
+                clone_game_state.zones[ZonePosition.LIBRARY][player_index] = OrderedDict()
+                clone_game_state.zones[ZonePosition.HAND][player_index] = OrderedDict()
         return clone_game_state
