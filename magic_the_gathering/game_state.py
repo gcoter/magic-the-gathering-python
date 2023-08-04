@@ -184,16 +184,12 @@ class GameState:
         card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
             card.state.owner_player_id if card.state is not None else None
         )
-        started_turn_controlled_by_player_one_hot_vector = self.player_index_to_one_hot_vector(
-            card.state.started_turn_controlled_by_player_id if card.state is not None else None
-        )
-        player_index_vector = np.zeros(self.n_players)
+        player_index_vector = self.player_index_to_one_hot_vector(player_index)
         zone_vector = self.zone_position_to_one_hot_vector(zone)
         return np.concatenate(
             [
                 card_vector,
                 card_owner_one_hot_vector,
-                started_turn_controlled_by_player_one_hot_vector,
                 player_index_vector,
                 zone_vector,
             ]

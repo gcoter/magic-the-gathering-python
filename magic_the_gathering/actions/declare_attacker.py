@@ -13,7 +13,7 @@ class DeclareAttackerAction(Action):
         for target_player_index, target_player in enumerate(game_state.players):
             if target_player_index != attacker_player_index and game_state.players[target_player_index].is_alive:
                 for card_uuid, card in player_board.items():
-                    if card.is_creature and not card.state.is_tapped:
+                    if card.is_creature and not card.state.is_tapped and not card.state.is_summoning_sick:
                         possible_actions.append(
                             cls(
                                 attacker_player_index=attacker_player_index,
