@@ -61,15 +61,4 @@ class UntapAllAction(Action):
         player_board = game_state.zones[ZonePosition.BOARD][self.player_index]
         for player_card in player_board.values():
             player_card.state.is_tapped = False
-
-        # Reset mana pool
-        game_state.players[self.player_index].mana_pool = {
-            "W": 0,
-            "U": 0,
-            "B": 0,
-            "R": 0,
-            "G": 0,
-            "any": 0,
-        }
-
         return game_state
