@@ -171,7 +171,7 @@ class GameState:
             else:
                 for player_index in range(self.n_players):
                     for card_uuid, card in self.zones[zone][player_index].items():
-                        vector = self.__create_one_zone_vector(card=card, zone=zone)
+                        vector = self.__create_one_zone_vector(card=card, zone=zone, player_index=player_index)
                         uuids.append(card_uuid)
                         zones_vectors.append(vector)
         final_array = np.array(zones_vectors).astype(np.float32)
@@ -179,12 +179,15 @@ class GameState:
             return final_array, uuids
         return final_array
 
-    def __create_one_zone_vector(self, card, zone) -> np.ndarray:
+    def __create_one_zone_vector(self, card, zone, player_index=None) -> np.ndarray:
         card_vector = card.to_vector()
         card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
             card.state.owner_player_id if card.state is not None else None
         )
-        player_index_vector = self.player_index_to_one_hot_vector(player_index)
+        if player_index is None:
+            player_index_vector = np.zeros(self.n_players)
+        else:
+            player_index_vector = self.player_index_to_one_hot_vector(player_index)
         zone_vector = self.zone_position_to_one_hot_vector(zone)
         return np.concatenate(
             [
