@@ -213,14 +213,7 @@ class GameState:
     def hide_information_to_current_player(self):
         clone_game_state = deepcopy(self)
         for player_index in range(self.n_players):
-            if player_index == clone_game_state.current_player_index:
-                clone_game_state.zones[ZonePosition.LIBRARY][player_index] = clone_game_state.zones[
-                    ZonePosition.LIBRARY
-                ][player_index]
-                clone_game_state.zones[ZonePosition.HAND][player_index] = clone_game_state.zones[ZonePosition.HAND][
-                    player_index
-                ]
-            else:
+            if player_index != clone_game_state.current_player_index:
                 clone_game_state.zones[ZonePosition.LIBRARY][player_index] = OrderedDict()
                 clone_game_state.zones[ZonePosition.HAND][player_index] = OrderedDict()
         return clone_game_state
