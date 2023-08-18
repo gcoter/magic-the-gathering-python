@@ -33,6 +33,7 @@ class MainPhase(PhaseWherePlayersGetPriority):
                 action
                 for action in TapAction.list_possible_actions(game_state)
                 if action.player_index == game_state.current_player_index
+                and game_state.zones[ZonePosition.BOARD][game_state.current_player_index][action.card_uuid].is_land
             ]
         )
         return possible_actions

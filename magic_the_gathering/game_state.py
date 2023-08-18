@@ -1,5 +1,6 @@
 import json
 from collections import OrderedDict
+from copy import deepcopy
 from enum import Enum
 from typing import Dict, List, Optional
 from uuid import uuid4
@@ -164,43 +165,38 @@ class GameState:
         for zone in ZonePosition:
             if zone == ZonePosition.STACK:
                 for card_uuid, card in self.zones[zone].items():
-                    card_vector = card.to_vector()
-                    card_owner_one_hot_vector = self.player_index_to_one_hot_vector(card.state.owner_player_id)
-                    player_index_vector = np.zeros(self.n_players)
-                    zone_vector = self.zone_position_to_one_hot_vector(zone)
+                    vector = self.__create_one_zone_vector(card=card, zone=zone)
                     uuids.append(card_uuid)
-                    vector = np.concatenate(
-                        [
-                            card_vector,
-                            card_owner_one_hot_vector,
-                            player_index_vector,
-                            zone_vector,
-                        ]
-                    )
                     zones_vectors.append(vector)
-            elif zone != ZonePosition.LIBRARY:
+            else:
                 for player_index in range(self.n_players):
                     for card_uuid, card in self.zones[zone][player_index].items():
-                        card_vector = card.to_vector()
-                        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
-                            card.state.owner_player_id if card.state is not None else None
-                        )
-                        player_index_vector = self.player_index_to_one_hot_vector(player_index)
-                        zone_vector = self.zone_position_to_one_hot_vector(zone)
+                        vector = self.__create_one_zone_vector(card=card, zone=zone, player_index=player_index)
                         uuids.append(card_uuid)
-                        vector = np.concatenate(
-                            [
-                                card_vector,
-                                card_owner_one_hot_vector,
-                                player_index_vector,
-                                zone_vector,
-                            ]
-                        )
                         zones_vectors.append(vector)
         final_array = np.array(zones_vectors).astype(np.float32)
         if return_uuids:
             return final_array, uuids
         return final_array
+
+    def __create_one_zone_vector(self, card, zone, player_index=None) -> np.ndarray:
+        card_vector = card.to_vector()
+        card_owner_one_hot_vector = self.player_index_to_one_hot_vector(
+            card.state.owner_player_id if card.state is not None else None
+        )
+        if player_index is None:
+            player_index_vector = np.zeros(self.n_players)
+        else:
+            player_index_vector = self.player_index_to_one_hot_vector(player_index)
+        zone_vector = self.zone_position_to_one_hot_vector(zone)
+        return np.concatenate(
+            [
+                card_vector,
+                card_owner_one_hot_vector,
+                player_index_vector,
+                zone_vector,
+            ]
+        )
 
     def player_index_to_one_hot_vector(self, player_index: int = None) -> np.ndarray:
         one_hot_vector = np.zeros(self.n_players)
@@ -213,3 +209,11 @@ class GameState:
         if zone is not None:
             one_hot_vector[zone.value] = 1
         return one_hot_vector
+
+    def hide_information_to_current_player(self):
+        clone_game_state = deepcopy(self)
+        for player_index in range(self.n_players):
+            if player_index != clone_game_state.current_player_index:
+                clone_game_state.zones[ZonePosition.LIBRARY][player_index] = OrderedDict()
+                clone_game_state.zones[ZonePosition.HAND][player_index] = OrderedDict()
+        return clone_game_state

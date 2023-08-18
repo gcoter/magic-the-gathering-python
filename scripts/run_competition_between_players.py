@@ -57,13 +57,6 @@ def create_decks(
     return decks
 
 
-def create_hands(game_state: GameState):
-    for player_index, player in enumerate(game_state.players):
-        for _ in range(game_state.game_mode.initial_hand_size):
-            game_state = DrawAction(player_index=player_index).execute(game_state=game_state)
-    return game_state
-
-
 def create_players(
     game_mode: GameMode,
     players_classes: List[str],
@@ -140,7 +133,6 @@ def run_competition_between_players(
             players=players,
         )
         game_state.set_libraries(libraries=decks)
-        game_state = create_hands(game_state=game_state)
         game_engine = GameEngine(game_state=game_state, game_logs_dataset=game_logs_dataset)
         winner_player_index = game_engine.run()
         win_counts[winner_player_index] += 1

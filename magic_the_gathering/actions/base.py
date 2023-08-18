@@ -26,6 +26,10 @@ class Action:
         "TapAction",
         "UntapAction",
         "UntapAllAction",
+        "DiscardAction",
+        "MoveAllFromHandToLibraryAction",
+        "PutCardToBottomOfLibraryAction",
+        "TakeMulliganAction",
     ]
 
     @staticmethod
@@ -118,9 +122,11 @@ class Action:
                 source_card_vectors.append(source_card_vector)
         if self.target_card_uuids is not None:
             for target_card_uuid in self.target_card_uuids:
-                target_card_index = uuids.index(target_card_uuid)
-                target_card_vector = zones_vector[target_card_index]
-                target_card_vectors.append(target_card_vector)
+                if target_card_uuid in uuids:
+                    # Sometimes, an action moves a card, so it becomes missing
+                    target_card_index = uuids.index(target_card_uuid)
+                    target_card_vector = zones_vector[target_card_index]
+                    target_card_vectors.append(target_card_vector)
 
         source_card_vectors = np.array(source_card_vectors, dtype=np.float32)
         target_card_vectors = np.array(target_card_vectors, dtype=np.float32)
