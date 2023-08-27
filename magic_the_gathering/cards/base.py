@@ -23,6 +23,7 @@ class Card:
             color_identity=color_identity,
             type=series["type_line"],
             text=series["oracle_text"] if not pd.isna(series["oracle_text"]) else "",
+            mana_cost=series["mana_cost"],  # FIXME: did not look for consequences of this addition
             mana_cost_dict=Card.convert_mana_cost_to_dict(series["mana_cost"])
             if not pd.isna(series["mana_cost"])
             else None,
@@ -53,6 +54,7 @@ class Card:
         color_identity: List[str],
         type: str,
         text: str,
+        mana_cost: str,
         mana_cost_dict: Optional[Dict[str, int]] = None,
         power: Optional[str] = "",
         toughness: Optional[str] = "",
@@ -64,6 +66,7 @@ class Card:
         self.color_identity = color_identity
         self.type = type
         self.text = text
+        self.mana_cost = mana_cost
         self.mana_cost_dict = mana_cost_dict
         self.power = power
         self.toughness = toughness
@@ -76,6 +79,7 @@ class Card:
             color_identity=self.color_identity,
             type=self.type,
             text=self.text,
+            mana_cost=self.mana_cost,
             mana_cost_dict=self.mana_cost_dict,
             power=self.power,
             toughness=self.toughness,
@@ -104,8 +108,7 @@ class Card:
                 if player.mana_pool[mana_color] < mana_cost:
                     return False
         player_pool_value = sum(player.mana_pool.values())
-        mana_value = sum(self.mana_cost_dict.values())
-        if player_pool_value < mana_value:
+        if player_pool_value < self.mana_value:
             return False
         return True
 
@@ -158,8 +161,14 @@ class Card:
         # FIXME: Handle multi-color cards
         return self.color_identity[0]
 
+    @property
+    def mana_value(self) -> int:
+        return sum(self.mana_cost_dict.values()) if self.mana_cost_dict is not None else 0
+
     def __repr__(self) -> str:
-        return f"Card(uuid={self.uuid}, name={self.name}, color_identity={self.color_identity}, type={self.type}, mana_cost={self.mana_cost_dict}, power={self.get_power()}, toughness={self.get_toughness()}, state={self.state})"
+        if self.is_land:
+            return f"{self.name}"
+        return f"{self.name} - {self.mana_cost} - ({int(self.power)}/{int(self.toughness)})"
 
     def __str__(self) -> str:
         return self.__repr__()
