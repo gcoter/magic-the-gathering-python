@@ -192,7 +192,7 @@ class Card:
         type_vector = self.__type_to_vector()
         power_toughness_vector = self.__power_toughness_to_vector()
         mana_cost_vector = self.__mana_cost_to_vector()
-        state_vector = self.state.to_vector() if self.state is not None else np.zeros(2)
+        state_vector = self.state.to_vector() if self.state is not None else np.zeros(3)
         return np.concatenate(
             [
                 color_identity_vector,

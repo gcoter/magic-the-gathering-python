@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from random import shuffle
 from typing import List
 
@@ -37,5 +38,7 @@ class ShuffleAction(Action):
     def _execute(self, game_state: GameState) -> GameState:
         assert self.zone != ZonePosition.STACK
         zone_to_shuffle = game_state.zones[self.zone][self.player_index]
-        shuffle(zone_to_shuffle)
+        zone_items = list(zone_to_shuffle.items())
+        shuffle(zone_items)
+        game_state.zones[self.zone][self.player_index] = OrderedDict(zone_items)
         return game_state
