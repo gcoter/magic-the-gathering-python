@@ -38,12 +38,75 @@ def print_execution_time(func):
 
 
 @print_execution_time
+def upgrade_deck_recur(
+    deck: OrderedDict[str, object],
+    deck_creator: RandomVanillaDeckCreator,
+    current_iteration: int,
+    max_iterations: int = 25,
+    games_limit: int = 100,
+    p_value: float = 0.05,
+) -> OrderedDict[str, object]:
+    """
+    Makes a deck fight against itself with a random card changed.
+    If the new deck wins, it is returned.
+    Otherwise, tries again.
+    :return:
+    """
+    if current_iteration > max_iterations:
+        print("Max iterations reached, the deck failed to be upgraded")
+        return deck
+
+    tweaked_deck = _tweak_deck(copy.deepcopy(deck), deck_creator)
+    winner_player_index = get_index_of_best_deck(
+        decks=copy.deepcopy([deck, tweaked_deck]), games_limit=games_limit, p_value=p_value
+    )
+
+    if winner_player_index is None:
+        print("No clear better deck has been identified, trying another tweak")
+        return upgrade_deck_recur(
+            copy.deepcopy(deck),
+            deck_creator,
+            current_iteration=current_iteration + 1,
+            max_iterations=max_iterations,
+            games_limit=games_limit,
+            p_value=p_value,
+        )
+
+    if winner_player_index == 1:
+        print(f"Deck has been upgraded after {current_iteration} iterations")
+        return tweaked_deck
+
+    print("Tweaked deck lost, trying another tweak")
+    return upgrade_deck_recur(
+        copy.deepcopy(deck),
+        deck_creator,
+        current_iteration=current_iteration + 1,
+        max_iterations=max_iterations,
+        games_limit=games_limit,
+        p_value=p_value,
+    )
+
+
+def _tweak_deck(deck: OrderedDict[str, object], deck_creator: RandomVanillaDeckCreator) -> OrderedDict[str, object]:
+    key_of_entry_to_remove = random.choice(list(deck.keys()))
+    print(f"Removing {deck[key_of_entry_to_remove].name} from the deck")
+    del deck[key_of_entry_to_remove]
+    deck_creator.add_a_card_at_random(random.choice(_get_colors_of_deck(deck)), deck)
+    return deck
+
+
+def _get_colors_of_deck(deck: OrderedDict[str, object]) -> list[str]:
+    color_identities = [card.color_identity for card in deck.values()]
+    return list(set([color for color_identity in color_identities for color in color_identity if color != "C"]))
+
+
+@print_execution_time
 def search_for_arena_winners(
     champions_to_find: int = 10,
     consecutive_test_wins_threshold: int = 2,
     games_limit_per_test: int = 100,
     p_value: float = 0.05,
-):
+) -> list[OrderedDict[str, object]]:
     return [
         search_for_arena_winner(
             consecutive_test_wins_threshold=consecutive_test_wins_threshold,
@@ -234,10 +297,31 @@ def get_deck_simple_repr(deck: OrderedDict[str, object]) -> str:
 
 
 if __name__ == "__main__":
+    legal_lands_df = pd.read_csv("data/basic_land_cards.csv")
+    legal_creatures_df = pd.read_csv("data/vanilla_creature_cards.csv")
+    deck_creator = RandomVanillaDeckCreator(
+        legal_lands_df,
+        legal_creatures_df,
+        deck_size=20,
+        lands_proportion=17 / 40,
+    )
+
     champions = search_for_arena_winners(
-        champions_to_find=10,
+        champions_to_find=1,
         consecutive_test_wins_threshold=5,
         games_limit_per_test=100,
         p_value=0.05,
     )
     print("\n\n".join([get_deck_simple_repr(champion) for champion in champions]))
+
+    # deck = deck_creator.create_decks(n_players=1)[0]
+    deck = champions[0]
+    for _ in range(100):
+        print(f"\nRound {_}")
+        print(get_deck_simple_repr(deck))
+        deck = upgrade_deck_recur(
+            deck, deck_creator, current_iteration=0, max_iterations=25, games_limit=25, p_value=0.05
+        )
+
+    print("Upgraded deck:")
+    print(get_deck_simple_repr(deck))
