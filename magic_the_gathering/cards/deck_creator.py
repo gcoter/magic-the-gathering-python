@@ -41,6 +41,7 @@ class RandomVanillaDeckCreator:
         self,
         color: str,
         current_deck: OrderedDict[str, Card],
+        log: bool = False,
     ) -> OrderedDict[str, Card]:
         creature_color_filter = self.legal_creatures_df["color_identity"] == f"['{color}']"
         creature_card_names = self.legal_creatures_df[creature_color_filter]["name"].unique()
@@ -55,6 +56,7 @@ class RandomVanillaDeckCreator:
             card_series = self.legal_creatures_df[self.legal_creatures_df["name"] == card_name].iloc[0]
 
         card = Card.from_series(card_series)
-        print(f"Adding {card.name} to the deck")
+        if log:
+            print(f"Adding {card.name} to the deck")
         current_deck[card.uuid] = card
         return current_deck

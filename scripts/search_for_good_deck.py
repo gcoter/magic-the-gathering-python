@@ -91,7 +91,7 @@ def _tweak_deck(deck: OrderedDict[str, object], deck_creator: RandomVanillaDeckC
     key_of_entry_to_remove = random.choice(list(deck.keys()))
     print(f"Removing {deck[key_of_entry_to_remove].name} from the deck")
     del deck[key_of_entry_to_remove]
-    deck_creator.add_a_card_at_random(random.choice(_get_colors_of_deck(deck)), deck)
+    deck_creator.add_a_card_at_random(random.choice(_get_colors_of_deck(deck)), deck, log=True)
     return deck
 
 
