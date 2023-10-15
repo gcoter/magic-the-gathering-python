@@ -13,24 +13,23 @@ from magic_the_gathering.phases.upkeep import UpkeepPhase
 
 
 class Turn:
-    def __init__(self):
-        self.__phases = [
-            BeginningPhase(),
-            UntapPhase(),
-            UpkeepPhase(),
-            DrawPhase(),
-            MainPhase(name="Main Phase 1"),
-            CombatBeginningPhase(),
-            CombatDeclareAttackersPhase(),
-            CombatDeclareBlockersPhase(),
-            CombatDamagePhase(),
-            CombatEndPhase(),
-            MainPhase(name="Main Phase 2"),
-            EndPhase(),
-        ]
+    PHASES = [
+        BeginningPhase(),
+        UntapPhase(),
+        UpkeepPhase(),
+        DrawPhase(),
+        MainPhase(name="Main Phase 1"),
+        CombatBeginningPhase(),
+        CombatDeclareAttackersPhase(),
+        CombatDeclareBlockersPhase(),
+        CombatDamagePhase(),
+        CombatEndPhase(),
+        MainPhase(name="Main Phase 2"),
+        EndPhase(),
+    ]
 
     def run(self, game_state: GameState) -> GameState:
-        for phase in self.__phases:
+        for phase in Turn.PHASES:
             # No Draw Phase for the first turn (for the first player)
             if isinstance(phase, DrawPhase) and game_state.current_turn_counter == 1:
                 continue
